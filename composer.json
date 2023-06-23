@@ -16,5 +16,12 @@
     "require": {
         "laravel/framework": "^10.0",
         "livewire/livewire": "^2.12"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SteelAnts\\DataTable\\DataTableServiceProvider"
+            ]
+        }
     }
 }
