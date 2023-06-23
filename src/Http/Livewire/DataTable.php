@@ -134,6 +134,19 @@ class DataTable extends Component
         $this->items_per_page = $value;
     }
 
+    public function setOrder($column){
+        $function = strpos($column, '.') === false ? 'orderBy' : 'sortBy';
+        $this->{$function}($column);
+    }
+
+    public function setOrderDirection($direction){
+        if ($direction == 'asc') {
+            $this->order_direction = 'asc';
+        } else {
+            $this->order_direction = 'desc';
+        }
+    }
+
     public function orderBy($column)
     {
         $this->actual_page = 0;
@@ -321,7 +334,7 @@ class DataTable extends Component
 
     private function addTotal($data)
     {
-        if ($this->totals == []) {
+        if ($this->totals == [] || count($this->totals) > 0) {
             return $data;
         }
 

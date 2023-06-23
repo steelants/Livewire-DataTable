@@ -7,6 +7,18 @@
         </form>
     @endif
     @if ($dataGetFromDB != null)
+        <div class="input-group my-2 d-md-none">
+            <button class="input-group-text" wire:click="setOrderDirection('{{ $order_direction == 'asc' ? 'desc' : 'asc' }}')"><i>
+                    @if ($order_direction != 'asc')
+                    ↑@else↓
+                    @endif
+                </i></button>
+            <select class="form-select" wire:change="setOrder($event.target.value)">
+                @foreach ($headers as $key => $header)
+                    <option value="{{ str_replace('->', '.', $properties2[count($properties2) - count($headers) + $key]) }}">{{ ucwords($header) }}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="table-responsive">
             <table class="table table-mobile-break">
                 <caption>
@@ -38,13 +50,22 @@
                         <tr>
                             @foreach ($headers as $key => $header)
                                 <td class="text-truncate">
-                                    @if (self::getTotals() != [] && end($dataGetFromDB) == $item)
-                                        <b>
-                                    @endif
-                                    {{ $item[$properties2[count($properties2) - count($headers) + $key]] }}
-                                    @if (end($dataGetFromDB) == $item)
-                                        </b>
-                                    @endif
+
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-block d-md-none text-muted pe-2">
+                                            {{ $headers[$key] }}
+                                        </div>
+                                        <div>
+                                            @if (self::getTotals() != [] && end($dataGetFromDB) == $item)
+                                                <b>
+                                            @endif
+                                            {{ $item[$properties2[count($properties2) - count($headers) + $key]] }}
+                                            @if (end($dataGetFromDB) == $item)
+                                                </b>
+                                            @endif
+                                        </div>
+                                    </div>
+
                                 </td>
                             @endforeach
                             @if (self::getActions($item) != null && (self::getTotals() == [] || end($dataGetFromDB) != $item))

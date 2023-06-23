@@ -10,6 +10,7 @@ class GenericDataTable extends DataTable
     {
         $this->actions = [];
         $this->contract_id = $contract_id;
+
         parent::setModel($model);
         parent::setHeaders($headers);
         parent::setItemPerPage($items_per_page);
