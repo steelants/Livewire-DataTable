@@ -15,7 +15,7 @@
                 </i></button>
             <select class="form-select" wire:change="setOrder($event.target.value)">
                 @foreach ($headers as $key => $header)
-                    <option value="{{ str_replace('->', '.', $properties2[count($properties2) - count($headers) + $key]) }}">{{ ucwords($header) }}</option>
+                    <option @if (($order_by != null && $order_by == $properties2[count($properties2) - count($headers) + $key]) || ($sort_by != null && $sort_by == str_replace('->', '.', $properties2[count($properties2) - count($headers) + $key]))) selected @endif value="{{ str_replace('->', '.', $properties2[count($properties2) - count($headers) + $key]) }}">{{ ucwords($header) }}</option>
                 @endforeach
             </select>
         </div>
@@ -32,11 +32,11 @@
                             <th scope="col" wire:click={{ strpos($properties2[count($properties2) - count($headers) + $key], '->') === false ? 'orderBy' : 'sortBy' }}('{{ str_replace('->', '.', $properties2[count($properties2) - count($headers) + $key]) }}')>
                                 {{ ucwords($header) }}
                                 @if (($order_by != null && $order_by == $properties2[count($properties2) - count($headers) + $key]) || ($sort_by != null && $sort_by == str_replace('->', '.', $properties2[count($properties2) - count($headers) + $key])))
-                                    @if ($order_direction != 'asc')
-                                        <i>↑</i>
-                                    @else($order_direction != 'asc')
-                                        <i>↓</i>
-                                    @endif
+                                    <i>
+                                        @if ($order_direction != 'asc')
+                                        ↑@else↓
+                                        @endif
+                                    </i>
                                 @else
                                     <i>↕</i>
                                 @endif

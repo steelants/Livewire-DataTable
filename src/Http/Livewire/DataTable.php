@@ -135,6 +135,7 @@ class DataTable extends Component
     }
 
     public function setOrder($column){
+        $this->order_direction = ($this->order_direction == 'asc' ? 'desc' : 'asc');
         $function = strpos($column, '.') === false ? 'orderBy' : 'sortBy';
         $this->{$function}($column);
     }
