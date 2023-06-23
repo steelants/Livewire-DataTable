@@ -1,8 +1,9 @@
 # LV-DataTable
-### SteelAnts
-[SteelAnts s.r.o.](https://www.steelants.cz/)
+### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
+
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 
+## Examples
 Use of Generic Prefab:
 ```html
     @livewire('generic-data-table', [
