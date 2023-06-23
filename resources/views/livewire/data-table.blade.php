@@ -92,7 +92,7 @@
         @if ($total_pages > 1)
             <div class="d-flex justify-content-between">
                 <div>
-                    <napravo>
+                    <nav>
                         <ul class="pagination">
                             @if ($actual_page > 0)
                                 <li class="page-item">
@@ -119,7 +119,7 @@
                                 </li>
                             @endif
                         </ul>
-                        </nav>
+                    </nav>
                 </div>
                 <div>
                     <select class="form-select" wire:model="items_per_page">
