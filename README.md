@@ -1,7 +1,7 @@
 # LV-DataTable
 ### SteelAnts
 [SteelAnts s.r.o.](https://www.steelants.cz/)
-[![Total Downloads](https://img.shields.io/packagist/dt/guzzlehttp/guzzle.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
+[![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 
 Use of Generic Prefab:
 ```html
