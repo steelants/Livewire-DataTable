@@ -1,6 +1,6 @@
 {
     "name": "steelants/datatable",
-    "description": "DESC",
+    "description": "Simple Datatable class based on Laravel and livewire",
     "type": "dev",
     "license": "MIT",
     "autoload": {
