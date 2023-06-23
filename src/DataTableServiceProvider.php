@@ -1,4 +1,5 @@
 <?php
+
 namespace SteelAnts\DataTable;
 
 use Illuminate\Support\ServiceProvider;
@@ -16,27 +17,28 @@ use SteelAnts\DataTable\Console\Commands\CreateDataTableCommand;
 
 
 
-class DataTableServiceProvider extends ServiceProvider {
+class DataTableServiceProvider extends ServiceProvider
+{
 
-    public function boot(){
+    public function boot()
+    {
         Livewire::component('datatable', DataTable::class);
         Livewire::component('generic-data-table', GenericDataTable::class);
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views/livewire', 'datatable');
-
         $this->publishes([
-            __DIR__.'/../resources/views/livewire/' => base_path('resources/views/vendor/steelants/datatable'),
+            __DIR__ . '/../resources/views/livewire/' => resource_path('views/vendor/datatable'),
         ]);
+
 
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CreateDataTableCommand::class,
             ]);
         }
-
     }
 
-    public function register(){
-
+    public function register()
+    {
     }
 }

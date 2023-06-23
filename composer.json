@@ -1,5 +1,5 @@
 {
-    "name": "steelants/datatable",
+    "name": "steelants/livewire-datatable",
     "description": "Simple Datatable class based on Laravel and livewire",
     "type": "library",
     "license": "MIT",

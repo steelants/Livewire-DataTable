@@ -1,6 +1,6 @@
 <?php
 
-namespace SteelAnts\DataTable\Trats;
+namespace SteelAnts\DataTable\Http\Traits;
 
 trait HasExport
 {
