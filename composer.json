@@ -2,7 +2,7 @@
     "name": "steelants/datatable",
     "description": "DESC",
     "type": "dev",
-    "license": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "SteelAnts\\DataTable\\": "src/"
