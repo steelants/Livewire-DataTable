@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Livewire\Livewire;
 use SteelAnts\DataTable\Http\Livewire\DataTable;
 use SteelAnts\DataTable\Http\Livewire\GenericDataTable;
+use SteelAnts\DataTable\Console\Commands\CreateDataTableCommand;
+
 
 
 class DataTableServiceProvider extends ServiceProvider {
@@ -21,6 +23,17 @@ class DataTableServiceProvider extends ServiceProvider {
         Livewire::component('generic-data-table', GenericDataTable::class);
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views/livewire', 'datatable');
+
+        $this->publishes([
+            __DIR__.'/../resources/views/livewire/' => base_path('resources/views/vendor/steelants/datatable'),
+        ]);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CreateDataTableCommand::class,
+            ]);
+        }
+
     }
 
     public function register(){
