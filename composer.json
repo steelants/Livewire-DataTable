@@ -1,0 +1,20 @@
+{
+    "name": "steelants/datatable",
+    "description": "DESC",
+    "type": "dev",
+    "license": "library",
+    "autoload": {
+        "psr-4": {
+            "SteelAnts\\DataTable\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "SteelAnts"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^10.0",
+        "livewire/livewire": "^2.12"
+    }
+}
