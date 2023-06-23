@@ -66,11 +66,6 @@ class TaskDataTable extends DataTable
         $item["description"] = \Str::limit($item['description'], 60);
         return $item;
     }
-
-    public function render()
-    {
-        return view('livewire.components.task-data-table');
-    }
 }
 ```
 ```html
