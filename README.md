@@ -71,3 +71,6 @@ class TaskDataTable extends DataTable
 ```html
     @livewire('components.task-data-table', [], key($contract->id))
 ```
+
+
+V1.0.0

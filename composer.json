@@ -1,7 +1,7 @@
 {
     "name": "steelants/datatable",
     "description": "Simple Datatable class based on Laravel and livewire",
-    "type": "package",
+    "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
