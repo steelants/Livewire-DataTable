@@ -4,6 +4,7 @@ namespace SteelAnts\DataTable\Http\Livewire;
 
 use Exception;
 use Livewire\Component;
+use Illuminate\Support\Str;
 
 class DataTable extends Component
 {
@@ -78,7 +79,7 @@ class DataTable extends Component
         foreach ($properties as $property) {
             if (strpos($property, '.') !== false) {
                 if (explode(".", $property)[1] == "count") {
-                    $this->properties2[] = str_replace(".", "_", $property);
+                    $this->properties2[] = Str::of(explode(".", $property)[0])->snake(). '_count';
                     $this->counts[] = explode(".", $property)[0];
                 } else {
                     $this->properties2[] = str_replace(".", "->", $property);
@@ -135,7 +136,6 @@ class DataTable extends Component
     }
 
     public function setOrder($column){
-        $this->order_direction = ($this->order_direction == 'asc' ? 'desc' : 'asc');
         $function = strpos($column, '.') === false ? 'orderBy' : 'sortBy';
         $this->{$function}($column);
     }
@@ -235,7 +235,12 @@ class DataTable extends Component
 
         if ($this->wheres != []) {
             foreach ($this->wheres as $where) {
-                $query = $query->where($where[0], $where[1], $where[2]);
+                if (strpos($where[0], '.') !== false){
+                    $relation = explode(".", $where[0]);
+                    $query = $query->whereRelation($relation[0], $relation[1], $where[1], $where[2]);
+                }else {
+                    $query = $query->where($where[0], $where[1], $where[2]);
+                }
             }
         }
 
