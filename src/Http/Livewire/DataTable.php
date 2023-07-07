@@ -291,8 +291,6 @@ class DataTable extends Component
         ];
     }
 
-    addLivewireAction
-
     public function getActions($item)
     {
         $validatedActions = $this->actions;

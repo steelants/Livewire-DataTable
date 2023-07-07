@@ -5,7 +5,7 @@ namespace SteelAnts\DataTable\Http\Livewire;
 use Exception;
 use Livewire\Component;
 
-class DataTable extends Component
+class DataTableV2 extends Component
 {
     protected $queryString = [];
 
