@@ -271,12 +271,27 @@ class DataTable extends Component
     public function addAction($icon, $lang_title, $route, $isDanger = false)
     {
         $this->actions[] = [
+            'type' => 'route',
             'icon' => $icon,
             'lang_title' => __($lang_title),
             'route' => $route,
             'is_danger' => $isDanger ?? false,
         ];
     }
+
+    public function addLivewireAction($icon, $lang_title, $lv_action, $arguments = [], $isDanger = false)
+    {
+        $this->actions[] = [
+            'type' => 'livewire',
+            'icon' => $icon,
+            'lang_title' => __($lang_title),
+            'action' => $lv_action,
+            'arguments' => $arguments,
+            'is_danger' => $isDanger ?? false,
+        ];
+    }
+
+    addLivewireAction
 
     public function getActions($item)
     {
