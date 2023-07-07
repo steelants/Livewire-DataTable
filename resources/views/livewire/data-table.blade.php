@@ -73,9 +73,15 @@
                                     <div class="d-flex justify-content-end align-items-center">
                                         @foreach (self::getActions($item) as $action)
                                             @if ($action['type'] === 'livewire')
-                                                <button class="class="btn ms-1 @if ($action['is_danger'] ?? false) btn-danger @else btn-secondary @endif" href="{{ isset($action['route']) ? route($action['route']['name'], (array) ($action['route']['parameters'] ? [$action['route']['parameters'][0] => $item[$action['route']['parameters'][1]]] : [])) : '' }}" title="{{ __($action['lang_title']) }}" wire:click="{{$action['action']}}({{$action['arguments']}})">{{ __($action['lang_title']) }}</button>
+                                                <button class="btn ms-1 @if ($action['is_danger'] ?? false) btn-danger @else btn-secondary @endif" title="{{ __($action['lang_title']) }}" wire:click="{{ $action['action'] }}('{{ $item['id'] }}')">
+                                                    <div class="d-inline d-md-inline">{{ __($action['lang_title']) }}</div>
+                                                    <div class="d-none d-md-none">
+                                                        <i class="fa {{ $action['icon'] }}"></i>
+                                                    </div>
+                                                </button>
                                             @else
                                                 <a @if ($action['is_danger'] ?? false) onclick="return confirm('datatables.action.configmation')" @endif class="btn ms-1 @if ($action['is_danger'] ?? false) btn-danger @else btn-secondary @endif" href="{{ isset($action['route']) ? route($action['route']['name'], (array) ($action['route']['parameters'] ? [$action['route']['parameters'][0] => $item[$action['route']['parameters'][1]]] : [])) : '' }}" title="{{ __($action['lang_title']) }}">
+
                                                     <div class="d-inline d-md-inline">{{ __($action['lang_title']) }}</div>
                                                     <div class="d-none d-md-none">
                                                         <i class="fa {{ $action['icon'] }}"></i>

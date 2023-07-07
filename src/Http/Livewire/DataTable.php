@@ -76,6 +76,7 @@ class DataTable extends Component
 
     public function setProperties($properties)
     {
+        $this->properties2[] = 'id';
         foreach ($properties as $property) {
             if (strpos($property, '.') !== false) {
                 if (explode(".", $property)[1] == "count") {
@@ -89,6 +90,7 @@ class DataTable extends Component
                 $this->properties2[] = $property;
             }
         }
+
     }
 
     public function setModel($model)
@@ -254,12 +256,11 @@ class DataTable extends Component
         }
 
         $this->dataGetFromDB = [];
-
         foreach ($dataFromDB as $item) {
             $tempObject = [];
             foreach ($this->properties2 as $property) {
                 $propertiesSingles = explode("->", $property);
-                $tempObject[$property] = $this->resolvePropertyValue($item, $propertiesSingles[0], array_slice($propertiesSingles, 1, count($propertiesSingles) - 1));
+                $tempObject[$property] = $this->resolvePropertyValue($item, $propertiesSingles[0], array_slice($propertiesSingles, count($propertiesSingles)));
             }
 
             $this->dataGetFromDB[] = $this->getMutatedRow($tempObject);
@@ -279,14 +280,17 @@ class DataTable extends Component
         ];
     }
 
-    public function addLivewireAction($icon, $lang_title, $lv_action, $arguments = [], $isDanger = false)
+    public function addLivewireAction($icon, $lang_title, $lv_action, $isDanger = false)
     {
+        if (!method_exists($this, $lv_action)) {
+            throw "Action not found";
+        }
+
         $this->actions[] = [
             'type' => 'livewire',
             'icon' => $icon,
             'lang_title' => __($lang_title),
             'action' => $lv_action,
-            'arguments' => $arguments,
             'is_danger' => $isDanger ?? false,
         ];
     }
