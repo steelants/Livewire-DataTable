@@ -13,9 +13,10 @@ class DataTableV2 extends Component
     public $sortBy;
     public bool $sortDesc = true;
 
-    public function query(): Builder
-    {
-    }
+    // public function query(): Builder
+    // {
+    //      return Model::where('id','>',0)->limit(100);
+    // }
 
     public function dataset(): array
     {
@@ -27,9 +28,19 @@ class DataTableV2 extends Component
         ];
     }
 
+    // public function row($row) : array
+    // {
+    //     return $row;
+    // }
+
+    // public function colum($colum)
+    // {
+    //     return "value";
+    // }
+
     public function headers(): array
     {
-        return array_keys($this->getData()[0]);
+        return array_keys($this->dataset[0]);
     }
 
     public function footers(): array
@@ -53,11 +64,10 @@ class DataTableV2 extends Component
         } else if (method_exists($this, "query")) {
             $datasetFromDB = [];
             foreach ($this->query()->get() as $item) {
-                $tempRow = [];
-                foreach ($item->toArray() as $key => $property) {
-                    $tempRow[$key] = (method_exists($this, "getColumn{$key}Data") ? $this->{"getColumn{$key}Data"}($property) : $property);
+                $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
+                foreach ($tempRow as $key => $property) {
+                    $tempRow[$key] = (method_exists($this, "colum{$key}Data") ? $this->{"collum{$key}Data"}($property) : $property);
                 }
-                $tempRow = (method_exists($this, "getRowData") ? $this->{"getRowData"}($tempRow) : $tempRow);
                 $datasetFromDB[] = $tempRow;
             }
             $this->dataset = $datasetFromDB;
@@ -68,20 +78,7 @@ class DataTableV2 extends Component
         return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
     }
 
-    public function getRowData($item)
-    {
-        return $item;
-    }
-
     public function actions($item)
-    {
-    }
-
-    public function columns()
-    {
-    }
-
-    public function rows($item)
     {
     }
 }
