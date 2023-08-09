@@ -4,7 +4,19 @@
             <thead>
                 <tr>
                     @foreach ($headers as $header)
-                        <th scope="col">{{ $header }}</th>
+                        {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
+                        <th @if ($header != $sortBy) wire:click="$set('sortBy','{{ $header }}')" @else wire:click="$set('sortDesc','{{ !$sortDesc }}')" @endif scope="col">
+                            @if ($header != $sortBy)
+                                ↕
+                            @else
+                                @if ($sortDesc)
+                                    ↑
+                                @else
+                                    ↓
+                                @endif
+                            @endif
+                            {{ ucwords($header) }}
+                        </th>
                     @endforeach
                 </tr>
             </thead>
@@ -17,6 +29,13 @@
                     </tr>
                 @endforeach
             </tbody>
+            @if (!empty($footers))
+                <tfoot>
+                    @foreach ($footers as $footer)
+                        <th scope="col">{{ $footer }}</th>
+                    @endforeach
+                </tfoot>
+            @endif
         </table>
     @else
         <p>{{ __('Nebyly nalezeny data') }}</p>

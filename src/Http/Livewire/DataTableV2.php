@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Builder;
 
 class DataTableV2 extends Component
 {
-    protected $queryString = [];
+    protected $queryString = ['sortBy','sortDesc'];
+    protected $dataset = [];
+    public $sortBy;
+    public bool $sortDesc = true;
 
-    public function query() : Builder
+    public function query(): Builder
     {
     }
 
@@ -29,32 +32,40 @@ class DataTableV2 extends Component
         return array_keys($this->getData()[0]);
     }
 
+    public function footers(): array
+    {
+        return ["totals", count($this->dataset)];
+    }
+
     public function render()
     {
-        return view('datatable::data-table', [
+        return view('datatable::data-table-v2', [
             'dataset' => $this->getData(),
             'headers' => $this->headers(),
+            'footers' => $this->footers(),
         ]);
     }
 
     private function getData(): array
     {
-        if (method_exists($this, "dataset")) {
-            return $this->dataset();
-        }
+        if ($this->dataset != []) {
 
-        $dataset = $this->query();
-        $datasetFromDB = [];
-        foreach ($dataset as $item) {
-            $tempRow = [];
-            foreach ($item as $key => $property) {
-                $tempRow[$key] = (method_exists($this, "getColumn{$key}Data") ? $this->{"getColumn{$key}Data"}($property) : $property);
+        } else if (method_exists($this, "query")) {
+            $datasetFromDB = [];
+            foreach ($this->query()->get() as $item) {
+                $tempRow = [];
+                foreach ($item->toArray() as $key => $property) {
+                    $tempRow[$key] = (method_exists($this, "getColumn{$key}Data") ? $this->{"getColumn{$key}Data"}($property) : $property);
+                }
+                $tempRow = (method_exists($this, "getRowData") ? $this->{"getRowData"}($tempRow) : $tempRow);
+                $datasetFromDB[] = $tempRow;
             }
-            $tempRow = (method_exists($this, "getRowData") ? $this->{"getRowData"}($tempRow) : $tempRow);
-            $datasetFromDB[] = $tempRow->toArray();
+            $this->dataset = $datasetFromDB;
+        } else {
+            $this->dataset = $this->dataset();
         }
         
-        return $datasetFromDB;
+        return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
     }
 
     public function getRowData($item)
@@ -72,10 +83,5 @@ class DataTableV2 extends Component
 
     public function rows($item)
     {
-        return view('datatable::data-table', [
-            'dataset' => $this->getData(),
-            'headers' => $this->headers(),
-        ]);
     }
-
 }
