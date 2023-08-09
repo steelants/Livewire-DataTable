@@ -60,7 +60,7 @@ class DataTableV2 extends Component
 
     public function render()
     {
-        return view('datatable::data-table-v2', [
+        return view('datatable::data-table', [
             'dataset' => $this->getData(),
             'headers' => $this->headers(),
         ]);
