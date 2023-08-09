@@ -4,58 +4,29 @@ namespace SteelAnts\DataTable\Http\Livewire;
 
 use Exception;
 use Livewire\Component;
+use Illuminate\Database\Eloquent\Builder;
 
 class DataTableV2 extends Component
 {
     protected $queryString = [];
 
-    private $dataset = [];
-    public function setQuery(){
-
+    public function query() : Builder
+    {
     }
 
-    public function setData() : array {
-
+    public function dataset(): array
+    {
+        return [
+            [
+                "cool1" => "test1",
+                "cool2" => "test2",
+            ],
+        ];
     }
 
-    private function getData() : array {
-        if ($this->dataset != []){
-            return $this->dataset;
-        }
-
-        if (!method_exists($this, "setData")) {
-            $dataset =  collect($this->setData());
-        }
-
-        $dataset = $this->setQuety();
-        foreach ($dataset as $item) {
-            $tempRow = [];
-            foreach ($item as $key => $property) {
-                $tempRow[$key] = (method_exists($this, "getColumn{$key}Data") ? $this->{"getColumn{$key}Data"}($property) : $property);
-            }
-            $tempRow = (method_exists($this, "getRowData") ? $this->{"getRowData"}($tempRow) : $tempRow);
-            $this->dataset[] = $tempRow->toArray();
-        }
-    }
-
-    public function getRowData($item){
-        return $item;
-    }
-
-    public function headers() : array {
-        return array_keys($this->getData());
-    }
-
-    public function actions($item){
-
-    }
-
-    public function columns(){
-
-    }
-
-    public function rows($item){
-
+    public function headers(): array
+    {
+        return array_keys($this->getData()[0]);
     }
 
     public function render()
@@ -65,4 +36,46 @@ class DataTableV2 extends Component
             'headers' => $this->headers(),
         ]);
     }
+
+    private function getData(): array
+    {
+        if (method_exists($this, "dataset")) {
+            return $this->dataset();
+        }
+
+        $dataset = $this->query();
+        $datasetFromDB = [];
+        foreach ($dataset as $item) {
+            $tempRow = [];
+            foreach ($item as $key => $property) {
+                $tempRow[$key] = (method_exists($this, "getColumn{$key}Data") ? $this->{"getColumn{$key}Data"}($property) : $property);
+            }
+            $tempRow = (method_exists($this, "getRowData") ? $this->{"getRowData"}($tempRow) : $tempRow);
+            $datasetFromDB[] = $tempRow->toArray();
+        }
+        
+        return $datasetFromDB;
+    }
+
+    public function getRowData($item)
+    {
+        return $item;
+    }
+
+    public function actions($item)
+    {
+    }
+
+    public function columns()
+    {
+    }
+
+    public function rows($item)
+    {
+        return view('datatable::data-table', [
+            'dataset' => $this->getData(),
+            'headers' => $this->headers(),
+        ]);
+    }
+
 }
