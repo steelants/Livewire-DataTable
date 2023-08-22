@@ -260,7 +260,7 @@ class DataTable extends Component
             $tempObject = [];
             foreach ($this->properties2 as $property) {
                 $propertiesSingles = explode("->", $property);
-                $tempObject[$property] = $this->resolvePropertyValue($item, $propertiesSingles[0], array_slice($propertiesSingles, count($propertiesSingles)));
+                $tempObject[$property] = $this->resolvePropertyValue($item, $propertiesSingles[0], array_slice($propertiesSingles, 1, count($propertiesSingles) - 1));
             }
 
             $this->dataGetFromDB[] = $this->getMutatedRow($tempObject);
