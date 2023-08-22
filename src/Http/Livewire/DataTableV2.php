@@ -10,6 +10,7 @@ class DataTableV2 extends Component
 {
     protected $queryString = ['sortBy','sortDesc'];
     protected $dataset = [];
+    protected $crud = false;
     public $sortBy;
     public bool $sortDesc = true;
 
@@ -74,11 +75,12 @@ class DataTableV2 extends Component
         } else {
             $this->dataset = $this->dataset();
         }
-        
+
         return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
     }
 
-    public function actions($item)
-    {
-    }
+    // public function actions($item)
+    // {
+
+    // }
 }

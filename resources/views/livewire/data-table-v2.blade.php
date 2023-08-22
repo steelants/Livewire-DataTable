@@ -18,7 +18,14 @@
                             {{ ucwords($header) }}
                         </th>
                     @endforeach
+                    @if(method_exists($this, "actions"))
+                        <th>
+                            {{__('datatable.actions')}};
+                        </th>
+                    @endif
                 </tr>
+
+
             </thead>
             <tbody>
                 @foreach ($dataset as $row)
@@ -26,6 +33,19 @@
                         @foreach ($row as $key => $collum)
                             <td>{{ $collum }}</td>
                         @endforeach
+                    @if(method_exists($this, "actions"))
+                     <td>
+                            @foreach ($this->actions($row) as $action)
+                                @if ($action["type"] == "route")
+                                    <a href="{{ route($action["name"], $action["parameters"]) }}"> {{__($action["name"])}}</a>
+                                @elseif ($action["type"] == "livewire")
+                                    <button wire:click='{{$action["action"]}}({{ $action["parameters"]}})'> {{__($action["name"])}}</button>
+                                @else
+                                    {{ __('datatable.actions.not_implemented') }};
+                                @endif
+                            @endforeach
+                       </td>
+                    @endif
                     </tr>
                 @endforeach
             </tbody>
