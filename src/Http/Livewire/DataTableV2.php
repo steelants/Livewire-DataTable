@@ -55,7 +55,7 @@ class DataTableV2 extends Component
     {
         return view('datatable::data-table-v2', [
             'dataset' => $this->getData(),
-            'headers' => $this->headers(),
+            'headers' => $this->getHeader(),
             'footers' => $this->footers(),
         ]);
     }
@@ -78,6 +78,20 @@ class DataTableV2 extends Component
         }
 
         return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
+    }
+
+
+    private function getHeader(): array
+    {
+        if (!method_exists($this, "headers")) {
+            return [];
+        }
+
+        if (count(array_keys($this->dataset[0])) != count($this->headers())) {
+            throw new Exception("Number of porperties (".count(array_keys($this->dataset[0]))."), need to be equal to number of headers (".count($this->headers()).")");
+        }
+
+        return $this->headers();
     }
 
     // public function actions($item): array
