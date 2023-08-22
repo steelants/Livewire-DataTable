@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class DataTableV2 extends Component
 {
-    protected $queryString = ['sortBy','sortDesc'];
+    /* RUNTIME VARIABLES */
+    protected $queryString = ['sortBy', 'sortDesc'];
     protected $dataset = [];
-    protected $crud = false;
+
+    /* SORTING VARIABLES */
     public $sortBy;
     public bool $sortDesc = true;
 
@@ -61,7 +63,6 @@ class DataTableV2 extends Component
     private function getData(): array
     {
         if ($this->dataset != []) {
-
         } else if (method_exists($this, "query")) {
             $datasetFromDB = [];
             foreach ($this->query()->get() as $item) {
@@ -79,8 +80,24 @@ class DataTableV2 extends Component
         return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
     }
 
-    // public function actions($item)
+    // public function actions($item): array
     // {
-
+    //     return [
+    //         [
+    //             'type' => "route",
+    //             'class' => "danger",
+    //             'name' => 'task.show',
+    //             'parameters' => [
+    //                 'task' => $item['id'],
+    //             ],
+    //         ],
+    //         [
+    //             'type' => "livewire",
+    //             'action' => 'showModal',
+    //             'parameters' => [
+    //                 'task' => $item['id'],
+    //             ],
+    //         ],
+    //     ];
     // }
 }
