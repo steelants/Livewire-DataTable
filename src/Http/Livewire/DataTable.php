@@ -357,7 +357,7 @@ class DataTable extends Component
 
     private function addTotal($data)
     {
-        if ($this->totals == [] || count($this->totals) > 0) {
+        if ($this->totals == [] || count($this->totals) == 0) {
             return $data;
         }
 
@@ -369,7 +369,7 @@ class DataTable extends Component
         foreach ($data as $key => $item) {
             foreach ($item as $property => $value) {
                 if (!array_key_exists($property, $dataTotal)) {
-                    $dataTotal[$property] = ((is_numeric($value) && in_array($property, $this->totals)) ? 0 : "t");
+                    $dataTotal[$property] = ((is_numeric($value) && in_array($property, $this->totals)) ? 0 : "");
                 }
 
                 if (is_numeric($value)&& in_array($property, $this->totals)) {
