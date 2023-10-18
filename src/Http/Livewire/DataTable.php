@@ -80,7 +80,7 @@ class DataTable extends Component
         foreach ($properties as $property) {
             if (strpos($property, '.') !== false) {
                 if (explode(".", $property)[1] == "count") {
-                    $this->properties2[] = Str::of(explode(".", $property)[0])->snake(). '_count';
+                    $this->properties2[] = Str::of(explode(".", $property)[0])->snake() . '_count';
                     $this->counts[] = explode(".", $property)[0];
                 } else {
                     $this->properties2[] = str_replace(".", "->", $property);
@@ -90,7 +90,6 @@ class DataTable extends Component
                 $this->properties2[] = $property;
             }
         }
-
     }
 
     public function setModel($model)
@@ -137,12 +136,14 @@ class DataTable extends Component
         $this->items_per_page = $value;
     }
 
-    public function setOrder($column){
+    public function setOrder($column)
+    {
         $function = strpos($column, '.') === false ? 'orderBy' : 'sortBy';
         $this->{$function}($column);
     }
 
-    public function setOrderDirection($direction){
+    public function setOrderDirection($direction)
+    {
         if ($direction == 'asc') {
             $this->order_direction = 'asc';
         } else {
@@ -237,16 +238,21 @@ class DataTable extends Component
 
         if ($this->wheres != []) {
             foreach ($this->wheres as $where) {
-                if (strpos($where[0], '.') !== false){
+                if (strpos($where[0], '.') !== false) {
                     $relation = explode(".", $where[0]);
                     $query = $query->whereRelation($relation[0], $relation[1], $where[1], $where[2]);
-                }else {
+                } else {
                     $query = $query->where($where[0], $where[1], $where[2]);
                 }
             }
         }
 
         $dataFromDB = $query->get();
+        if (count($dataFromDB) == 0) {
+            $this->dataGetFromDB = [];
+            return;
+        }
+
         if ($this->sort_by != null) {
             if ($this->order_direction == 'asc') {
                 $dataFromDB = $dataFromDB->sortBy($this->sort_by);
@@ -260,7 +266,7 @@ class DataTable extends Component
             $tempObject = [];
             foreach ($this->properties2 as $property) {
                 $propertiesSingles = explode("->", $property);
-                $tempObject[$property] = $this->resolvePropertyValue($item, $propertiesSingles[0], array_slice($propertiesSingles, 1, count($propertiesSingles) - 1));
+                $tempObject[$property] = $this->resolvePropertyValue($item, $propertiesSingles[0], array_slice($propertiesSingles, 1));
             }
 
             $this->dataGetFromDB[] = $this->getMutatedRow($tempObject);
@@ -372,7 +378,7 @@ class DataTable extends Component
                     $dataTotal[$property] = ((is_numeric($value) && in_array($property, $this->totals)) ? 0 : "");
                 }
 
-                if (is_numeric($value)&& in_array($property, $this->totals)) {
+                if (is_numeric($value) && in_array($property, $this->totals)) {
                     $dataTotal[$property] += $value;
                 }
             }
