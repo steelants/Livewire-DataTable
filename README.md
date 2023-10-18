@@ -74,5 +74,3 @@ class TaskDataTable extends DataTable
 ```shell
 git tag x.x.x
 git push --tags
-```
-tes
