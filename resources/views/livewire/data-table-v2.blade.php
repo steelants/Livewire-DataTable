@@ -20,7 +20,7 @@
                     @endforeach
                     @if(method_exists($this, "actions"))
                         <th>
-                            {{__('datatable.actions')}};
+                            {{__('datatable::ui.actions')}}
                         </th>
                     @endif
                 </tr>
@@ -41,7 +41,7 @@
                                 @elseif ($action["type"] == "livewire")
                                     <button wire:click='{{$action["action"]}}({{ $action["parameters"]}})'> {{__($action["name"])}}</button>
                                 @else
-                                    {{ __('datatable.actions.not_implemented') }};
+                                    {{ __('datatable::ui.actions.not_implemented') }}
                                 @endif
                             @endforeach
                        </td>
@@ -58,6 +58,6 @@
             @endif
         </table>
     @else
-        <p>{{ __('Nebyly nalezeny data') }}</p>
+        <p>{{ __('datatable::ui.nothing_found') }}</p>
     @endif
 </div>

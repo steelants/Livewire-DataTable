@@ -25,17 +25,20 @@ class DataTableServiceProvider extends ServiceProvider
         Livewire::component('datatable', DataTable::class);
         Livewire::component('generic-data-table', GenericDataTable::class);
 
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'datatable');
+
         $this->loadViewsFrom(__DIR__ . '/../resources/views/livewire', 'datatable');
+
         $this->publishes([
             __DIR__ . '/../resources/views/livewire/' => resource_path('views/vendor/datatable'),
+            __DIR__.'/../lang' => $this->app->langPath('vendor/datatable'),
         ]);
 
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                CreateDataTableCommand::class,
-            ]);
+        if (!$this->app->runningInConsole()) {
+            return;
         }
+
+        $this->commands([CreateDataTableCommand::class,]);
     }
 
     public function register()
