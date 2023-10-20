@@ -25,8 +25,6 @@
                             </th>
                         @endif
                     </tr>
-
-
                 </thead>
                 <tbody>
                     @foreach ($dataset as $row)
