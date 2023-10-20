@@ -57,6 +57,10 @@ class DataTableV2 extends Component
         return ["totals", count($this->dataset)];
     }
 
+    public function updatedItemsPerPage(){
+        $this->pagesIndex = 0;
+    }
+
     public function updatedPageIndex()
     {
         $this->getData(true);
@@ -67,6 +71,9 @@ class DataTableV2 extends Component
         $queryStrings = ['sortBy', 'sortDesc'];
         if ($this->paginated == true) {
             $queryStrings[] = 'pagesIndex';
+        }
+        if ($this->itemsPerPage != 0) {
+            $queryStrings[] = 'itemsPerPage';
         }
         return $queryStrings;
     }
