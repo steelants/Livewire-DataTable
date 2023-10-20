@@ -54,7 +54,13 @@ class DataTableV2 extends Component
 
     public function footers(): array
     {
-        return ["totals", count($this->dataset)];
+        $footer = [];
+        $footer[] = "Count";
+        for ($item=1; $item < count($this->dataset[0]); $item++) {
+            $footer[] = "";
+        }
+        $footer[] = count($this->dataset);
+        return $footer;
     }
 
     public function updatedItemsPerPage(){
@@ -116,7 +122,7 @@ class DataTableV2 extends Component
             $itemsTotal = $this->dataset->count();
         }
 
-        if ($this->paginated != false) {
+        if ($this->paginated != false && $this->itemsPerPage != 0) {
             $this->pagesTotal = round($itemsTotal / $this->itemsPerPage);
         }
 
