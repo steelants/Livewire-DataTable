@@ -57,6 +57,24 @@
                 @endif
             </table>
         </div>
+        @if ($pagesTotal > 1)
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    @if ($pagesIndex > 0)
+                        <li class="page-item"><a class="page-link" wire:click.prevent="$set('pagesIndex', {{ $pagesIndex - 1 }})">Previous</a></li>
+                    @endif
+                    @for ($pageNumber = 0; $pageNumber <= $pagesTotal; $pageNumber++)
+                        @if ($pageNumber > $pagesIndex + 3 || $pageNumber < $pagesIndex - 3)
+                            @continue
+                        @endif
+                        <li class="page-item"><a class="page-link @if ($pagesIndex == $pageNumber) active @endif" wire:click.prevent="$set('pagesIndex', {{ $pageNumber }})">{{ $pageNumber +1 }}</a></li>
+                    @endfor
+                    @if ($pagesIndex < $pagesTotal)
+                        <li class="page-item"><a class="page-link" wire:click.prevent="$set('pagesIndex', {{ $pagesIndex + 1 }})">Next</a></li>
+                    @endif
+                </ul>
+            </nav>
+        @endif
     @else
         <p>{{ __('datatable::ui.nothing_found') }}</p>
     @endif

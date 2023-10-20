@@ -12,9 +12,16 @@ class DataTableV2 extends Component
     protected $queryString = ['sortBy', 'sortDesc'];
     protected $dataset = [];
 
+    public int $pagesTotal = 1;
+    public int $pagesIndex = 0;
+
     /* SORTING VARIABLES */
     public $sortBy;
     public bool $sortDesc = true;
+
+    /* PAGINATION */
+    public $paginated = false;
+    public int $itemsPerPage = 10;
 
     // public function query(): Builder
     // {
@@ -51,6 +58,10 @@ class DataTableV2 extends Component
         return ["totals", count($this->dataset)];
     }
 
+    public function updatedPageIndex(){
+        $this->getData(true);
+    }
+
     public function render()
     {
         return view('datatable::data-table-v2', [
@@ -60,12 +71,24 @@ class DataTableV2 extends Component
         ]);
     }
 
-    private function getData(): array
+    private function getData($force = false): array
     {
-        if ($this->dataset != []) {
+        $itemsTotal = 0;
+        if ($this->dataset != [] && $force != true) {
+
         } else if (method_exists($this, "query")) {
             $datasetFromDB = [];
-            foreach ($this->query()->get() as $item) {
+            $query = $this->query();
+            $itemsTotal = $query->count();
+
+            if ($this->paginated != false){
+                $query->limit($this->itemsPerPage);
+                if ($this->pagesIndex > 0) {
+                    $query = $query->offset($this->itemsPerPage * $this->pagesIndex);
+                }
+            }
+
+            foreach ($query->get() as $item) {
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
                 foreach ($tempRow as $key => $property) {
                     $tempRow[$key] = (method_exists($this, "colum{$key}Data") ? $this->{"collum{$key}Data"}($property) : $property);
@@ -75,6 +98,11 @@ class DataTableV2 extends Component
             $this->dataset = $datasetFromDB;
         } else {
             $this->dataset = $this->dataset();
+            $itemsTotal = $this->dataset->count();
+        }
+
+        if ($this->paginated != false){
+            $this->pagesTotal = round($itemsTotal / $this->itemsPerPage);
         }
 
         return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
