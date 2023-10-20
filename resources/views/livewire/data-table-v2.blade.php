@@ -60,14 +60,14 @@
         @if ($pagesTotal > 1)
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
+                    @php($pagesIndex = max(0, min($pagesIndex, $pagesTotal)))
+                    @php($startPage = max(0, $pagesIndex - intval(7 / 2)))
+                    @php($endPage = min($pagesTotal, $startPage + 7 - 1))
                     @if ($pagesIndex > 0)
                         <li class="page-item"><a class="page-link" wire:click.prevent="$set('pagesIndex', {{ $pagesIndex - 1 }})">Previous</a></li>
                     @endif
-                    @for ($pageNumber = 0; $pageNumber <= $pagesTotal; $pageNumber++)
-                        @if ($pageNumber > $pagesIndex + 3 || $pageNumber < $pagesIndex - 3)
-                            @continue
-                        @endif
-                        <li class="page-item"><a class="page-link @if ($pagesIndex == $pageNumber) active @endif" wire:click.prevent="$set('pagesIndex', {{ $pageNumber }})">{{ $pageNumber +1 }}</a></li>
+                    @for($i = $startPage; $i <= $endPage; $i++)
+                        <li class="page-item"><a class="page-link @if ($i == $pagesIndex) active @endif" @if ($i != $pagesIndex) wire:click.prevent="$set('pagesIndex', {{ $i }})" @endif>{{ $i }}</a></li>
                     @endfor
                     @if ($pagesIndex < $pagesTotal)
                         <li class="page-item"><a class="page-link" wire:click.prevent="$set('pagesIndex', {{ $pagesIndex + 1 }})">Next</a></li>

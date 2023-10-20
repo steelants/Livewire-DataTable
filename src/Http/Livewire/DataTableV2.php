@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 class DataTableV2 extends Component
 {
     /* RUNTIME VARIABLES */
-    protected $queryString = ['sortBy', 'sortDesc'];
     protected $dataset = [];
 
     public int $pagesTotal = 1;
@@ -58,8 +57,18 @@ class DataTableV2 extends Component
         return ["totals", count($this->dataset)];
     }
 
-    public function updatedPageIndex(){
+    public function updatedPageIndex()
+    {
         $this->getData(true);
+    }
+
+    public function queryString(): array
+    {
+        $queryStrings = ['sortBy', 'sortDesc'];
+        if ($this->paginated == true) {
+            $queryStrings[] = 'pagesIndex';
+        }
+        return $queryStrings;
     }
 
     public function render()
@@ -75,13 +84,12 @@ class DataTableV2 extends Component
     {
         $itemsTotal = 0;
         if ($this->dataset != [] && $force != true) {
-
         } else if (method_exists($this, "query")) {
             $datasetFromDB = [];
             $query = $this->query();
             $itemsTotal = $query->count();
 
-            if ($this->paginated != false){
+            if ($this->paginated != false) {
                 $query->limit($this->itemsPerPage);
                 if ($this->pagesIndex > 0) {
                     $query = $query->offset($this->itemsPerPage * $this->pagesIndex);
@@ -101,7 +109,7 @@ class DataTableV2 extends Component
             $itemsTotal = $this->dataset->count();
         }
 
-        if ($this->paginated != false){
+        if ($this->paginated != false) {
             $this->pagesTotal = round($itemsTotal / $this->itemsPerPage);
         }
 
@@ -116,7 +124,7 @@ class DataTableV2 extends Component
         }
 
         if (count(array_keys($this->dataset[0])) != count($this->headers())) {
-            throw new Exception("Number of porperties (".count(array_keys($this->dataset[0]))."), need to be equal to number of headers (".count($this->headers()).")");
+            throw new Exception("Number of porperties (" . count(array_keys($this->dataset[0])) . "), need to be equal to number of headers (" . count($this->headers()) . ")");
         }
 
         return $this->headers();
