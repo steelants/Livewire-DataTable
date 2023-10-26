@@ -76,15 +76,18 @@ class DataTableV2 extends Component
 
     public function queryString(): array
     {
-        $queryStrings = ['sortBy'];
+        $queryStrings = [];
         if ($this->paginated == true) {
             $queryStrings[] = 'pagesIndex';
         }
         if ($this->itemsPerPage != 0) {
             $queryStrings[] = 'itemsPerPage';
         }
-        if (!empty($this->sortBy)) {
-            $queryStrings[] = 'sortDesc';
+        if ($this->sortable != false){
+            $queryStrings[] = 'sortBy';
+            if (!empty($this->sortBy)) {
+                $queryStrings[] = 'sortDesc';
+            }
         }
         return $queryStrings;
     }
