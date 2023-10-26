@@ -73,7 +73,7 @@
                             @for ($i = $startPage; $i < $endPage; $i++)
                                 <li class="page-item"><a @if ($i != $pagesIndex) wire:click.prevent="$set('pagesIndex', {{ $i }})" @endif class="page-link @if ($i == $pagesIndex) active @endif">{{ $i }}</a></li>
                             @endfor
-                            @if ($pagesIndex < $pagesTotal)
+                            @if ($pagesIndex < ($pagesTotal -1 ))
                                 <li class="page-item"><a class="page-link" wire:click.prevent="$set('pagesIndex', {{ $pagesIndex + 1 }})">Next</a></li>
                             @endif
                         </ul>
