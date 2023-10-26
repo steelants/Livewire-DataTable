@@ -134,7 +134,12 @@ class DataTableV2 extends Component
             $this->pagesTotal = round($itemsTotal / $this->itemsPerPage);
         }
 
-        return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
+        $finalCollection = collect($this->dataset);
+        if ($this->sortable){
+            $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc);
+        }
+        
+        return $finalCollection->toArray();
     }
 
 
