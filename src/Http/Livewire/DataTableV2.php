@@ -20,7 +20,7 @@ class DataTableV2 extends Component
 
     /* PAGINATION */
     public $paginated = false;
-    public int $itemsPerPage = 10;
+    public int $itemsPerPage = 0;
 
     // public function query(): Builder
     // {
@@ -54,13 +54,14 @@ class DataTableV2 extends Component
 
     public function footers(): array
     {
-        $footer = [];
-        $footer[] = "Count";
-        for ($item=1; $item < count($this->dataset[0]); $item++) {
-            $footer[] = "";
-        }
-        $footer[] = count($this->dataset);
-        return $footer;
+        return [];
+        // $footer = [];
+        // $footer[] = "Count";
+        // for ($item=1; $item < count($this->dataset[0]); $item++) {
+        //     $footer[] = "";
+        // }
+        // $footer[] = count($this->dataset);
+        // return $footer;
     }
 
     public function updatedItemsPerPage(){
@@ -74,12 +75,15 @@ class DataTableV2 extends Component
 
     public function queryString(): array
     {
-        $queryStrings = ['sortBy', 'sortDesc'];
+        $queryStrings = ['sortBy'];
         if ($this->paginated == true) {
             $queryStrings[] = 'pagesIndex';
         }
         if ($this->itemsPerPage != 0) {
             $queryStrings[] = 'itemsPerPage';
+        }
+        if (!empty($this->sortBy)) {
+            $queryStrings[] = 'sortDesc';
         }
         return $queryStrings;
     }
