@@ -15,6 +15,7 @@ class DataTableV2 extends Component
     public int $pagesIndex = 0;
 
     /* SORTING VARIABLES */
+    public $sortable = false;
     public $sortBy;
     public bool $sortDesc = true;
 
