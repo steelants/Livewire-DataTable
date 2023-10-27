@@ -65,7 +65,8 @@ class DataTableV2 extends Component
         // return $footer;
     }
 
-    public function updatedItemsPerPage(){
+    public function updatedItemsPerPage()
+    {
         $this->pagesIndex = 0;
     }
 
@@ -83,7 +84,7 @@ class DataTableV2 extends Component
         if ($this->itemsPerPage != 0) {
             $queryStrings[] = 'itemsPerPage';
         }
-        if ($this->sortable != false){
+        if ($this->sortable != false) {
             $queryStrings[] = 'sortBy';
             if (!empty($this->sortBy)) {
                 $queryStrings[] = 'sortDesc';
@@ -119,6 +120,7 @@ class DataTableV2 extends Component
 
             foreach ($query->get() as $item) {
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
+                $tempRow['id'] = $item->id;
                 foreach ($tempRow as $key => $property) {
                     $tempRow[$key] = (method_exists($this, "colum{$key}Data") ? $this->{"collum{$key}Data"}($property) : $property);
                 }
@@ -135,10 +137,10 @@ class DataTableV2 extends Component
         }
 
         $finalCollection = collect($this->dataset);
-        if ($this->sortable){
+        if ($this->sortable) {
             $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc);
         }
-        
+
         return $finalCollection->toArray();
     }
 
@@ -154,8 +156,11 @@ class DataTableV2 extends Component
             return $this->headers();
         }
 
-        if (count(array_keys($this->dataset[0])) != count($this->headers())) {
-            throw new Exception("Number of porperties (" . count(array_keys($this->dataset[0])) . "), need to be equal to number of headers (" . count($this->headers()) . ")");
+        $datasetHeadersCount = count(array_keys($this->dataset[0]));
+        if ($datasetHeadersCount != count($this->headers())) {
+            if (($datasetHeadersCount - 1) != count($this->headers())) {
+                throw new Exception("Number of porperties (" . count(array_keys($this->dataset[0])) . "), need to be equal to number of headers (" . count($this->headers()) . ")");
+            }
         }
 
         return $this->headers();
