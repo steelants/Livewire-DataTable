@@ -145,8 +145,13 @@ class DataTableV2 extends Component
 
     private function getHeader(): array
     {
+
         if (!method_exists($this, "headers")) {
             return [];
+        }
+
+        if ($this->dataset == []) {
+            return $this->headers();
         }
 
         if (count(array_keys($this->dataset[0])) != count($this->headers())) {
