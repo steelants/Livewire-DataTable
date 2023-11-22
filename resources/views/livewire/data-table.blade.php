@@ -104,7 +104,7 @@
                 <div>
                     <nav>
                         <ul class="pagination">
-                            @if ($actual_page > 0)
+                                 @if ($actual_page > 0)
                                 <li class="page-item">
                                     <a class="page-link" wire:click="previousPage()">
                                         PREVIOUS
@@ -112,16 +112,16 @@
                                 </li>
                             @endif
                             @for ($page_index = $actual_page - 4; $page_index <= $actual_page + 4; $page_index++)
-                                @if ($page_index < 0 || $page_index > $total_pages)
+                                @if ($page_index < 0 || ($page_index+1) > $total_pages)
                                     @continue
                                 @endif
                                 <li class="page-item">
                                     <a class="page-link @if ($page_index == $actual_page) active @endif" wire:click="setPage({{ $page_index }})">
-                                        {{ $page_index }}
+                                        {{ $page_index +1 }}
                                     </a>
                                 </li>
                             @endfor
-                            @if ($actual_page < $total_pages)
+                            @if (($actual_page+ 1) < $total_pages)
                                 <li class="page-item">
                                     <a class="page-link" wire:click="nextPage()">
                                         NEXT
