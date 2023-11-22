@@ -2,7 +2,7 @@
     @if ($colum_to_search != [])
         <form class="d-flex" role="search" wire:submit.prevent="searchString()">
             @csrf
-            <input aria-label="Search" class="form-control me-2" placeholder="Search" type="search" wire:model=search_string>
+            <input aria-label="Search" class="form-control me-2" placeholder="Search" type="search" wire:model.debounce.500ms=search_string>
             <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
     @endif

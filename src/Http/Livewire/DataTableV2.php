@@ -15,12 +15,13 @@ class DataTableV2 extends Component
     public int $pagesIndex = 0;
 
     /* SORTING VARIABLES */
+    public $sortable = false;
     public $sortBy;
     public bool $sortDesc = true;
 
     /* PAGINATION */
     public $paginated = false;
-    public int $itemsPerPage = 10;
+    public int $itemsPerPage = 0;
 
     // public function query(): Builder
     // {
@@ -54,16 +55,18 @@ class DataTableV2 extends Component
 
     public function footers(): array
     {
-        $footer = [];
-        $footer[] = "Count";
-        for ($item=1; $item < count($this->dataset[0]); $item++) {
-            $footer[] = "";
-        }
-        $footer[] = count($this->dataset);
-        return $footer;
+        return [];
+        // $footer = [];
+        // $footer[] = "Count";
+        // for ($item=1; $item < count($this->dataset[0]); $item++) {
+        //     $footer[] = "";
+        // }
+        // $footer[] = count($this->dataset);
+        // return $footer;
     }
 
-    public function updatedItemsPerPage(){
+    public function updatedItemsPerPage()
+    {
         $this->pagesIndex = 0;
     }
 
@@ -74,12 +77,18 @@ class DataTableV2 extends Component
 
     public function queryString(): array
     {
-        $queryStrings = ['sortBy', 'sortDesc'];
+        $queryStrings = [];
         if ($this->paginated == true) {
             $queryStrings[] = 'pagesIndex';
         }
         if ($this->itemsPerPage != 0) {
             $queryStrings[] = 'itemsPerPage';
+        }
+        if ($this->sortable != false) {
+            $queryStrings[] = 'sortBy';
+            if (!empty($this->sortBy)) {
+                $queryStrings[] = 'sortDesc';
+            }
         }
         return $queryStrings;
     }
@@ -111,6 +120,7 @@ class DataTableV2 extends Component
 
             foreach ($query->get() as $item) {
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
+                $tempRow['id'] = $item->id;
                 foreach ($tempRow as $key => $property) {
                     $tempRow[$key] = (method_exists($this, "colum{$key}Data") ? $this->{"collum{$key}Data"}($property) : $property);
                 }
@@ -126,18 +136,31 @@ class DataTableV2 extends Component
             $this->pagesTotal = round($itemsTotal / $this->itemsPerPage);
         }
 
-        return collect($this->dataset)->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc)->toArray();
+        $finalCollection = collect($this->dataset);
+        if ($this->sortable) {
+            $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc);
+        }
+
+        return $finalCollection->toArray();
     }
 
 
     private function getHeader(): array
     {
+
         if (!method_exists($this, "headers")) {
             return [];
         }
 
-        if (count(array_keys($this->dataset[0])) != count($this->headers())) {
-            throw new Exception("Number of porperties (" . count(array_keys($this->dataset[0])) . "), need to be equal to number of headers (" . count($this->headers()) . ")");
+        if ($this->dataset == []) {
+            return $this->headers();
+        }
+
+        $datasetHeadersCount = count(array_keys($this->dataset[0]));
+        if ($datasetHeadersCount != count($this->headers())) {
+            if (($datasetHeadersCount - 1) != count($this->headers())) {
+                throw new Exception("Number of porperties (" . count(array_keys($this->dataset[0])) . "), need to be equal to number of headers (" . count($this->headers()) . ")");
+            }
         }
 
         return $this->headers();
