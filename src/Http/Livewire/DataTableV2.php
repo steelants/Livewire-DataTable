@@ -133,7 +133,7 @@ class DataTableV2 extends Component
         }
 
         if ($this->paginated != false && $this->itemsPerPage != 0) {
-            $this->pagesTotal = round($itemsTotal / $this->itemsPerPage);
+            $this->pagesTotal = round(ceil($itemsTotal / $this->itemsPerPage));
         }
 
         $finalCollection = collect($this->dataset);

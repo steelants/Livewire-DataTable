@@ -240,7 +240,7 @@ class DataTable extends Component
         }
 
         if ($this->items_per_page != 0) {
-            $this->total_pages = round(($query->count() / $this->items_per_page), 0, PHP_ROUND_HALF_UP);
+            $this->total_pages = round(ceil($query->count() / $this->items_per_page), 0);
             $query = $query->limit($this->items_per_page);
             if ($this->actual_page > 0) {
                 $query = $query->offset($this->items_per_page * $this->actual_page);
