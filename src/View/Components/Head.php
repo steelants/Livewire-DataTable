@@ -10,11 +10,10 @@ class Head extends Component
 {
     public function __construct(
         public array $headers,
-        public bool $sortable,
-        public string $sortBy,
-        public bool  $sortDesc,
+        public bool|null $sortable,
+        public string|null $sortBy,
+        public bool|null  $sortDesc,
     ) {
-
     }
 
     /**

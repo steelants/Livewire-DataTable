@@ -2,7 +2,7 @@
     @if ($dataset != null)
         <div class="table-responsive">
             <table class="table">
-                <x-datatable-head :headers=$headers :sortable={{$sortable}} :sortBy='{{$sortBy}}' :sortDesc={{$sortDesc}}/>
+                <x-datatable-head :headers="$headers" :sortable="$sortable" :sortBy="$sortBy" :sortDesc="$sortDesc"/>
                 <tbody>
                     @foreach ($dataset as $row)
                         <tr>
@@ -31,12 +31,12 @@
                     @endforeach
                 </tbody>
                 @if (!empty($footers))
-                    <x-datatable-foot :footers='{{ $footers }}' />
+                    <x-datatable-foot :footers="$footers" />
                 @endif
             </table>
         </div>
         @if ($paginated == true)
-            <x-datatable-pagination :pagesIndex='{{ $pagesIndex }}' :itemsPerPage='{{ $itemsPerPage }}' :pagesTotal='{{ $pagesTotal }}' />
+            <x-datatable-pagination :pagesIndex="$pagesIndex" :itemsPerPage="$itemsPerPage" :pagesTotal="$pagesTotal" />
         @endif
     @else
         <p>{{ __('datatable::ui.nothing_found') }}</p>
