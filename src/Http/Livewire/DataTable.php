@@ -214,14 +214,6 @@ class DataTable extends Component
             });
         }
 
-        if ($this->items_per_page != 0) {
-            $this->total_pages = round(($query->count() / $this->items_per_page), 0, PHP_ROUND_HALF_UP);
-            $query = $query->limit($this->items_per_page);
-            if ($this->actual_page > 0) {
-                $query = $query->offset($this->items_per_page * $this->actual_page);
-            }
-        }
-
         if ($this->order_by != null) {
             $query = $query->orderBy($this->order_by, $this->order_direction);
         }
@@ -244,6 +236,14 @@ class DataTable extends Component
                 } else {
                     $query = $query->where($where[0], $where[1], $where[2]);
                 }
+            }
+        }
+
+        if ($this->items_per_page != 0) {
+            $this->total_pages = round(ceil($query->count() / $this->items_per_page), 0);
+            $query = $query->limit($this->items_per_page);
+            if ($this->actual_page > 0) {
+                $query = $query->offset($this->items_per_page * $this->actual_page);
             }
         }
 
@@ -275,10 +275,10 @@ class DataTable extends Component
         $this->dataGetFromDB = $this->addTotal($this->dataGetFromDB);
     }
 
-    public function addAction($icon, $lang_title, $route, $isDanger = false)
+    public function addAction($icon, $lang_title, $route, $isDanger = false, $type = 'route')
     {
         $this->actions[] = [
-            'type' => 'route',
+            'type' => $type,
             'icon' => $icon,
             'lang_title' => __($lang_title),
             'route' => $route,
