@@ -6,12 +6,13 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Pagination extends Component
+class Head extends Component
 {
     public function __construct(
-        public int $pagesIndex,
-        public int $itemsPerPage,
-        public int $pagesTotal,
+        public array $headers,
+        public bool $sortable,
+        public string $sortBy,
+        public bool  $sortDesc,
     ) {
 
     }
@@ -21,6 +22,6 @@ class Pagination extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('datatable-components::pagination');
+        return view('datatable-components::thead');
     }
 }

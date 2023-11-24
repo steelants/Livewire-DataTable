@@ -2,33 +2,7 @@
     @if ($dataset != null)
         <div class="table-responsive">
             <table class="table">
-                <thead>
-                    <tr>
-                        @foreach ($headers as $header)
-                            {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
-                            <th @if ($sortable) @if ($header != $sortBy) wire:click="$set('sortBy','{{ $header }}')" @else wire:click="$set('sortDesc','{{ !$sortDesc }}')" @endif
-                                @endif scope="col">
-                                @if ($sortable)
-                                    @if ($header != $sortBy)
-                                        ↕
-                                    @else
-                                        @if ($sortDesc)
-                                            ↑
-                                        @else
-                                            ↓
-                                        @endif
-                                    @endif
-                                @endif
-                                {{ ucwords($header) }}
-                            </th>
-                        @endforeach
-                        @if (method_exists($this, 'actions'))
-                            <th>
-                                {{ __('datatable::ui.actions') }}
-                            </th>
-                        @endif
-                    </tr>
-                </thead>
+                <x-datatable-head :headers=$headers sortable={{$sortable}} sortBy='{{$sortBy}}' sortDesc={{$sortDesc}}/>
                 <tbody>
                     @foreach ($dataset as $row)
                         <tr>
@@ -57,49 +31,12 @@
                     @endforeach
                 </tbody>
                 @if (!empty($footers))
-                    <tfoot>
-                        @foreach ($footers as $footer)
-                            <th scope="col">{{ $footer }}</th>
-                        @endforeach
-                    </tfoot>
+                    <x-datatable-foot footers='{{ $footers }}' />
                 @endif
             </table>
         </div>
         @if ($paginated == true)
-            <div class="d-flex justify-content-between">
-                <nav aria-label="Page navigation example">
-                    @if ($pagesTotal > 1)
-                        <ul class="pagination">
-                            @php($pagesIndex = max(0, min($pagesIndex, $pagesTotal)))
-                            @php($startPage = max(0, $pagesIndex - intval(7 / 2)))
-                            @php($endPage = min($pagesTotal, $startPage + 7 - 1))
-                            @if ($pagesIndex > 0)
-                                <li class="page-item"><a class="page-link"
-                                        wire:click.prevent="$set('pagesIndex', {{ $pagesIndex - 1 }})">Previous</a>
-                                </li>
-                            @endif
-                            @for ($i = $startPage; $i < $endPage; $i++)
-                                <li class="page-item"><a
-                                        @if ($i != $pagesIndex) wire:click.prevent="$set('pagesIndex', {{ $i }})" @endif
-                                        class="page-link @if ($i == $pagesIndex) active @endif">{{ $i }}</a>
-                                </li>
-                            @endfor
-                            @if ($pagesIndex < $pagesTotal - 1)
-                                <li class="page-item"><a class="page-link"
-                                        wire:click.prevent="$set('pagesIndex', {{ $pagesIndex + 1 }})">Next</a></li>
-                            @endif
-                        </ul>
-                    @endif
-                </nav>
-                <div>
-                    <select class="form-select" wire:model="itemsPerPage">
-                        @foreach ([10, 20, 50, 100, 1000] as $itemsPerPage)
-                            <option value="{{ $itemsPerPage }}">{{ $itemsPerPage != 0 ? $itemsPerPage : 'custom' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
+            <x-datatable-pagination pagesIndex='{{ $pagesIndex }}' itemsPerPage='{{ $itemsPerPage }}' pagesTotal='{{ $pagesTotal }}' />
         @endif
     @else
         <p>{{ __('datatable::ui.nothing_found') }}</p>

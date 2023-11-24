@@ -6,12 +6,10 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Pagination extends Component
+class Foot extends Component
 {
     public function __construct(
-        public int $pagesIndex,
-        public int $itemsPerPage,
-        public int $pagesTotal,
+        public array $footers,
     ) {
 
     }
@@ -21,6 +19,6 @@ class Pagination extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('datatable-components::pagination');
+        return view('datatable-components::tfoot');
     }
 }
