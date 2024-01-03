@@ -8,12 +8,19 @@ use Illuminate\View\Component;
 
 class Pagination extends Component
 {
+    public $startPage = 1;
+    public $endPage = 1;
+    private $span = 2;
+        
     public function __construct(
-        public int $pagesIndex,
+        public int $currentPage,
         public int $itemsPerPage,
         public int $pagesTotal,
+        public int $itemsTotal,
     ) {
-
+        $this->currentPage = max(1, min($this->currentPage, $this->pagesTotal));
+        $this->startPage = max(1, $this->currentPage - $this->span);
+        $this->endPage = min($this->pagesTotal, $this->currentPage + $this->span);
     }
 
     /**

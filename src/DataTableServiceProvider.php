@@ -25,6 +25,7 @@ class DataTableServiceProvider extends ServiceProvider
         Blade::component('datatable-pagination', Pagination::class);
         Blade::component('datatable-foot', Foot::class);
         Blade::component('datatable-head', Head::class);
+        Blade::component('datatable-body', Body::class);
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views/livewire', 'datatable');
         Livewire::component('datatable', DataTable::class);
