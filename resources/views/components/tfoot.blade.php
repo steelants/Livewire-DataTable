@@ -1,5 +1,5 @@
 <tfoot>
     @foreach ($footers as $footer)
-        <th scope="col">{{ $footer }}</th>
+        <th>{{ $footer }}</th>
     @endforeach
 </tfoot>

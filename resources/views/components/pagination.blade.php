@@ -60,11 +60,11 @@
         </nav>
         <div class="d-flex align-items-center text-nowrap">
             <span class="me-4">
-                {{ 1 + $itemsPerPage * $currentPage }} -
+                {{ $itemsPerPage * ($currentPage - 1) + 1 }} -
                 @if ($currentPage == $endPage)
                     {{ $itemsTotal % ($itemsPerPage * $endPage) }}
                 @else
-                    {{ $itemsPerPage * ($currentPage + 1) }}
+                    {{ $itemsPerPage * $currentPage }}
                 @endif
                 of {{ $itemsTotal }}
             </span>

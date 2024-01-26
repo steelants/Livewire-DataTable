@@ -6,6 +6,7 @@ use Exception;
 use Livewire\Component;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class DataTableV2 extends Component
 {
@@ -18,13 +19,20 @@ class DataTableV2 extends Component
     public int $itemsTotal = 1;
 
     /* SORTING VARIABLES */
-    public $sortable = false;
+    public $sortable = true;
     public $sortBy;
-    public bool $sortDesc = true;
+    public $sortDirection = 'asc';
 
     /* PAGINATION */
-    public $paginated = false;
+    public $paginated = true;
     public int $itemsPerPage = 10;
+
+    // Other config
+    public string $tableClass = 'table align-middle';
+    public string $viewName = 'datatable::data-table-v2';
+
+    // TODO: do i need this?
+    public string $keyPropery = 'id';
 
     // public function query(): Builder
     // {
@@ -33,22 +41,35 @@ class DataTableV2 extends Component
 
     public function dataset(): array
     {
-        return [
-            [
-                "cool1" => "test1",
-                "cool2" => "test2",
-            ],
-        ];
+        return [];
     }
 
+
+    // transformace whole row on input
     // public function row($row) : array
     // {
     //     return $row;
     // }
 
-    // public function colum($colum)
+    // transform one column on input
+    // public function column[Colum]($column) : mixed
     // {
-    //     return "value";
+    //      
+    // }
+
+
+    // transform whole row on output (optional)
+    // NOTE: values are rendered with {!! !!}
+    // public function renderRow($row) : array
+    // {
+    //     return $row;
+    // }
+
+    // transform one column on output (optional)
+    // NOTE: values are rendered with {!! !!}
+    // public function renderColumn[Column]($value, $row) : string
+    // {
+    //     return $value;
     // }
 
     public function headers(): array
@@ -73,10 +94,11 @@ class DataTableV2 extends Component
         $this->currentPage = 1;
     }
 
-    public function updatedCurrentPage()
-    {
-        $this->getData(true);
-    }
+    // TODO vasek: k cemu je tohle? kdyz se automaticky pri change property spusti render
+    // public function updatedCurrentPage()
+    // {
+    //     $this->getData(true);
+    // }
 
     public function queryString(): array
     {
@@ -90,27 +112,22 @@ class DataTableV2 extends Component
         if ($this->sortable != false) {
             $queryStrings[] = 'sortBy';
             if (!empty($this->sortBy)) {
-                $queryStrings[] = 'sortDesc';
+                $queryStrings[] = 'sortDirection';
             }
         }
         return $queryStrings;
     }
 
-    public function render()
-    {
-        return view('datatable::data-table-v2', [
-            'dataset' => $this->getData(),
-            'headers' => $this->getHeader(),
-            'footers' => $this->footers(),
-        ]);
-    }
-
     private function getData($force = false): array
     {
         $this->itemsTotal = 0;
-        if ($this->dataset != [] && $force != true) {
+
+
+        // TODO vasek: k cemu je tohle?
+        // if ($this->dataset != [] && $force != true) {
             
-        } else if (method_exists($this, "query")) {
+        // } else 
+        if (method_exists($this, "query")) {
             $datasetFromDB = [];
             $actions = [];
             $query = $this->query();
@@ -125,10 +142,15 @@ class DataTableV2 extends Component
 
             foreach ($query->get() as $item) {
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
-                $tempRow['id'] = $item->id;
+
                 foreach ($tempRow as $key => $property) {
-                    $tempRow[$key] = (method_exists($this, "colum{$key}Data") ? $this->{"collum{$key}Data"}($property) : $property);
+                    $method = "column".Str::camel($key)."Data";
+                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($property) : $property);
                 }
+
+                // TODO: do i need this?
+                $tempRow['__key'] = $item->{$this->keyPropery};
+
                 $datasetFromDB[] = $tempRow;
 
                 if(method_exists($this, "actions")){
@@ -139,7 +161,7 @@ class DataTableV2 extends Component
             $this->actions = $actions;
         } else {
             $this->dataset = $this->dataset();
-            $this->itemsTotal = $this->dataset->count();
+            $this->itemsTotal = count($this->dataset);
         }
 
         if ($this->paginated != false && $this->itemsPerPage != 0) {
@@ -148,7 +170,8 @@ class DataTableV2 extends Component
 
         $finalCollection = collect($this->dataset);
         if ($this->sortable) {
-            $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDesc);
+            // TODO: fix
+            $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDirection == 'desc');
         }
 
         return $finalCollection->toArray();
@@ -196,4 +219,13 @@ class DataTableV2 extends Component
     //         ],
     //     ];
     // }
+
+    public function render()
+    {
+        return view($this->viewName, [
+            'dataset' => $this->getData(),
+            'headers' => $this->getHeader(),
+            'footers' => $this->footers(),
+        ]);
+    }
 }

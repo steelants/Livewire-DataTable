@@ -1,14 +1,8 @@
 <div>
     @if ($dataset != null)
-        @dump($paginated)
-        @dump($currentPage)
-        @dump($pagesTotal)
-        @dump($itemsTotal)
-        @dump($itemsPerPage)
-
         <div class="table-responsive">
-            <table class="table">
-                <x-datatable-head :headers="$headers" :sortable="$sortable" :sortBy="$sortBy" :sortDesc="$sortDesc"/>
+            <table class="{{ $tableClass }}">
+                <x-datatable-head :headers="$headers" :sortable="$sortable" :sortBy="$sortBy" :sortDirection="$sortDirection"/>
                 
                 <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" />
                 

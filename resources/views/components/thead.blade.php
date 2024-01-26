@@ -2,25 +2,35 @@
     <tr>
         @foreach ($headers as $header)
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
-            <th @if ($sortable) @if ($header != $sortBy) wire:click="$set('sortBy','{{ $header }}')" @else wire:click="$set('sortDesc','{{ !$sortDesc }}')" @endif @endif scope="col">
-                @if ($sortable)
-                    @if ($header != $sortBy)
-                        ↕
-                    @else
-                        @if ($sortDesc)
-                            ↑
+            <th scope="col">
+                <span 
+                    @if ($sortable) 
+                        class="datatable-head-sort"
+                        @if ($header != $sortBy) 
+                            wire:click="$set('sortBy','{{ $header }}')" 
+                        @else 
+                            wire:click="$set('sortDirection','{{ $sortDirection == 'desc' ? 'asc' : 'desc' }}')" 
+                        @endif 
+                    @endif
+                >
+                    {{ ucwords($header) }}
+                    @if ($sortable)
+                        @if ($header != $sortBy)
+                            <i class="fas fa-sort opacity-50"></i>
                         @else
-                            ↓
+                            @if ($sortDirection == 'asc')
+                                <i class="fas fa-sort-up opacity-50"></i>
+                            @else
+                                <i class="fas fa-sort-down opacity-50"></i>
+                            @endif
                         @endif
                     @endif
-                @endif
-                {{ ucwords($header) }}
+                </span>
             </th>
         @endforeach
-        {{-- @if (method_exists($this, 'actions'))
-            <th>
-                {{ __('datatable::ui.actions') }}
-            </th>
-        @endif --}}
+
+        @if (method_exists($this, 'actions'))
+            <th class="text-end">Actions</th>
+        @endif
     </tr>
 </thead>
