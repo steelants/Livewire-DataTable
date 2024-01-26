@@ -133,6 +133,10 @@ class DataTableV2 extends Component
             $query = $this->query();
             $this->itemsTotal = $query->count();
 
+            if($this->sortable && !empty($this->sortBy)){
+                $query->orderBy($this->sortBy, $this->sortDirection);
+            }
+
             if ($this->paginated != false) {
                 $query->limit($this->itemsPerPage);
                 if ($this->currentPage > 1) {
