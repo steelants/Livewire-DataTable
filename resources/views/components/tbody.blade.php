@@ -5,15 +5,15 @@
                 @php($row = $this->renderRow($row))
 
                 @foreach (array_keys($headers) as $key)
-                    <td>{!! $row[$key] !!}</td>
+                    <td>{!! $row[$key] ?? '' !!}</td>
                 @endforeach
             @else
                 @foreach (array_keys($headers) as $key)
                     @php($method = 'renderColumn'.ucfirst(Str::camel($key)))
                     @if(method_exists($this, $method))
-                        <td>{!! $this->{$method}($row[$key], $row) !!}</td>
+                        <td>{!! $this->{$method}($row[$key] ?? '', $row) !!}</td>
                     @else
-                        <td>{{ $row[$key] }}</td>
+                        <td>{{ $row[$key] ?? '' }}</td>
                     @endif
                 @endforeach
             @endif

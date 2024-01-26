@@ -1,21 +1,22 @@
 <thead>
     <tr>
-        @foreach ($headers as $header)
+        @foreach ($headers as $key => $header)
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
             <th scope="col">
                 <span 
                     @if ($sortable) 
                         class="datatable-head-sort"
-                        @if ($header != $sortBy) 
-                            wire:click="$set('sortBy','{{ $header }}')" 
+                        @if ($key != $sortBy) 
+                            wire:click="$set('sortBy','{{ $key }}')" 
                         @else 
                             wire:click="$set('sortDirection','{{ $sortDirection == 'desc' ? 'asc' : 'desc' }}')" 
                         @endif 
                     @endif
                 >
-                    {{ ucwords($header) }}
+                    <span>{{ ucfirst($header) }}</span>
+
                     @if ($sortable)
-                        @if ($header != $sortBy)
+                        @if ($key != $sortBy)
                             <i class="fas fa-sort opacity-50"></i>
                         @else
                             @if ($sortDirection == 'asc')

@@ -8,6 +8,12 @@
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     </li>
+                @else
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    </li>
                 @endif
 
                 @if ($startPage > 1)
