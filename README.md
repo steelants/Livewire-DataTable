@@ -1,4 +1,4 @@
-# Livewire datatable
+# Livewire DataTable
 ### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
 
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
@@ -43,6 +43,13 @@ class UserDataTable extends DataTableV2
                 'text' => "Remove",
                 'actionClass' => 'text-danger',
                 'iconClass' => 'fas fa-trash',
+            ],
+            [
+                // url action
+                'type' => "url",
+                'url' => rounte('user.show', [id => $item['id']]),
+                'text' => "Show",
+                'iconClass' => 'fas fa-eye',
             ]
         ];
     }
