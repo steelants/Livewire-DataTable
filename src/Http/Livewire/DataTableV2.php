@@ -18,18 +18,24 @@ class DataTableV2 extends Component
     public int $currentPage = 1;
     public int $itemsTotal = 1;
 
-    /* SORTING VARIABLES */
-    public $sortable = true;
-    public $sortBy;
-    public $sortDirection = 'asc';
+    // Enable sorting
+    public bool $sortable = true;
+    public string $sortBy = '';
+    public string $sortDirection = 'asc';
 
-    /* PAGINATION */
-    public $paginated = true;
+    // Enable pagination
+    public bool $paginated = true;
     public int $itemsPerPage = 10;
+
+    // Enable fulltext search
+    public bool $searchable = false;
+    public array $searchableColumns = [];
+    public string $searchValue = '';
 
     // Other config
     public string $tableClass = 'table align-middle';
     public string $viewName = 'datatable::data-table-v2';
+    public bool $showHeader = true;
 
     // TODO: do i need this?
     public string $keyPropery = 'id';
@@ -39,38 +45,44 @@ class DataTableV2 extends Component
     //      return Model::where('id','>',0)->limit(100);
     // }
 
+    // Transformace whole row on input (optional)
+    // Returns associative array 
+    // public function row(Model $row) : array
+    // {
+    //     return [
+    //         'id' => $row->id,
+    //     ];
+    // }
+
+    // Transform one column on input (optional)
+    // public function columnFoo(mixed $column) : mixed
+    // {
+    //      return $column;
+    // }
+
+
+    // Transform whole row on output (optional)
+    // !!! NOTE: values are rendered with {!! !!}, manually escape values
+    // public function renderRow(array $row) : array
+    // {
+    //     return [
+    //         'id' => e($row['id'])
+    //     ];
+    // }
+
+    // Transform one column on output (optional)
+    // !!! NOTE: values are rendered with {!! !!}, manually escape values
+    // public function renderColumnFoo(mixed $value, array $row) : string
+    // {
+    //     return e($value);
+    // }
+
+
+
     public function dataset(): array
     {
         return [];
     }
-
-
-    // transformace whole row on input
-    // public function row($row) : array
-    // {
-    //     return $row;
-    // }
-
-    // transform one column on input
-    // public function column[Colum]($column) : mixed
-    // {
-    //      
-    // }
-
-
-    // transform whole row on output (optional)
-    // NOTE: values are rendered with {!! !!}
-    // public function renderRow($row) : array
-    // {
-    //     return $row;
-    // }
-
-    // transform one column on output (optional)
-    // NOTE: values are rendered with {!! !!}
-    // public function renderColumn[Column]($value, $row) : string
-    // {
-    //     return $value;
-    // }
 
     public function headers(): array
     {
@@ -106,6 +118,9 @@ class DataTableV2 extends Component
         if ($this->paginated == true) {
             $queryStrings[] = 'currentPage';
         }
+        if ($this->searchable == true) {
+            $queryStrings[] = 'searchValue';
+        }
         if ($this->itemsPerPage != 0) {
             $queryStrings[] = 'itemsPerPage';
         }
@@ -131,6 +146,20 @@ class DataTableV2 extends Component
             $datasetFromDB = [];
             $actions = [];
             $query = $this->query();
+
+            if($this->searchable && !empty($this->searchValue)){
+                $query->where(function($q){
+                    foreach($this->searchableColumns as $i => $column){
+                        if($i == 0){
+                            $q->where($column, 'LIKE', '%' . $this->searchValue . '%');
+                        }else{
+                            $q->orWhere($column, 'LIKE', '%' . $this->searchValue . '%');
+                        }
+                    }
+                });
+            }
+
+
             $this->itemsTotal = $query->count();
 
             if($this->sortable && !empty($this->sortBy)){
@@ -192,13 +221,6 @@ class DataTableV2 extends Component
         if ($this->dataset == []) {
             return $this->headers();
         }
-
-        // $datasetHeadersCount = count(array_keys($this->dataset[0]));
-        // if ($datasetHeadersCount != count($this->headers())) {
-        //     if (($datasetHeadersCount - 1) != count($this->headers())) {
-        //         throw new Exception("Number of porperties (" . count(array_keys($this->dataset[0])) . "), need to be equal to number of headers (" . count($this->headers()) . ")");
-        //     }
-        // }
 
         return $this->headers();
     }
