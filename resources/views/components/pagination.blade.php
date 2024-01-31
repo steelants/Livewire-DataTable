@@ -4,7 +4,7 @@
             <ul class="pagination mb-0">
                 @if ($currentPage > 1)
                     <li class="page-item">
-                        <a class="page-link" wire:click.prevent="$set('currentPage', {{ $currentPage - 1 }})">
+                        <a class="page-link" wire:click="$set('currentPage', {{ $currentPage - 1 }})" wire:key="page-prev">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     </li>
@@ -18,7 +18,7 @@
 
                 @if ($startPage > 1)
                     <li class="page-item">
-                        <button type="button" class="page-link" wire:click.prevent="$set('currentPage', {{ 1 }})">
+                        <button type="button" class="page-link" wire:click="$set('currentPage', {{ 1 }})" wire:key="page-1">
                             1
                         </button>
                     </li>
@@ -34,7 +34,7 @@
 
                 @for ($i = $startPage; $i <= $endPage; $i++)
                     <li class="page-item">
-                        <button type="button" class="page-link @if ($i == $currentPage) active @endif" @if ($i != $currentPage) wire:click.prevent="$set('currentPage', {{ $i }})" @endif>
+                        <button type="button" class="page-link @if ($i == $currentPage) active @endif" wire:key="page-{{$i}}" @if ($i != $currentPage)  wire:click="$set('currentPage', {{ $i }})" @endif>
                             {{ $i }}
                         </button>
                     </li>
@@ -49,7 +49,7 @@
                         </li>
                     @endif
                     <li class="page-item">
-                        <button type="button" class="page-link" wire:click.prevent="$set('currentPage', {{ $pagesTotal }})">
+                        <button type="button" class="page-link" wire:click="$set('currentPage', {{ $pagesTotal }})"  wire:key="page-{{$pagesTotal}}">
                             {{ $pagesTotal }}
                         </button>
                     </li>
@@ -57,7 +57,7 @@
 
                 @if ($currentPage < $pagesTotal)
                     <li class="page-item">
-                        <button type="button" class="page-link" wire:click.prevent="$set('currentPage', {{ $currentPage + 1 }})">
+                        <button type="button" class="page-link" wire:click="$set('currentPage', {{ $currentPage + 1 }})" wire:key="page-next">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </li>
