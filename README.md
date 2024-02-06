@@ -12,7 +12,7 @@ use App\Models\User;
 use SteelAnts\DataTable\Http\Livewire\DataTableV2;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserDataTable extends DataTableV2
+class UserDataTable extends DataTableV3
 {
 
     // Get model query
