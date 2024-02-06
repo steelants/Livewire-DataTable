@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
-class DataTableV2 extends Component
+class DataTableV3 extends Component
 {
     /* RUNTIME VARIABLES */
     public $dataset = [];
