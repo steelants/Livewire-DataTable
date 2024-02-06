@@ -33,7 +33,11 @@
                         <tr>
                             @foreach ($row as $key => $collum)
                                 @if($key != "id" || ($key == "id" && in_array("id", $headers)))
-                                    <td>{{ $collum }}</td>
+                                    @if (method_exists($this, 'renderRow'))
+                                        <td>{!! $this->actions($renderRow, $row) !!}</td>
+                                    @else
+                                        <td>{{ $collum }}</td>
+                                    @endif
                                 @endif
                             @endforeach
                             @if (method_exists($this, 'actions'))
@@ -46,6 +50,8 @@
                                         @else
                                             {{ __('datatable::ui.actions.not_implemented') }}
                                         @endif
+
+
                                     @endforeach
                                 </td>
                             @endif

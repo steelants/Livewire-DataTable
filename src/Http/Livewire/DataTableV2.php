@@ -43,6 +43,14 @@ class DataTableV2 extends Component
     //     return $row;
     // }
 
+    // public function renderRow($name, $object)
+    // {
+    //     if ($name->name == "name") {
+    //         return '<a href="' . route('name', ['id' => $model->id]) . '">' . $object[$name] . '</a>';
+    //     }
+    //     return $object[$name];
+    // }
+
     // public function colum($colum)
     // {
     //     return "value";
