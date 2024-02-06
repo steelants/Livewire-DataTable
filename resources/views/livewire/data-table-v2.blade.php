@@ -34,7 +34,7 @@
                             @foreach ($row as $key => $collum)
                                 @if($key != "id" || ($key == "id" && in_array("id", $headers)))
                                     @if (method_exists($this, 'renderRow'))
-                                        <td>{!! $this->actions($renderRow, $row) !!}</td>
+                                        <td>{!! $this->renderRow($key, $row) !!}</td>
                                     @else
                                         <td>{{ $collum }}</td>
                                     @endif
