@@ -34,7 +34,7 @@ class DataTableV3 extends Component
 
     // Other config
     public string $tableClass = 'table align-middle';
-    public string $viewName = 'datatable::data-table-v2';
+    public string $viewName = 'datatable::data-table-v3';
     public bool $showHeader = true;
 
     // TODO: do i need this?
