@@ -234,7 +234,11 @@ class DataTable extends Component
                     $relation = explode(".", $where[0]);
                     $query = $query->whereRelation($relation[0], $relation[1], $where[1], $where[2]);
                 } else {
-                    $query = $query->where($where[0], $where[1], $where[2]);
+                    if ($where[1] === "in"){
+                        $query = $query->whereIn($where[0], $where[2]);
+                    } else {
+                        $query = $query->where($where[0], $where[1], $where[2]);
+                    }
                 }
             }
         }
