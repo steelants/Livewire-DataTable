@@ -9,7 +9,7 @@
 namespace App\Http\Livewire;
 
 use App\Models\User;
-use SteelAnts\DataTable\Http\Livewire\DataTableV2;
+use SteelAnts\DataTable\Http\Livewire\DataTableV3;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserDataTable extends DataTableV3
