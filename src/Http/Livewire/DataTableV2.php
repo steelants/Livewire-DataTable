@@ -136,8 +136,15 @@ class DataTableV2 extends Component
             }
             $this->dataset = $datasetFromDB;
         } else {
-            $this->dataset = $this->dataset();
-            $itemsTotal = $this->dataset->count();
+            $datasetFromDB = [];
+            foreach ($this->dataset() as $key => $item) {
+                $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
+                $tempRow['key'] = $key;
+
+                $datasetFromDB[] = $tempRow;
+            }
+            $this->dataset = $datasetFromDB;
+            $itemsTotal = count($this->dataset);
         }
 
         if ($this->paginated != false && $this->itemsPerPage != 0) {
