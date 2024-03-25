@@ -21,7 +21,7 @@
 
             @if (!empty($actions))
                 <td class="text-end">
-                    @if (isset($actions[$idx]))
+                    @if (!empty($actions[$idx]))
                         <div class="dropdown position-static">
                             <button class="datatable-dropdown-action btn btn-sq btn-sm" type="button" data-bs-toggle="dropdown" data-bs-boundary="window">
                                 <i class="fas fa-ellipsis-v"></i>
