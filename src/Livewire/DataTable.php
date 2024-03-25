@@ -1,14 +1,11 @@
 <?php
 
-namespace SteelAnts\DataTable\Http\Livewire;
+namespace SteelAnts\DataTable\Livewire;
 
-use Exception;
 use Livewire\Component;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
-class DataTableV3 extends Component
+class DataTable extends Component
 {
     /* RUNTIME VARIABLES */
     public $dataset = [];
@@ -34,7 +31,7 @@ class DataTableV3 extends Component
 
     // Other config
     public string $tableClass = 'table align-middle';
-    public string $viewName = 'datatable::data-table-v3';
+    public string $viewName = 'datatable::data-table';
     public bool $showHeader = true;
 
     // TODO: do i need this?
@@ -106,7 +103,7 @@ class DataTableV3 extends Component
         $this->currentPage = 1;
     }
 
-    // TODO vasek: k cemu je tohle? kdyz se automaticky pri change property spusti render
+    // TODO
     // public function updatedCurrentPage()
     // {
     //     $this->getData(true);
@@ -138,7 +135,7 @@ class DataTableV3 extends Component
         $this->itemsTotal = 0;
 
 
-        // TODO vasek: k cemu je tohle?
+        // TODO 
         // if ($this->dataset != [] && $force != true) {
             
         // } else 

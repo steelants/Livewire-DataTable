@@ -6,13 +6,13 @@
 ## Usage
 
 ```php
-namespace App\Http\Livewire;
+namespace App\Livewire;
 
 use App\Models\User;
-use SteelAnts\DataTable\Http\Livewire\DataTableV3;
+use SteelAnts\DataTable\Livewire\DataTable;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserDataTable extends DataTableV3
+class UserTable extends DataTable
 {
 
     // Get model query
@@ -67,7 +67,7 @@ class UserDataTable extends DataTableV3
 ```
 
 ```blade
-@livewire('user-data-table', [], key('data-table'))
+@livewire('user-table', [], key('data-table'))
 ```
 
 ## Configuration

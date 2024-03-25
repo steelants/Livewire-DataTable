@@ -27,15 +27,16 @@ class CreateDataTableCommand extends Command
     {
         $content = '';
         $content .= $this->generateMethod('mount');
+        // TODO FIX
         $this->saveDataTable($name, $content);
     }
 
     private function getHead($className) {
         return "<?php
 
-        namespace App\Http\Livewire\Components;
+        namespace App\Livewire\Components;
 
-        use SteelAnts\DataTable\Http\Livewire\DataTable;
+        use SteelAnts\DataTable\Livewire\DataTable;
 
         class $className extends DataTable
         {
@@ -59,12 +60,12 @@ class CreateDataTableCommand extends Command
     private function saveDataTable($name, $content) {
         if(empty($content)) return;
 
-        $testFilePath = base_path() . '/app/Http/Livewire/Components/'.$name.'.php';
+        $testFilePath = base_path() . '/app/Livewire/Components/'.$name.'.php';
 
         $fp = fopen($testFilePath , 'w');
         fwrite($fp,  $this->getHead($name).$content.$this->getFoot());
         fclose($fp);
 
-        $this->info("DataTable generated:  /app/Http/Livewire/Components/$name.php");
+        $this->info("DataTable generated:  /app/Livewire/Components/$name.php");
     }
 }

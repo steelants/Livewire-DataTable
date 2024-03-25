@@ -5,10 +5,8 @@ namespace SteelAnts\DataTable;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
-use SteelAnts\DataTable\Http\Livewire\DataTable;
-use SteelAnts\DataTable\Http\Livewire\GenericDataTable;
+use SteelAnts\DataTable\Livewire\DataTable;
 use SteelAnts\DataTable\Console\Commands\CreateDataTableCommand;
-use SteelAnts\DataTable\Http\Livewire\DataTableV2;
 use SteelAnts\DataTable\View\Components\Pagination;
 use SteelAnts\DataTable\View\Components\Head;
 use SteelAnts\DataTable\View\Components\Body;
@@ -29,8 +27,6 @@ class DataTableServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views/livewire', 'datatable');
         Livewire::component('datatable', DataTable::class);
-        Livewire::component('generic-data-table', GenericDataTable::class);
-        Livewire::component('datatable-v2', DataTableV2::class);
 
         $this->publishes([
             __DIR__ . '/../lang' => $this->app->langPath('vendor/datatable'),
