@@ -9,10 +9,10 @@
 namespace App\Livewire;
 
 use App\Models\User;
-use SteelAnts\DataTable\Livewire\DataTable;
+use SteelAnts\DataTable\Livewire\DataTableComponent;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserTable extends DataTable
+class UserTable extends DataTableComponent
 {
 
     // Get model query

@@ -5,7 +5,7 @@ namespace SteelAnts\DataTable\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Str;
 
-class DataTable extends Component
+class DataTableComponent extends Component
 {
     /* RUNTIME VARIABLES */
     public $dataset = [];

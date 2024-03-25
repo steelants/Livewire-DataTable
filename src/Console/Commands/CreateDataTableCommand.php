@@ -35,9 +35,9 @@ class CreateDataTableCommand extends Command
 
         namespace App\Livewire\Components;
 
-        use SteelAnts\DataTable\Livewire\DataTable;
+        use SteelAnts\DataTable\Livewire\DataTableComponent;
 
-        class $className extends DataTable
+        class $className extends DataTableComponent
         {
         ";
     }
