@@ -20,7 +20,7 @@ class DataTableV2 extends Component
     public bool $sortDesc = true;
 
     /* PAGINATION */
-    public $paginated = false;
+    public bool $paginated = false;
     public int $itemsPerPage = 0;
 
     // public function query(): Builder
