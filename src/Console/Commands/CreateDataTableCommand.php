@@ -27,8 +27,7 @@ class CreateDataTableCommand extends Command
     {
         $content = '';
         $content .= $this->generateMethod('mount');
-        // TODO FIX
-        $this->saveDataTable($name, $content);
+        $this->saveDataTable($this->argument('name'), $content);
     }
 
     private function getHead($className) {
