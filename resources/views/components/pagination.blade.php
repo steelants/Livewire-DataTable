@@ -81,7 +81,7 @@
                 of {{ $itemsTotal }}
             </span>
             <span class="me-2">Per page: </span>
-            <select class="form-select" wire:model="itemsPerPage">
+            <select class="form-select" wire:model.live="itemsPerPage">
                 @foreach ([10, 20, 50, 100, 1000] as $itemsPerPage)
                     <option value="{{ $itemsPerPage }}">
                         {{ $itemsPerPage != 0 ? $itemsPerPage : 'custom' }}
