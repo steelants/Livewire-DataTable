@@ -87,6 +87,7 @@ class UserTable extends DataTableComponent
     }
 ```
 
+### Render
 ```blade
 @livewire('user-table', [], key('data-table'))
 ```
