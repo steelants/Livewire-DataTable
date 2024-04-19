@@ -66,6 +66,27 @@ class UserTable extends DataTableComponent
 }
 ```
 
+### Using without query / models
+```php
+    // instead of method query() implement dataset() 
+    public function dataset(): array
+    {
+        return [
+            [    
+                'id' => '1',
+                'name' => 'Name 1',
+                'email' => 'E-mail 1',
+            ],
+            [    
+                'id' => '2',
+                'name' => 'Name 2',
+                'email' => 'E-mail 2',
+            ],
+            // ...
+        ];
+    }
+```
+
 ```blade
 @livewire('user-table', [], key('data-table'))
 ```
