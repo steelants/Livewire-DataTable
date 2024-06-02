@@ -2,7 +2,7 @@
     @if($searchable)
         <div class="row mb-3">
             <div class="col-md-6 col-lg-4">
-                <input type="text" class="form-control" placeholder="Search..." wire:model="searchValue">
+                <input type="text" class="form-control" placeholder="Search..." wire:model.live.debounce="searchValue">
             </div>
         </div>
     @endif
