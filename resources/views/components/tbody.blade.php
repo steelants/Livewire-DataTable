@@ -39,7 +39,10 @@
                                             <span>{{ __($action['text']) }}</span>
                                         </a>
                                     @elseif ($action['type'] == 'livewire')
-                                        <button class="dropdown-item {{ $action['actionClass'] ?? '' }}" wire:click='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'>
+                                        <button class="dropdown-item {{ $action['actionClass'] ?? '' }}" 
+                                            wire:click='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'
+                                            @if(!empty($action['confirm'])) wire:confirm="{{__($action['confirm'])}}" @endif
+                                        >
                                             @if (!empty($action['iconClass']))
                                                 <i class="dropdown-item-icon {{ $action['iconClass'] }}"></i>
                                             @endif
