@@ -17,6 +17,7 @@ class DataTableComponent extends Component
 
     // Enable sorting
     public bool $sortable = true;
+    public array $sortableColumns = [];
     public string $sortBy = '';
     public string $sortDirection = 'asc';
 
