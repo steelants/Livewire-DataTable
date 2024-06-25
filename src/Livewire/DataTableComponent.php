@@ -43,7 +43,7 @@ class DataTableComponent extends Component
     // }
 
     // Transformace whole row on input (optional)
-    // Returns associative array 
+    // Returns associative array
     // public function row(Model $row) : array
     // {
     //     return [
@@ -135,10 +135,10 @@ class DataTableComponent extends Component
         $this->itemsTotal = 0;
 
 
-        // TODO 
+        // TODO
         // if ($this->dataset != [] && $force != true) {
-            
-        // } else 
+
+        // } else
         if (method_exists($this, "query")) {
             $datasetFromDB = [];
             $actions = [];
@@ -174,7 +174,7 @@ class DataTableComponent extends Component
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
                 foreach ($tempRow as $key => $property) {
-                    $method = "column".Str::camel($key)."Data";
+                    $method = "column".Str::camel(str_replace('.', '_', $key))."Data";
                     $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($property) : $property);
                 }
 
