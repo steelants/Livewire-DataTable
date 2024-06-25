@@ -4,7 +4,7 @@
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
             <th scope="col">
                 <span
-                    @if ($sortable)
+                @if ($sortable && in_array($key, $sortableColumns))
                         class="datatable-head-sort"
                         @if ($key != $sortBy)
                             wire:click="$set('sortBy','{{ $key }}')"
@@ -15,7 +15,7 @@
                 >
                     <span>{{ ucfirst($header) }}</span>
 
-                    @if ($sortable)
+                    @if ($sortable && in_array($key, $sortableColumns))
                         @if ($key != $sortBy)
                             <i class="fas fa-sort opacity-50"></i>
                         @else
