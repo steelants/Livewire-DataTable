@@ -17,6 +17,7 @@ class DataTableComponent extends Component
 
     // Enable sorting
     public bool $sortable = true;
+    public array $sortableColumns = [];
     public string $sortBy = '';
     public string $sortDirection = 'asc';
 
@@ -192,7 +193,7 @@ class DataTableComponent extends Component
                 }
 
                 // TODO: do i need this?
-                $tempRow['__key'] = $item->{$this->keyPropery};
+                // $tempRow['__key'] = $item->{$this->keyPropery};
 
                 $datasetFromDB[] = $tempRow;
 
@@ -204,6 +205,13 @@ class DataTableComponent extends Component
             $this->actions = $actions;
         } else {
             $this->dataset = $this->dataset();
+            $actions = [];
+            if(method_exists($this, "actions")){
+                foreach($this->dataset as $tempRow){
+                    $actions[] = $this->actions($tempRow);
+                }
+            }
+            $this->actions = $actions;
             $this->itemsTotal = count($this->dataset);
         }
 
