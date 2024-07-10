@@ -176,7 +176,9 @@ class DataTableComponent extends Component
 
                 foreach ($tempRow as $key => $property) {
                     $method = "column".Str::camel(str_replace('.', '_', $key))."Data";
-                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($property) : $property);
+                    $ModelProperty = Str::camel(str_replace('.', '->', $key));
+
+                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($$ModelProperty) : $property);
                 }
 
                 // TODO: do i need this?
