@@ -140,9 +140,21 @@ class DataTableComponent extends Component
             
         // } else 
         if (method_exists($this, "query")) {
+            $relations = [];
+            foreach ($this->getHeader() as $header) {
+                if (strpos($header, ".") === false){
+                    continue;
+                }
+                $relations[] = explode('.', $header)[0];
+            }
+            
             $datasetFromDB = [];
             $actions = [];
             $query = $this->query();
+
+            if ($relations != []){
+                $query = $query->with($relations);
+            }
 
             if($this->searchable && !empty($this->searchValue)){
                 $query->where(function($q){
@@ -155,7 +167,6 @@ class DataTableComponent extends Component
                     }
                 });
             }
-
 
             $this->itemsTotal = $query->count();
 
@@ -174,8 +185,10 @@ class DataTableComponent extends Component
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
                 foreach ($tempRow as $key => $property) {
-                    $method = "column".Str::camel($key)."Data";
-                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($property) : $property);
+                    $method = "column".Str::camel(str_replace('.', '_', $key))."Data";
+                    $ModelProperty = Str::camel(str_replace('.', '->', $key));
+
+                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($this->${$ModelProperty}) : $property);
                 }
 
                 // TODO: do i need this?
