@@ -141,9 +141,23 @@ class DataTableComponent extends Component
 
         // } else
         if (method_exists($this, "query")) {
+            $relations = [];
+            foreach ($this->getHeader() as $header => $headerName) {
+                if (strpos($header, ".") === false){
+                    continue;
+                }
+                $relations[] = explode('.', $header)[0];
+            }
+
+
             $datasetFromDB = [];
             $actions = [];
             $query = $this->query();
+
+            if ($relations != []){
+                $query = $query->with($relations);
+            }
+
 
             if($this->searchable && !empty($this->searchValue)){
                 $query->where(function($q){
