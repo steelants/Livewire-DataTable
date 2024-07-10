@@ -2,6 +2,8 @@
 
 namespace SteelAnts\DataTable\Livewire;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Livewire\Component;
 use Illuminate\Support\Str;
 
@@ -142,29 +144,22 @@ class DataTableComponent extends Component
         // } else
         if (method_exists($this, "query")) {
             $relations = [];
-            foreach ($this->getHeader() as $header => $headerName) {
-                if (strpos($header, ".") === false){
-                    continue;
-                }
-                $relations[] = explode('.', $header)[0];
-            }
-
 
             $datasetFromDB = [];
             $actions = [];
             $query = $this->query();
 
-            if ($relations != []){
+            $relations = $this->getRelation($query->getQuery());
+            if ($relations != []) {
                 $query = $query->with($relations);
             }
 
-
-            if($this->searchable && !empty($this->searchValue)){
-                $query->where(function($q){
-                    foreach($this->searchableColumns as $i => $column){
-                        if($i == 0){
+            if ($this->searchable && !empty($this->searchValue)) {
+                $query->where(function ($q) {
+                    foreach ($this->searchableColumns as $i => $column) {
+                        if ($i == 0) {
                             $q->where($column, 'LIKE', '%' . $this->searchValue . '%');
-                        }else{
+                        } else {
                             $q->orWhere($column, 'LIKE', '%' . $this->searchValue . '%');
                         }
                     }
@@ -174,7 +169,7 @@ class DataTableComponent extends Component
 
             $this->itemsTotal = $query->count();
 
-            if($this->sortable && !empty($this->sortBy)){
+            if ($this->sortable && !empty($this->sortBy)) {
                 $query->orderBy($this->sortBy, $this->sortDirection);
             }
 
@@ -189,7 +184,7 @@ class DataTableComponent extends Component
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
                 foreach ($tempRow as $key => $property) {
-                    $method = "column".Str::camel(str_replace('.', '_', $key))."Data";
+                    $method = "column" . Str::camel(str_replace('.', '_', $key)) . "Data";
                     $ModelProperty = Str::camel(str_replace('.', '->', $key));
 
                     $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($$ModelProperty) : $property);
@@ -200,7 +195,7 @@ class DataTableComponent extends Component
 
                 $datasetFromDB[] = $tempRow;
 
-                if(method_exists($this, "actions")){
+                if (method_exists($this, "actions")) {
                     $actions[] = $this->actions($tempRow);
                 }
             }
@@ -209,8 +204,8 @@ class DataTableComponent extends Component
         } else {
             $this->dataset = $this->dataset();
             $actions = [];
-            if(method_exists($this, "actions")){
-                foreach($this->dataset as $tempRow){
+            if (method_exists($this, "actions")) {
+                foreach ($this->dataset as $tempRow) {
                     $actions[] = $this->actions($tempRow);
                 }
             }
@@ -274,5 +269,24 @@ class DataTableComponent extends Component
             'headers' => $this->getHeader(),
             'footers' => $this->footers(),
         ]);
+    }
+
+    private function getRelation(QueryBuilder $query)
+    {
+        $relations = [];
+
+        if ($query->joins != null) {
+            return $relations;
+        }
+
+        foreach ($this->getHeader() as $header => $headerName) {
+            if (strpos($header, ".") === false) {
+                continue;
+            }
+
+            $relations[] = explode('.', $header)[0];
+        }
+
+        return $relations;
     }
 }
