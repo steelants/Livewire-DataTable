@@ -159,11 +159,21 @@ class DataTableComponent extends Component
 
             if($this->searchable && !empty($this->searchValue)){
                 $query->where(function($q){
-                    foreach($this->searchableColumns as $i => $column){
-                        if($i == 0){
-                            $q->where($column, 'LIKE', '%' . $this->searchValue . '%');
-                        }else{
-                            $q->orWhere($column, 'LIKE', '%' . $this->searchValue . '%');
+                    foreach ($this->searchableColumns as $i => $column) {
+                        if ($i == 0) {
+                            if (strpos($column, ".") === false) {
+                                $q->where($column, 'LIKE', '%' . $this->searchValue . '%');
+                            } else {
+                                $column = explode('.',$column);
+                                $q->whereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
+                            }
+                        } else {
+                            if (strpos($column, ".") === false) {
+                                $q->orWhere($column, 'LIKE', '%' . $this->searchValue . '%');
+                            } else {
+                                $column = explode('.',$column);
+                                $q->orWhereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
+                            }
                         }
                     }
                 });
