@@ -202,13 +202,21 @@ class DataTableComponent extends Component
             $this->dataset = $datasetFromDB;
             $this->actions = $actions;
         } else {
-            $this->dataset = $this->dataset();
+            $dataset = $this->dataset();
+            if ($this->paginated != false) {
+                $from = $this->itemsPerPage * ($this->currentPage - 1);
+                $to = ($from + $this->itemsPerPage);
+                $this->dataset = array_slice($dataset, $from,  $to);
+            }
+
             $actions = [];
+
             if (method_exists($this, "actions")) {
                 foreach ($this->dataset as $tempRow) {
                     $actions[] = $this->actions($tempRow);
                 }
             }
+
             $this->actions = $actions;
             $this->itemsTotal = count($this->dataset);
         }
