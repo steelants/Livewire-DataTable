@@ -43,6 +43,7 @@ class UserTable extends DataTableComponent
                 'text' => "Remove",
                 'actionClass' => 'text-danger',
                 'iconClass' => 'fas fa-trash',
+                'confirm' => 'Are you sure you want to delete this post?',
             ],
             [
                 // url action
@@ -87,6 +88,7 @@ class UserTable extends DataTableComponent
     }
 ```
 
+### Render
 ```blade
 @livewire('user-table', [], key('data-table'))
 ```

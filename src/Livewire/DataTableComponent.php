@@ -2,6 +2,8 @@
 
 namespace SteelAnts\DataTable\Livewire;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Livewire\Component;
 use Illuminate\Support\Str;
 
@@ -44,7 +46,7 @@ class DataTableComponent extends Component
     // }
 
     // Transformace whole row on input (optional)
-    // Returns associative array 
+    // Returns associative array
     // public function row(Model $row) : array
     // {
     //     return [
@@ -136,10 +138,10 @@ class DataTableComponent extends Component
         $this->itemsTotal = 0;
 
 
-        // TODO 
+        // TODO
         // if ($this->dataset != [] && $force != true) {
-            
-        // } else 
+
+        // } else
         if (method_exists($this, "query")) {
             $relations = [];
             foreach ($this->getHeader() as $header) {
@@ -148,7 +150,7 @@ class DataTableComponent extends Component
                 }
                 $relations[] = explode('.', $header)[0];
             }
-            
+
             $datasetFromDB = [];
             $actions = [];
             $query = $this->query();
@@ -181,7 +183,7 @@ class DataTableComponent extends Component
 
             $this->itemsTotal = $query->count();
 
-            if($this->sortable && !empty($this->sortBy)){
+            if ($this->sortable && !empty($this->sortBy)) {
                 $query->orderBy($this->sortBy, $this->sortDirection);
             }
 
@@ -207,20 +209,28 @@ class DataTableComponent extends Component
 
                 $datasetFromDB[] = $tempRow;
 
-                if(method_exists($this, "actions")){
+                if (method_exists($this, "actions")) {
                     $actions[] = $this->actions($tempRow);
                 }
             }
             $this->dataset = $datasetFromDB;
             $this->actions = $actions;
         } else {
-            $this->dataset = $this->dataset();
+            $dataset = $this->dataset();
+            if ($this->paginated != false) {
+                $from = $this->itemsPerPage * ($this->currentPage - 1);
+                $to = ($from + $this->itemsPerPage);
+                $this->dataset = array_slice($dataset, $from,  $to);
+            }
+
             $actions = [];
-            if(method_exists($this, "actions")){
-                foreach($this->dataset as $tempRow){
+
+            if (method_exists($this, "actions")) {
+                foreach ($this->dataset as $tempRow) {
                     $actions[] = $this->actions($tempRow);
                 }
             }
+
             $this->actions = $actions;
             $this->itemsTotal = count($this->dataset);
         }
@@ -281,5 +291,24 @@ class DataTableComponent extends Component
             'headers' => $this->getHeader(),
             'footers' => $this->footers(),
         ]);
+    }
+
+    private function getRelation(QueryBuilder $query)
+    {
+        $relations = [];
+
+        if ($query->joins != null) {
+            return $relations;
+        }
+
+        foreach ($this->getHeader() as $header => $headerName) {
+            if (strpos($header, ".") === false) {
+                continue;
+            }
+
+            $relations[] = explode('.', $header)[0];
+        }
+
+        return $relations;
     }
 }

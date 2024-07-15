@@ -39,7 +39,7 @@
                 @for ($i = $startPage; $i <= $endPage; $i++)
                     <li class="page-item">
                         <button type="button" class="page-link @if ($i == $currentPage) active @endif" wire:key="page-{{ $i }}" @if ($i != $currentPage) wire:click="$set('currentPage', {{ $i }})" @endif>
-                            {{ $i }}
+                            {{ number_format($i,0, '.', ' ') }}
                         </button>
                     </li>
                 @endfor
@@ -54,7 +54,7 @@
                     @endif
                     <li class="page-item">
                         <button type="button" class="page-link" wire:click="$set('currentPage', {{ $pagesTotal }})" wire:key="page-{{ $pagesTotal }}">
-                            {{ $pagesTotal }}
+                            {{ number_format($pagesTotal,0, '.', ' ') }}
                         </button>
                     </li>
                 @endif
@@ -72,19 +72,19 @@
         </nav>
         <div class="d-flex align-items-center text-nowrap">
             <span class="me-4">
-                {{ $itemsPerPage * ($currentPage - 1) + 1 }} -
+                {{ number_format($itemsPerPage * ($currentPage - 1) + 1,0, '.', ' ') }} -
                 @if ($currentPage == $endPage)
-                    {{ $itemsTotal % ($itemsPerPage * $endPage) }}
+                    {{ number_format($itemsTotal % ($itemsPerPage * $endPage),0, '.', ' ') }}
                 @else
-                    {{ $itemsPerPage * $currentPage }}
+                    {{ number_format($itemsPerPage * $currentPage,0, '.', ' ') }}
                 @endif
-                of {{ $itemsTotal }}
+                of {{ number_format($itemsTotal,0, '.', ' ') }}
             </span>
             <span class="me-2">Per page: </span>
             <select class="form-select" wire:model.live="itemsPerPage">
                 @foreach ([10, 20, 50, 100, 1000] as $itemsPerPage)
                     <option value="{{ $itemsPerPage }}">
-                        {{ $itemsPerPage != 0 ? $itemsPerPage : 'custom' }}
+                        {{ $itemsPerPage != 0 ? number_format($itemsPerPage, 0, '.', ' ') : 'custom' }}
                     </option>
                 @endforeach
             </select>

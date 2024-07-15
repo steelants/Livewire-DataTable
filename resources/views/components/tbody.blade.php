@@ -5,15 +5,15 @@
                 @php($row = $this->renderRow($row))
 
                 @foreach (array_keys($headers) as $key)
-                    <td>{!! $row[$key] ?? '' !!}</td>
+                    <td>{!! Arr::get($row, $key) !!}</td>
                 @endforeach
             @else
                 @foreach (array_keys($headers) as $key)
-                    @php($method = 'renderColumn' . ucfirst(Str::camel($key)))
+                    @php($method = 'renderColumn' . ucfirst(Str::camel(str_replace('.', '_', $key))))
                     @if (method_exists($this, $method))
-                        <td>{!! $this->{$method}($row[$key] ?? '', $row) !!}</td>
+                        <td>{!! $this->{$method}(Arr::get($row, $key), $row) !!}</td>
                     @else
-                        <td>{{ $row[$key] ?? '' }}</td>
+                        <td>{{ Arr::get($row, $key) }}</td>
                     @endif
                 @endforeach
             @endif
@@ -39,7 +39,10 @@
                                             <span>{{ __($action['text']) }}</span>
                                         </a>
                                     @elseif ($action['type'] == 'livewire')
-                                        <button class="dropdown-item {{ $action['actionClass'] ?? '' }}" wire:click='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'>
+                                        <button class="dropdown-item {{ $action['actionClass'] ?? '' }}"
+                                            wire:click='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'
+                                            @if(!empty($action['confirm'])) wire:confirm="{{__($action['confirm'])}}" @endif
+                                        >
                                             @if (!empty($action['iconClass']))
                                                 <i class="dropdown-item-icon {{ $action['iconClass'] }}"></i>
                                             @endif
