@@ -137,7 +137,6 @@ class DataTableComponent extends Component
     {
         $this->itemsTotal = 0;
 
-
         // TODO
         // if ($this->dataset != [] && $force != true) {
 
@@ -155,9 +154,7 @@ class DataTableComponent extends Component
             $actions = [];
             $query = $this->query();
 
-            if ($relations != []){
-                $query = $query->with($relations);
-            }
+            $query = $this->getRelationJoins($query);
 
             if($this->searchable && !empty($this->searchValue)){
                 $query->where(function($q){
@@ -184,7 +181,12 @@ class DataTableComponent extends Component
             $this->itemsTotal = $query->count();
 
             if ($this->sortable && !empty($this->sortBy)) {
-                $query->orderBy($this->sortBy, $this->sortDirection);
+                $orderByColumn = $this->sortBy;
+                if (strpos($orderByColumn, ".") !== false) {
+                    $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
+                }
+
+                $query->orderBy($orderByColumn, $this->sortDirection);
             }
 
             if ($this->paginated != false) {
@@ -241,7 +243,6 @@ class DataTableComponent extends Component
 
         $finalCollection = collect($this->dataset);
         if ($this->sortable) {
-            // TODO: fix
             $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDirection == 'desc');
         }
 
@@ -310,5 +311,39 @@ class DataTableComponent extends Component
         }
 
         return $relations;
+    }
+
+    private function getRelationJoins(Builder $query): Builder
+    {
+        foreach ($this->getHeader() as $header => $headerName) {
+            if (strpos($header, ".") === false) {
+                continue;
+            }
+
+            $connection = explode('.', $header);
+            $relationProperty = $connection[0];
+            $relationName = $connection[1];
+
+            $relation = $query->getModel()->$relationProperty();
+            $relatedTable = $relation->getModel()->getTable();
+            $query->leftJoin($relatedTable, $relatedTable . '.id', '=', $query->getModel()->getTable() . '.' . $relation->getOwnerKeyName());
+            return $query->select([$query->getModel()->getTable() . '.*', $relatedTable . '.' . $relationName . ' AS ' . $header]);
+        }
+    }
+
+    private function getRelationSortColumn(Builder $query, string $column): string
+    {
+        if (strpos($column, ".") === false) {
+            throw "Not a relation column";
+        }
+
+        $connection = explode('.', $column);
+        $relationProperty = $connection[0];
+        $relationName = $connection[1];
+
+        $relation = $query->getModel()->$relationProperty();
+        $relatedTable = $relation->getModel()->getTable();
+
+        return $relatedTable . '.' . $relationName;
     }
 }

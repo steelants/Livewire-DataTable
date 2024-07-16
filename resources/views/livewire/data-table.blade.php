@@ -12,11 +12,11 @@
             <table class="{{ $tableClass }}">
 
                 @if($showHeader)
-                    <x-datatable-head :headers="$headers" :sortable="$sortable" :sortBy="$sortBy" :sortDirection="$sortDirection"/>
+                    <x-datatable-head :headers="$headers" :sortable="$sortable" :sortableColumns="$sortableColumns" :sortBy="$sortBy" :sortDirection="$sortDirection"/>
                 @endif
-                
+
                 <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" />
-                
+
                 @if (!empty($footers))
                     <x-datatable-foot :footers="$footers" />
                 @endif
