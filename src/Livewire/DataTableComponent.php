@@ -337,7 +337,7 @@ class DataTableComponent extends Component
     private function getRelationSortColumn(Builder $query, string $column): string
     {
         if (strpos($column, ".") === false) {
-            throw "Not a relation column";
+            throw $column .  " is not a relation column!";
         }
 
         $connection = explode('.', $column);
