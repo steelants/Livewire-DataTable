@@ -327,7 +327,7 @@ class DataTableComponent extends Component
 
             $relation = $query->getModel()->$relationProperty();
             $relatedTable = $relation->getModel()->getTable();
-            $query->leftJoin($relatedTable, $relatedTable . '.id', '=', $query->getModel()->getTable() . '.' . $relation->getOwnerKeyName());
+            $query->leftJoin($relatedTable, $relatedTable . '.'. $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
             $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
         }
 
