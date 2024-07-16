@@ -135,6 +135,10 @@ class DataTableComponent extends Component
 
     private function getData($force = false): array
     {
+        if ($this->sortable == true && $this->sortableColumns == []) {
+            $this->sortableColumns = array_keys($this->getHeader());
+        }
+        
         $this->itemsTotal = 0;
 
         // TODO
