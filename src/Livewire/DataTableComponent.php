@@ -315,6 +315,7 @@ class DataTableComponent extends Component
 
     private function getRelationJoins(Builder $query): Builder
     {
+        $selects = [ $query->getModel()->getTable(). '.*' ];
         foreach ($this->getHeader() as $header => $headerName) {
             if (strpos($header, ".") === false) {
                 continue;
@@ -327,8 +328,10 @@ class DataTableComponent extends Component
             $relation = $query->getModel()->$relationProperty();
             $relatedTable = $relation->getModel()->getTable();
             $query->leftJoin($relatedTable, $relatedTable . '.id', '=', $query->getModel()->getTable() . '.' . $relation->getOwnerKeyName());
-            return $query->select([$query->getModel()->getTable() . '.*', $relatedTable . '.' . $relationName . ' AS ' . $header]);
+            $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
         }
+
+        return $query->select($selects);
     }
 
     private function getRelationSortColumn(Builder $query, string $column): string
