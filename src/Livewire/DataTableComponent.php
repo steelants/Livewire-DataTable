@@ -142,7 +142,7 @@ class DataTableComponent extends Component
         if ($this->searchable == true && $this->searchableColumns == []) {
             $this->searchableColumns = array_keys($this->getHeader());
         }
-        
+
         $this->itemsTotal = 0;
 
         // TODO
@@ -169,14 +169,14 @@ class DataTableComponent extends Component
                     foreach ($this->searchableColumns as $i => $column) {
                         if ($i == 0) {
                             if (strpos($column, ".") === false) {
-                                $q->where($query->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
+                                $q->where($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
                             } else {
                                 $column = explode('.',$column);
                                 $q->whereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
                             }
                         } else {
                             if (strpos($column, ".") === false) {
-                                $q->orWhere($query->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
+                                $q->orWhere($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
                             } else {
                                 $column = explode('.',$column);
                                 $q->orWhereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
