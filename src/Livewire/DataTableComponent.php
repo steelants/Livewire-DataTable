@@ -4,6 +4,7 @@ namespace SteelAnts\DataTable\Livewire;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Livewire\Component;
 use Illuminate\Support\Str;
 
@@ -152,7 +153,7 @@ class DataTableComponent extends Component
         if (method_exists($this, "query")) {
             $relations = [];
             foreach ($this->getHeader() as $header) {
-                if (strpos($header, ".") === false){
+                if (strpos($header, ".") === false) {
                     continue;
                 }
                 $relations[] = explode('.', $header)[0];
@@ -164,21 +165,21 @@ class DataTableComponent extends Component
 
             $query = $this->getRelationJoins($query);
 
-            if($this->searchable && !empty($this->searchValue)){
-                $query->where(function($q){
+            if ($this->searchable && !empty($this->searchValue)) {
+                $query->where(function ($q) {
                     foreach ($this->searchableColumns as $i => $column) {
                         if ($i == 0) {
                             if (strpos($column, ".") === false) {
                                 $q->where($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
                             } else {
-                                $column = explode('.',$column);
+                                $column = explode('.', $column);
                                 $q->whereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
                             }
                         } else {
                             if (strpos($column, ".") === false) {
                                 $q->orWhere($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
                             } else {
-                                $column = explode('.',$column);
+                                $column = explode('.', $column);
                                 $q->orWhereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
                             }
                         }
@@ -208,7 +209,7 @@ class DataTableComponent extends Component
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
                 foreach ($tempRow as $key => $property) {
-                    $method = "column".Str::camel(str_replace('.', '_', $key))."Data";
+                    $method = "column" . Str::camel(str_replace('.', '_', $key)) . "Data";
                     $ModelProperty = Str::camel(str_replace('.', '->', $key));
 
                     $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($this->${$ModelProperty}) : $property);
@@ -323,20 +324,31 @@ class DataTableComponent extends Component
 
     private function getRelationJoins(Builder $query): Builder
     {
-        $selects = [ $query->getModel()->getTable(). '.*' ];
+        $selects = [$query->getModel()->getTable() . '.*'];
         foreach ($this->getHeader() as $header => $headerName) {
             if (strpos($header, ".") === false) {
                 continue;
             }
 
+            $model = $query->getModel();
             $connection = explode('.', $header);
             $relationProperty = $connection[0];
             $relationName = $connection[1];
 
-            $relation = $query->getModel()->$relationProperty();
-            $relatedTable = $relation->getModel()->getTable();
-            $query->leftJoin($relatedTable, $relatedTable . '.'. $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
-            $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
+            //verify that model has respective Relation
+            if (!(method_exists($model, $relationProperty))) {
+                continue;
+            }
+
+
+            $relation = $model->$relationProperty();
+            if (is_a($relation, 'BelongsTo')) {
+                $relatedTable = $relation->getModel()->getTable();
+                $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
+                $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
+            } else if (is_a($relation, 'HasOne'))  {
+                $relatedTable = $relation->getModel()->getTable();
+            }
         }
 
         return $query->select($selects);
