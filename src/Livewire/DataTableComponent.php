@@ -348,6 +348,7 @@ class DataTableComponent extends Component
                 $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
             } else if (is_a($relation, 'HasOne'))  {
                 $relatedTable = $relation->getModel()->getTable();
+                //TODO: FIX OTHER RELATIONS
             }
         }
 
