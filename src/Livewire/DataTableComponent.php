@@ -228,6 +228,8 @@ class DataTableComponent extends Component
             $this->actions = $actions;
         } else {
             $dataset = $this->dataset();
+            $this->itemsTotal = count($dataset);
+
             if ($this->paginated != false) {
                 $from = $this->itemsPerPage * ($this->currentPage - 1);
                 $to = ($from + $this->itemsPerPage);
@@ -243,7 +245,6 @@ class DataTableComponent extends Component
             }
 
             $this->actions = $actions;
-            $this->itemsTotal = count($this->dataset);
         }
 
         if ($this->paginated != false && $this->itemsPerPage != 0) {
