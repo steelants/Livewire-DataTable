@@ -235,8 +235,7 @@ class DataTableComponent extends Component
 
             if ($this->paginated != false) {
                 $from = $this->itemsPerPage * ($this->currentPage - 1);
-                $to = ($from + $this->itemsPerPage);
-                $this->dataset = array_slice($dataset, $from,  $to);
+                $this->dataset = array_slice($dataset, $from,  $this->itemsPerPage);
             }
 
             $actions = [];
