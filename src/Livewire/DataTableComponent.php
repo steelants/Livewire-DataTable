@@ -7,6 +7,9 @@ use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 
 class DataTableComponent extends Component
 {
@@ -228,6 +231,8 @@ class DataTableComponent extends Component
             $this->actions = $actions;
         } else {
             $dataset = $this->dataset();
+            $this->itemsTotal = count($dataset);
+
             if ($this->paginated != false) {
                 $from = $this->itemsPerPage * ($this->currentPage - 1);
                 $to = ($from + $this->itemsPerPage);
@@ -243,7 +248,6 @@ class DataTableComponent extends Component
             }
 
             $this->actions = $actions;
-            $this->itemsTotal = count($this->dataset);
         }
 
         if ($this->paginated != false && $this->itemsPerPage != 0) {
@@ -342,11 +346,11 @@ class DataTableComponent extends Component
 
 
             $relation = $model->$relationProperty();
-            if (is_a($relation, 'BelongsTo')) {
+            if ($relation instanceof BelongsTo) {
                 $relatedTable = $relation->getModel()->getTable();
                 $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
                 $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
-            } else if (is_a($relation, 'HasOne'))  {
+            } else if ($relation instanceof HasOne)  {
                 $relatedTable = $relation->getModel()->getTable();
                 //TODO: FIX OTHER RELATIONS
             }
