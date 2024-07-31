@@ -4,7 +4,6 @@ namespace SteelAnts\DataTable\Livewire;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
