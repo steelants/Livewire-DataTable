@@ -4,9 +4,11 @@ namespace SteelAnts\DataTable\Livewire;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 
 class DataTableComponent extends Component
 {
@@ -245,8 +247,7 @@ class DataTableComponent extends Component
 
             if ($this->paginated != false) {
                 $from = $this->itemsPerPage * ($this->currentPage - 1);
-                $to = ($from + $this->itemsPerPage);
-                $this->dataset = array_slice($dataset, $from,  $to);
+                $this->dataset = array_slice($dataset, $from,  $this->itemsPerPage);
             }
 
             $actions = [];
@@ -357,11 +358,11 @@ class DataTableComponent extends Component
 
 
             $relation = $model->$relationProperty();
-            if (is_a($relation, 'BelongsTo')) {
+            if ($relation instanceof BelongsTo) {
                 $relatedTable = $relation->getModel()->getTable();
                 $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
                 $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
-            } else if (is_a($relation, 'HasOne'))  {
+            } else if ($relation instanceof HasOne)  {
                 $relatedTable = $relation->getModel()->getTable();
                 //TODO: FIX OTHER RELATIONS
             }
