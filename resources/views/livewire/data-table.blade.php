@@ -1,18 +1,51 @@
 <div>
     @if($searchable)
-        <div class="row mb-3">
-            <div class="col-md-6 col-lg-4">
+        <div class="row g-2 mb-3">
+            <div class="col-md-6 col-lg-3 me-auto">
                 <input type="text" class="form-control" placeholder="Search..." wire:model.live.debounce="searchValue">
             </div>
+            {{-- <div class="col-auto">
+                <button type="button" class="btn btn-outline" data-bs-toggle="collapse" data-bs-target="#filters_{{ $this->__id }}">
+                    <i class="me-2 fas fa-filter"></i>
+                    <span>{{ __('datatable::ui.filters') }}</span>
+                    <span class="badge text-bg-secondary ms-2">3</span>
+                </button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-outline">
+                    <i class="me-2 fas fa-download"></i>
+                    <span>{{ __('datatable::ui.export') }}</span>
+                </button>
+            </div> --}}
         </div>
     @endif
+
+    <div class="collapse" id="filters_{{ $this->__id }}">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row gx-2 gy-3 mb-3">
+                    <div class="col-md-4 col-lg-3">
+                        
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-3">
+                    <button type="button" class="btn btn-primary">
+                        <span>{{ __(('datatable::ui.filter_action')) }}</span>
+                    </button>
+                    <button type="button" class="btn btn-outline">
+                        <span>{{ __(('datatable::ui.reset_filter')) }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     @if ($dataset != null)
         <div class="table-responsive">
             <table class="{{ $tableClass }}">
 
                 @if($showHeader)
-                    <x-datatable-head :headers="$headers" :sortable="$sortable" :sortableColumns="$sortableColumns" :sortBy="$sortBy" :sortDirection="$sortDirection"/>
+                    <x-datatable-head :headers="$headers" :headerFilters="$headerFilters" :sortable="$sortable" :sortableColumns="$sortableColumns" :sortBy="$sortBy" :sortDirection="$sortDirection"/>
                 @endif
 
                 <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" />

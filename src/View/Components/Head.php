@@ -14,6 +14,7 @@ class Head extends Component
         public string|null $sortBy,
         public string|null  $sortDirection,
         public array|null $sortableColumns,
+        public array|null $headerFilters,
     ) {
     }
 

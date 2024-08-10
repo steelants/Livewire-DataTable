@@ -33,6 +33,10 @@ class DataTableComponent extends Component
     public array $searchableColumns = [];
     public string $searchValue = '';
 
+    public bool $filterable = false;
+    public array $filter = [];
+    public array $headerFilter = [];
+
     // Other config
     public string $tableClass = 'table align-middle';
     public string $viewName = 'datatable::data-table';
@@ -100,6 +104,15 @@ class DataTableComponent extends Component
         // }
         // $footer[] = count($this->dataset);
         // return $footer;
+    }
+
+    public function headerFilters(): array 
+    {
+        return [];
+    }
+
+    public function updatedHeaderfilter(){
+        
     }
 
     public function updatedItemsPerPage()
@@ -301,6 +314,7 @@ class DataTableComponent extends Component
             'dataset' => $this->getData(),
             'headers' => $this->getHeader(),
             'footers' => $this->footers(),
+            'headerFilters' => $this->headerFilters(),
         ]);
     }
 
