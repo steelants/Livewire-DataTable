@@ -93,6 +93,23 @@ class UserTable extends DataTableComponent
 @livewire('user-table', [], key('data-table'))
 ```
 
+### Dev Enviroment
+1) Clone Repo to `[LARVEL-ROOT]packages/`
+2) Modify ;composer.json`
+```json
+    "autoload": {
+        "psr-4": {
+            ...
+            "SteelAnts\\DataTable\\": "packages/Livewire-DataTable/src/"
+            ...
+        }
+    },
+```
+3) Add (code below) to: `[LARVEL-ROOT]packages/bootstrap/providers.php`
+```php
+SteelAnts\DataTable\DataTableServiceProvider::class,
+```
+
 ## Configuration
 ```php
 // Enable sorting

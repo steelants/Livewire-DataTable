@@ -7,7 +7,6 @@ use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Livewire\Component;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
@@ -372,5 +371,9 @@ class DataTableComponent extends Component
         $relatedTable = $relation->getModel()->getTable();
 
         return $relatedTable . '.' . $relationName;
+    }
+
+    public function UpdatedSearchValue(){
+        $this->currentPage = 1;
     }
 }
