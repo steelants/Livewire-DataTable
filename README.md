@@ -36,7 +36,7 @@ class UserTable extends DataTableComponent
     {
         return [
             [
-                // livewrei action
+                // livewire action
                 'type' => "livewire",
                 'action' => "remove",
                 'parameters' => $item['id'],
@@ -94,7 +94,7 @@ class UserTable extends DataTableComponent
 ```
 
 ### Dev Enviroment
-1) Clone Repo to `[LARVEL-ROOT]packages/`
+1) Clone Repo to `[LARVEL-ROOT]/packages/`
 2) Modify ;composer.json`
 ```json
     "autoload": {
@@ -105,7 +105,7 @@ class UserTable extends DataTableComponent
         }
     },
 ```
-3) Add (code below) to: `[LARVEL-ROOT]packages/bootstrap/providers.php`
+3) Add (code below) to: `[LARVEL-ROOT]/bootstrap/providers.php`
 ```php
 SteelAnts\DataTable\DataTableServiceProvider::class,
 ```

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Livewire\Attributes\On;
 
 class DataTableComponent extends Component
 {
@@ -15,7 +16,7 @@ class DataTableComponent extends Component
     public $dataset = [];
     public $actions = [];
 
-    public int $pagesTotal = 1; 
+    public int $pagesTotal = 1;
     public int $currentPage = 1;
     public int $itemsTotal = 1;
 
@@ -41,10 +42,6 @@ class DataTableComponent extends Component
 
     // TODO: do i need this?
     public string $keyPropery = 'id';
-
-    public $listeners = [
-        'refresh' => '$refresh',
-    ];
 
     // public function query(): Builder
     // {
@@ -209,12 +206,7 @@ class DataTableComponent extends Component
                 }
             }
 
-            $get = $query->get();
-            if ($this->currentPage > 1 && empty($get->count())) {
-                $this->currentPage --;
-                $this->dispatch('refresh');
-            }
-            foreach ($get as $item) {
+            foreach ($query->get() as $item) {
 
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
@@ -245,11 +237,6 @@ class DataTableComponent extends Component
                 $this->dataset = array_slice($dataset, $from,  $this->itemsPerPage);
             }
 
-            if ($this->currentPage > 1 && count($this->dataset) == 0) {
-                $this->currentPage --;
-                $this->dispatch('refresh');
-            }
-
             $actions = [];
 
             if (method_exists($this, "actions")) {
@@ -270,9 +257,17 @@ class DataTableComponent extends Component
             $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDirection == 'desc');
         }
 
+        if ($this->currentPage > $this->pagesTotal) {
+            $this->dispatch('updatedCurrentPage', $this->pagesTotal);
+        }
+
         return $finalCollection->toArray();
     }
 
+    #[On('updatedCurrentPage')]
+    public function updatedCurrentPage(int $value){
+        $this->currentPage = $value;
+    }
 
     private function getHeader(): array
     {
