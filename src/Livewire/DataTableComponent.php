@@ -211,10 +211,10 @@ class DataTableComponent extends Component
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
                 foreach ($tempRow as $key => $property) {
-                    $method = "column" . Str::camel(str_replace('.', '_', $key)) . "Data";
+                     $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key)));
                     $ModelProperty = Str::camel(str_replace('.', '->', $key));
 
-                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($this->${$ModelProperty}) : $property);
+                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($item->$ModelProperty) : $property);
                 }
 
                 // TODO: do i need this?
