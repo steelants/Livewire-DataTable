@@ -2,11 +2,7 @@
 
 namespace SteelAnts\DataTable\Livewire;
 
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Livewire\Component;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Livewire\Attributes\On;
 
 class DataTableComponent extends Component
@@ -45,11 +41,6 @@ class DataTableComponent extends Component
 
     // TODO: do i need this?
     public string $keyPropery = 'id';
-
-    // public function query(): Builder
-    // {
-    //      return Model::where('id','>',0)->limit(100);
-    // }
 
     // Transformace whole row on input (optional)
     // Returns associative array
@@ -109,7 +100,7 @@ class DataTableComponent extends Component
 
     public function headerFilters(): array 
     {
-        return [];
+        return array_fill_keys(array_keys($this->getHeader()), ['type' => 'text']);
     }
 
     public function updatedHeaderfilter(){
@@ -148,7 +139,64 @@ class DataTableComponent extends Component
         return $queryStrings;
     }
 
+    private function getDatasetFromArray($dataset): array
+    {
+        $this->itemsTotal = count($dataset);
+        
+        if ($this->paginated != false) {
+            $from = $this->itemsPerPage * ($this->currentPage - 1);
+            $dataset = array_slice($dataset, $from,  $this->itemsPerPage);
+        }
+
+        if (method_exists($this, "row")) {
+            foreach ($dataset as $key => $item) {
+                $tempRow = $this->row($item);
+                foreach ($tempRow as $key2 => $property) {
+                    $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key2)));
+                    if (!method_exists($this, $method)) {
+                        continue;
+                    }
+                    $tempRow[$key2] = $this->{$method}($property);
+                }
+                $dataset[$key] = $tempRow;
+            }
+        }
+
+        if ($this->sortable && !empty($this->sortBy)) {
+            $dataset = collect($dataset)->sortBy($this->sortBy, SORT_REGULAR, ($this->sortDirection == "desc"))->toArray();
+        }
+        return $dataset;
+    }
+
     private function getData($force = false): array
+    {
+        $this->setDefaults();
+
+        $this->itemsTotal = 0;
+
+        if (method_exists($this, "query")) {
+            $this->dataset = $this->datasetFromDB($this->query());
+        } else {
+            $this->dataset = $this->getDatasetFromArray($this->dataset());
+        }
+        if (method_exists($this, "actions")) {
+            foreach ($this->dataset as $tempRow) {
+                $this->actions[] = $this->actions($tempRow);
+            }
+        }
+
+        if ($this->paginated != false && $this->itemsPerPage != 0) {
+            $this->pagesTotal = round(ceil($this->itemsTotal / $this->itemsPerPage));
+        }
+
+        if ($this->currentPage > $this->pagesTotal) {
+            $this->dispatch('updatedCurrentPage', $this->pagesTotal);
+        }
+
+        return $this->dataset;
+    }
+
+    private function setDefaults()
     {
         if ($this->sortable == true && $this->sortableColumns == []) {
             $this->sortableColumns = array_keys($this->getHeader());
@@ -157,123 +205,6 @@ class DataTableComponent extends Component
         if ($this->searchable == true && $this->searchableColumns == []) {
             $this->searchableColumns = array_keys($this->getHeader());
         }
-
-        $this->itemsTotal = 0;
-
-        // TODO
-        // if ($this->dataset != [] && $force != true) {
-
-        // } else
-        if (method_exists($this, "query")) {
-            $relations = [];
-            foreach ($this->getHeader() as $header) {
-                if (strpos($header, ".") === false) {
-                    continue;
-                }
-                $relations[] = explode('.', $header)[0];
-            }
-
-            $datasetFromDB = [];
-            $actions = [];
-            $query = $this->query();
-
-            $query = $this->getRelationJoins($query);
-
-            if ($this->searchable && !empty($this->searchValue)) {
-                $query->where(function ($q) {
-                    foreach ($this->searchableColumns as $i => $column) {
-                        if ($i == 0) {
-                            if (strpos($column, ".") === false) {
-                                $q->where($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
-                            } else {
-                                $column = explode('.', $column);
-                                $q->whereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
-                            }
-                        } else {
-                            if (strpos($column, ".") === false) {
-                                $q->orWhere($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
-                            } else {
-                                $column = explode('.', $column);
-                                $q->orWhereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
-                            }
-                        }
-                    }
-                });
-            }
-            $this->itemsTotal = $query->count();
-
-            if ($this->sortable && !empty($this->sortBy)) {
-                $orderByColumn = $this->sortBy;
-                if (strpos($orderByColumn, ".") !== false) {
-                    $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
-                }
-
-                $query->orderBy($orderByColumn, $this->sortDirection);
-            }
-
-            if ($this->paginated != false) {
-                $query->limit($this->itemsPerPage);
-                if ($this->currentPage > 1) {
-                    $query = $query->offset($this->itemsPerPage * ($this->currentPage - 1));
-                }
-            }
-
-            foreach ($query->get() as $item) {
-
-                $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
-
-                foreach ($tempRow as $key => $property) {
-                     $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key)));
-                    $ModelProperty = Str::camel(str_replace('.', '->', $key));
-
-                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($item->$ModelProperty) : $property);
-                }
-
-                // TODO: do i need this?
-                // $tempRow['__key'] = $item->{$this->keyPropery};
-
-                $datasetFromDB[] = $tempRow;
-
-                if (method_exists($this, "actions")) {
-                    $actions[] = $this->actions($tempRow);
-                }
-            }
-            $this->dataset = $datasetFromDB;
-            $this->actions = $actions;
-        } else {
-            $dataset = $this->dataset();
-            $this->itemsTotal = count($dataset);
-
-            if ($this->paginated != false) {
-                $from = $this->itemsPerPage * ($this->currentPage - 1);
-                $this->dataset = array_slice($dataset, $from,  $this->itemsPerPage);
-            }
-
-            $actions = [];
-
-            if (method_exists($this, "actions")) {
-                foreach ($this->dataset as $tempRow) {
-                    $actions[] = $this->actions($tempRow);
-                }
-            }
-
-            $this->actions = $actions;
-        }
-
-        if ($this->paginated != false && $this->itemsPerPage != 0) {
-            $this->pagesTotal = round(ceil($this->itemsTotal / $this->itemsPerPage));
-        }
-
-        $finalCollection = collect($this->dataset);
-        if ($this->sortable) {
-            $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDirection == 'desc');
-        }
-
-        if ($this->currentPage > $this->pagesTotal) {
-            $this->dispatch('updatedCurrentPage', $this->pagesTotal);
-        }
-
-        return $finalCollection->toArray();
     }
 
     #[On('updatedCurrentPage')]
@@ -281,7 +212,7 @@ class DataTableComponent extends Component
         $this->currentPage = $value;
     }
 
-    private function getHeader(): array
+    public function getHeader(): array
     {
 
         if (!method_exists($this, "headers")) {
@@ -326,75 +257,7 @@ class DataTableComponent extends Component
         ]);
     }
 
-    private function getRelation(QueryBuilder $query)
-    {
-        $relations = [];
-
-        if ($query->joins != null) {
-            return $relations;
-        }
-
-        foreach ($this->getHeader() as $header => $headerName) {
-            if (strpos($header, ".") === false) {
-                continue;
-            }
-
-            $relations[] = explode('.', $header)[0];
-        }
-
-        return $relations;
-    }
-
-    private function getRelationJoins(Builder $query): Builder
-    {
-        $selects = [$query->getModel()->getTable() . '.*'];
-        foreach ($this->getHeader() as $header => $headerName) {
-            if (strpos($header, ".") === false) {
-                continue;
-            }
-
-            $model = $query->getModel();
-            $connection = explode('.', $header);
-            $relationProperty = $connection[0];
-            $relationName = $connection[1];
-
-            //verify that model has respective Relation
-            if (!(method_exists($model, $relationProperty))) {
-                continue;
-            }
-
-
-            $relation = $model->$relationProperty();
-            if ($relation instanceof BelongsTo) {
-                $relatedTable = $relation->getModel()->getTable();
-                $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
-                $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
-            } else if ($relation instanceof HasOne)  {
-                $relatedTable = $relation->getModel()->getTable();
-                //TODO: FIX OTHER RELATIONS
-            }
-        }
-
-        return $query->select($selects);
-    }
-
-    private function getRelationSortColumn(Builder $query, string $column): string
-    {
-        if (strpos($column, ".") === false) {
-            throw $column .  " is not a relation column!";
-        }
-
-        $connection = explode('.', $column);
-        $relationProperty = $connection[0];
-        $relationName = $connection[1];
-
-        $relation = $query->getModel()->$relationProperty();
-        $relatedTable = $relation->getModel()->getTable();
-
-        return $relatedTable . '.' . $relationName;
-    }
-
-    public function UpdatedSearchValue(){
+    public function updatedSearchValue(){
         $this->currentPage = 1;
     }
 }
