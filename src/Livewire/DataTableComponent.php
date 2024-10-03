@@ -6,9 +6,8 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Livewire\Component;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-
+use Livewire\Attributes\On;
 
 class DataTableComponent extends Component
 {
@@ -201,7 +200,6 @@ class DataTableComponent extends Component
                     }
                 });
             }
-
             $this->itemsTotal = $query->count();
 
             if ($this->sortable && !empty($this->sortBy)) {
@@ -221,13 +219,14 @@ class DataTableComponent extends Component
             }
 
             foreach ($query->get() as $item) {
+
                 $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
                 foreach ($tempRow as $key => $property) {
-                    $method = "column" . Str::camel(str_replace('.', '_', $key)) . "Data";
+                     $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key)));
                     $ModelProperty = Str::camel(str_replace('.', '->', $key));
 
-                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($this->${$ModelProperty}) : $property);
+                    $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($item->$ModelProperty) : $property);
                 }
 
                 // TODO: do i need this?
@@ -270,9 +269,17 @@ class DataTableComponent extends Component
             $finalCollection = $finalCollection->sortBy($this->sortBy, SORT_REGULAR, $this->sortDirection == 'desc');
         }
 
+        if ($this->currentPage > $this->pagesTotal) {
+            $this->dispatch('updatedCurrentPage', $this->pagesTotal);
+        }
+
         return $finalCollection->toArray();
     }
 
+    #[On('updatedCurrentPage')]
+    public function updatedCurrentPage(int $value){
+        $this->currentPage = $value;
+    }
 
     private function getHeader(): array
     {
@@ -385,5 +392,9 @@ class DataTableComponent extends Component
         $relatedTable = $relation->getModel()->getTable();
 
         return $relatedTable . '.' . $relationName;
+    }
+
+    public function UpdatedSearchValue(){
+        $this->currentPage = 1;
     }
 }
