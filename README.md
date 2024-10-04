@@ -162,8 +162,14 @@ public function renderColumnFoo(mixed $value, array $row) : string
 
 ## Other Packages
 [steelants/laravel-auth](https://github.com/steelants/laravel-auth)
+
 [steelants/laravel-boilerplate](https://github.com/steelants/Laravel-Boilerplate)
+
 [steelants/datatable](https://github.com/steelants/Livewire-DataTable)
+
 [steelants/form](https://github.com/steelants/Laravel-Form)
+
 [steelants/modal](https://github.com/steelants/Livewire-Modal)
+
 [steelants/laravel-tenant](https://github.com/steelants/Laravel-Tenant)
+
