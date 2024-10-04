@@ -11,10 +11,12 @@ namespace App\Livewire;
 use App\Models\User;
 use SteelAnts\DataTable\Livewire\DataTableComponent;
 use Illuminate\Database\Eloquent\Builder;
+use SteelAnts\DataTable\Traits\UseDatabase;
 
 class UserTable extends DataTableComponent
 {
-
+    Use UseDatabase;
+    
     // Get model query
     public function query(): Builder
     {

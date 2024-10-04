@@ -32,13 +32,23 @@
             <th class="text-end"></th>
         @endif
     </tr>
-
     @if (!empty($headerFilters))
         <tr>
             @foreach ($headers as $key => $header)
                 <td>
                     @if (isset($headerFilters[$key]))
-                        <x-form::input type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}" />
+                        @if ($headerFilters[$key]['type'] == "select")
+                            <select class="form-select">
+                                <option value="">{{ __('All') }}</option>
+                                @if (!empty($headerFilters[$key]['values']))
+                                    @foreach($headerFilters[$key]['values'] as $value => $name)
+                                        <option value="{{ $value }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        @else
+                            <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}" />
+                        @endif
                     @endif
                 </td>
             @endforeach

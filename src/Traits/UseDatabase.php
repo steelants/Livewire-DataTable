@@ -42,7 +42,23 @@ trait UseDatabase
                 }
             });
         }
-        
+
+        if ($this->filterable && !empty($this->headerFilter)) {
+            $query->where(function ($q) {
+                foreach ($this->headerFilter as $name => $value) {
+                    if (empty($value)) {
+                        continue;
+                    }
+                    if (strpos($name, ".") === false) {
+                        $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
+                    } else {
+                        $names = explode('.', $name);
+                        $q->whereRelation($names[0], $names[1], 'LIKE', '%' . $value . '%');
+                    }
+                }
+            });
+        }
+
         $this->itemsTotal = $query->count();
 
         if ($this->sortable && !empty($this->sortBy)) {

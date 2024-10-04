@@ -98,13 +98,18 @@ class DataTableComponent extends Component
         // return $footer;
     }
 
-    public function headerFilters(): array 
+    public function headerFilters(): array
     {
+        //only select and inputs
+        //select - ['table name' => ['type' => 'select', 'values' => ['value' => 'name', ''value2' => 'name2']]]
+        //text - ['table name' => ['type' => 'text']
+        //datetime - ['table name' => ['type' => 'datetime']]
+        //atd....
         return array_fill_keys(array_keys($this->getHeader()), ['type' => 'text']);
     }
 
     public function updatedHeaderfilter(){
-        
+
     }
 
     public function updatedItemsPerPage()
@@ -142,7 +147,7 @@ class DataTableComponent extends Component
     private function getDatasetFromArray($dataset): array
     {
         $this->itemsTotal = count($dataset);
-        
+
         if ($this->paginated != false) {
             $from = $this->itemsPerPage * ($this->currentPage - 1);
             $dataset = array_slice($dataset, $from,  $this->itemsPerPage);
@@ -253,7 +258,7 @@ class DataTableComponent extends Component
             'dataset' => $this->getData(),
             'headers' => $this->getHeader(),
             'footers' => $this->footers(),
-            'headerFilters' => $this->headerFilters(),
+            'headerFilters' => !empty($this->filterable) ? $this->headerFilters() : null,
         ]);
     }
 
