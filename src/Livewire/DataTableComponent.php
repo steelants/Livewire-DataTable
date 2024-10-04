@@ -4,6 +4,7 @@ namespace SteelAnts\DataTable\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Str;
 
 class DataTableComponent extends Component
 {
@@ -153,6 +154,16 @@ class DataTableComponent extends Component
             $dataset = array_slice($dataset, $from,  $this->itemsPerPage);
         }
 
+        if ($this->filterable && !empty($this->headerFilter)) {
+            foreach ($dataset as $key => $item) {
+                foreach ($item as $key2 => $property) {
+                    if (!empty($this->headerFilter[$key2]) && !str_contains($property, $this->headerFilter[$key2])) {
+                        unset($dataset[$key]);
+                    }
+                }
+            }
+        }
+
         if (method_exists($this, "row")) {
             foreach ($dataset as $key => $item) {
                 $tempRow = $this->row($item);
@@ -178,7 +189,6 @@ class DataTableComponent extends Component
         $this->setDefaults();
 
         $this->itemsTotal = 0;
-
         if (method_exists($this, "query")) {
             $this->dataset = $this->datasetFromDB($this->query());
         } else {
