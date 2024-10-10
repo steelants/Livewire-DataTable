@@ -49,11 +49,38 @@ trait UseDatabase
                     if (empty($value)) {
                         continue;
                     }
-                    if (strpos($name, ".") === false) {
-                        $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
-                    } else {
-                        $names = explode('.', $name);
-                        $q->whereRelation($names[0], $names[1], 'LIKE', '%' . $value . '%');
+                    $type = $this->headerFilters()[$name]['type'];
+                    if ($type == "text") {
+                        if (strpos($name, ".") === false) {
+                            $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
+                        } else {
+                            $names = explode('.', $name);
+                            $q->whereRelation($names[0], $names[1], 'LIKE', '%' . $value . '%');
+                        }
+                    } else if ($type == "select") {
+                        if (strpos($name, ".") === false) {
+                            $q->where($q->getModel()->getTable() . "." . $name, '=', $value);
+                        } else {
+                            $names = explode('.', $name);
+                            $q->whereRelation($names[0], $names[1], '=', $value);
+                        }
+                    } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
+                        if (strpos($name, ".") === false) {
+                            if (!empty($value['from'])) {
+                                $q->where($q->getModel()->getTable() . "." . $name, '>=', $value['from']);
+                            }
+                            if (!empty($value['to'])) {
+                                $q->where($q->getModel()->getTable() . "." . $name, '<=', $value['to']);
+                            }
+                        } else {
+                            $names = explode('.', $name);
+                            if (!empty($value['from'])) {
+                                $q->whereRelation($names[0], $names[1], '>=', $value['from']);
+                            }
+                            if (!empty($value['to'])) {
+                                $q->whereRelation($names[0], $names[1], '<=', $value['to']);
+                            }
+                        }
                     }
                 }
             });
