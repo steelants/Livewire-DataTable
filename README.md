@@ -163,7 +163,7 @@ public function renderColumnFoo(mixed $value, array $row) : string
 }
 ```
 
-## filters methods
+## Filters methods
 ``` php
     //Add filters to header for specific columns
     public function headerFilters(): array
