@@ -121,8 +121,11 @@ public bool $sortable = true;
 public bool $paginated = true;
 
 // Enable fulltext search
-public bool $searchable = false;
+public bool $searchable = true;
 public bool $searchableColumns = [];
+
+//Enable filters
+public bool $filterable = true;
 ```
 
 ## Optional transforms methods
@@ -158,6 +161,26 @@ public function renderColumnFoo(mixed $value, array $row) : string
 {
     return e($value);
 }
+```
+
+## filters methods
+``` php
+    //Add filters to header for specific columns
+    public function headerFilters(): array
+    {
+        return [
+            'column1Key' => ['type' => 'text'], //input type
+            'column2Key' => ['type' => 'select', 'values' => ['value' => 'name', 'value2' => 'name2']], //this for select
+        ];
+    }
+
+    //Add actions to header filters edit
+    public function updatedHeaderfilter(){
+        $this->validate([
+            'headerFilter.column1Key' => 'string',
+            'headerFilter.column2Key' => 'string',
+        ]);
+    }
 ```
 
 ## Other Packages
