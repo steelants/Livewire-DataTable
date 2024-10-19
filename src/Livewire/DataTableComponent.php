@@ -213,6 +213,8 @@ class DataTableComponent extends Component
 
     private function setDefaults()
     {
+        $this->actions = [];
+        
         if ($this->sortable == true && $this->sortableColumns == []) {
             $this->sortableColumns = array_keys($this->getHeader());
         }
