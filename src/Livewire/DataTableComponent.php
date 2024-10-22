@@ -199,7 +199,7 @@ class DataTableComponent extends Component
                         }
                     }
                     if ($this->searchable) {
-                        if (!empty($this->searchValue) && str_contains($property, $this->searchValue)) {
+                        if (!empty($this->searchValue) && !str_contains($property, $this->searchValue)) {
                             unset($dataset[$key]);
                             break;
                         }
