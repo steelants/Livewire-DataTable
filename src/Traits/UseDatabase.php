@@ -53,43 +53,19 @@ trait UseDatabase
 
         if ($this->filterable && !empty($this->headerFilter)) {
             $query->where(function ($q) {
-                $name = "";
                 foreach ($this->headerFilter as $name => $value) {
-                    if (empty($value)) {
-                        continue;
-                    }
-                    $type = $this->headerFilters()[$name]['type'];
-                    if ($type == "text") {
-                        if (strpos($name, ".") === false) {
-                            $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
-                        } else {
-                            $names = explode('.', $name);
-                            $q->whereRelation($names[0], $names[1], 'LIKE', '%' . $value . '%');
+                    if (is_array($value)) {
+                        foreach ($value as $key => $val) {
+                            $nameLocal = $name . "." . $key;
+                            while(is_array($val)){
+                                $firstKey = array_key_first($val);
+                                $nameLocal = $nameLocal . "." . $firstKey;
+                                $val = $val[$firstKey];
+                            }
+                            $this->getFiltersWhere($q, $nameLocal, $val);
                         }
-                    } else if ($type == "select") {
-                        if (strpos($name, ".") === false) {
-                            $q->where($q->getModel()->getTable() . "." . $name, '=', $value);
-                        } else {
-                            $names = explode('.', $name);
-                            $q->whereRelation($names[0], $names[1], '=', $value);
-                        }
-                    } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
-                        if (strpos($name, ".") === false) {
-                            if (!empty($value['from'])) {
-                                $q->where($q->getModel()->getTable() . "." . $name, '>=', $value['from']);
-                            }
-                            if (!empty($value['to'])) {
-                                $q->where($q->getModel()->getTable() . "." . $name, '<=', $value['to']);
-                            }
-                        } else {
-                            $names = explode('.', $name);
-                            if (!empty($value['from'])) {
-                                $q->whereRelation($names[0], $names[1], '>=', $value['from']);
-                            }
-                            if (!empty($value['to'])) {
-                                $q->whereRelation($names[0], $names[1], '<=', $value['to']);
-                            }
-                        }
+                    } else {
+                        $this->getFiltersWhere($q, $name, $value);
                     }
                 }
             });
@@ -130,6 +106,50 @@ trait UseDatabase
             $datasetFromDB[] = $tempRow;
         }
         return $datasetFromDB;
+    }
+
+    private function getFiltersWhere(&$q, $name, $value)
+    {
+        if (empty($value)) {
+            return;
+        }
+        $type = $this->headerFilters()[$name]['type'];
+        if ($type == "text") {
+            if (strpos($name, ".") === false) {
+                $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
+            } else {
+                $names = explode('.', $name);
+                $column = array_pop($names);
+                $q->whereRelation(implode(".", $names), $column, 'LIKE', '%' . $value . '%');
+            }
+        } else if ($type == "select") {
+            if (strpos($name, ".") === false) {
+                $q->where($q->getModel()->getTable() . "." . $name, '=', $value);
+            } else {
+                $names = explode('.', $name);
+                $column = array_pop($names);
+                $q->whereRelation(implode(".", $names), $column, '=', $value);
+            }
+        } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
+            if (strpos($name, ".") === false) {
+                if (!empty($value['from'])) {
+                    $q->where($q->getModel()->getTable() . "." . $name, '>=', $value['from']);
+                }
+                if (!empty($value['to'])) {
+                    $q->where($q->getModel()->getTable() . "." . $name, '<=', $value['to']);
+                }
+            } else {
+                $names = explode('.', $name);
+                $column = array_pop($names);
+                $table = implode(".", $names);
+                if (!empty($value['from'])) {
+                    $q->whereRelation($table, $column, '>=', $value['from']);
+                }
+                if (!empty($value['to'])) {
+                    $q->whereRelation($table, $column, '<=', $value['to']);
+                }
+            }
+        }
     }
 
     private function getRelationJoins(Builder $query): Builder
