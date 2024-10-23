@@ -2,6 +2,7 @@
 
 namespace SteelAnts\DataTable\Livewire;
 
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
@@ -160,9 +161,41 @@ class DataTableComponent extends Component
             foreach ($dataset as $key => $item) {
                 foreach ($item as $key2 => $property) {
                     if($this->filterable){
-                        if (!empty($this->headerFilter[$key2]) && !str_contains($property, $this->headerFilter[$key2])) {
-                            unset($dataset[$key]);
-                            break;
+                        if (!empty($this->headerFilter[$key2])) {
+                            $type = $this->headerFilters()[$key2]['type'];
+                            if ($type == "text") {
+                                if (!str_contains($property, $this->headerFilter[$key2])) {
+                                    unset($dataset[$key]);
+                                    break;
+                                }
+                            } else if ($type == "select") {
+                                if ($property != $this->headerFilter[$key2]) {
+                                    unset($dataset[$key]);
+                                    break;
+                                }
+                            } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
+                                $date1 = Carbon::parse($property);
+                                if (!empty($this->headerFilter[$key2]['from']) && !empty($this->headerFilter[$key2]['to'])) {
+                                    $date2 = Carbon::parse($this->headerFilter[$key2]['from']);
+                                    $date3 = Carbon::parse($this->headerFilter[$key2]['to']);
+                                    if ($date1->gte($date2) && $date1->lte($date3)) {
+                                        unset($dataset[$key]);
+                                        break;
+                                    }
+                                } else if (!empty($this->headerFilter[$key2]['from'])) {
+                                    $date2 = Carbon::parse($this->headerFilter[$key2]['from']);
+                                    if ($date1->gte($date2)) {
+                                        unset($dataset[$key]);
+                                        break;
+                                    }
+                                } else if (!empty($this->headerFilter[$key2]['from'])) {
+                                    $date3 = Carbon::parse($this->headerFilter[$key2]['to']);
+                                    if ($date1->lte($date3)) {
+                                        unset($dataset[$key]);
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                     if ($this->searchable) {

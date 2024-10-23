@@ -38,7 +38,7 @@
                 <td>
                     @if (isset($headerFilters[$key]))
                         @if ($headerFilters[$key]['type'] == "select")
-                            <select class="form-select">
+                            <select class="form-select" wire:model.change="headerFilter.{{ $key }}">
                                 <option value="">{{ __('All') }}</option>
                                 @if (!empty($headerFilters[$key]['values']))
                                     @foreach($headerFilters[$key]['values'] as $value => $name)
@@ -46,6 +46,11 @@
                                     @endforeach
                                 @endif
                             </select>
+                        @elseif($headerFilters[$key]['type'] == "date" || $headerFilters[$key]['type'] == "time" || $headerFilters[$key]['type'] == "datetime-local")
+                            <div class="input-group">
+                                <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}.from" />
+                                <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}.to" />
+                            </div>
                         @else
                             <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}" />
                         @endif
