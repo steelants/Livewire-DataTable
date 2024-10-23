@@ -16,6 +16,12 @@ trait UseDatabase
     //      return Model::where('id','>',0)->limit(100);
     // }
 
+    public function headers(): array
+    {
+        $keys = $this->query()->getModel()->getFillable();
+        return array_combine($keys, $keys);
+    }
+
     public function datasetFromDB($query): array
     {
         $datasetFromDB = [];
@@ -23,20 +29,22 @@ trait UseDatabase
 
         if ($this->searchable && !empty($this->searchValue)) {
             $query->where(function ($q) {
-                foreach ($this->searchableColumns as $i => $column) {
+                foreach ($this->searchableColumns as $i => $name) {
                     if ($i == 0) {
-                        if (strpos($column, ".") === false) {
-                            $q->where($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
+                        if (strpos($name, ".") === false) {
+                            $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $this->searchValue . '%');
                         } else {
-                            $column = explode('.', $column);
-                            $q->whereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
+                            $names = explode('.', $name);
+                            $column = array_pop($names);
+                            $q->whereRelation(implode(".", $names), $column, 'LIKE', '%' . $this->searchValue . '%');
                         }
                     } else {
-                        if (strpos($column, ".") === false) {
-                            $q->orWhere($q->getModel()->getTable() . "." . $column, 'LIKE', '%' . $this->searchValue . '%');
+                        if (strpos($name, ".") === false) {
+                            $q->orWhere($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $this->searchValue . '%');
                         } else {
-                            $column = explode('.', $column);
-                            $q->orWhereRelation($column[0], $column[1], 'LIKE', '%' . $this->searchValue . '%');
+                            $names = explode('.', $name);
+                            $column = array_pop($names);
+                            $q->orWhereRelation(implode(".", $names), $column, 'LIKE', '%' . $this->searchValue . '%');
                         }
                     }
                 }
@@ -46,14 +54,18 @@ trait UseDatabase
         if ($this->filterable && !empty($this->headerFilter)) {
             $query->where(function ($q) {
                 foreach ($this->headerFilter as $name => $value) {
-                    if (empty($value)) {
-                        continue;
-                    }
-                    if (strpos($name, ".") === false) {
-                        $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
+                    if (is_array($value)) {
+                        foreach ($value as $key => $val) {
+                            $nameLocal = $name . "." . $key;
+                            while(is_array($val)){
+                                $firstKey = array_key_first($val);
+                                $nameLocal = $nameLocal . "." . $firstKey;
+                                $val = $val[$firstKey];
+                            }
+                            $this->getFiltersWhere($q, $nameLocal, $val);
+                        }
                     } else {
-                        $names = explode('.', $name);
-                        $q->whereRelation($names[0], $names[1], 'LIKE', '%' . $value . '%');
+                        $this->getFiltersWhere($q, $name, $value);
                     }
                 }
             });
@@ -96,33 +108,94 @@ trait UseDatabase
         return $datasetFromDB;
     }
 
+    private function getFiltersWhere(&$q, $name, $value)
+    {
+        if (empty($value)) {
+            return;
+        }
+        $type = $this->headerFilters()[$name]['type'];
+        if ($type == "text") {
+            if (strpos($name, ".") === false) {
+                $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
+            } else {
+                $names = explode('.', $name);
+                $column = array_pop($names);
+                $q->whereRelation(implode(".", $names), $column, 'LIKE', '%' . $value . '%');
+            }
+        } else if ($type == "select") {
+            if (strpos($name, ".") === false) {
+                $q->where($q->getModel()->getTable() . "." . $name, '=', $value);
+            } else {
+                $names = explode('.', $name);
+                $column = array_pop($names);
+                $q->whereRelation(implode(".", $names), $column, '=', $value);
+            }
+        } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
+            if (strpos($name, ".") === false) {
+                if (!empty($value['from'])) {
+                    $q->where($q->getModel()->getTable() . "." . $name, '>=', $value['from']);
+                }
+                if (!empty($value['to'])) {
+                    $q->where($q->getModel()->getTable() . "." . $name, '<=', $value['to']);
+                }
+            } else {
+                $names = explode('.', $name);
+                $column = array_pop($names);
+                $table = implode(".", $names);
+                if (!empty($value['from'])) {
+                    $q->whereRelation($table, $column, '>=', $value['from']);
+                }
+                if (!empty($value['to'])) {
+                    $q->whereRelation($table, $column, '<=', $value['to']);
+                }
+            }
+        }
+    }
+
     private function getRelationJoins(Builder $query): Builder
     {
         $selects = [$query->getModel()->getTable() . '.*'];
         foreach ($this->getHeader() as $header => $headerName) {
+            $relation = null;
             if (strpos($header, ".") === false) {
                 continue;
             }
 
             $model = $query->getModel();
             $connection = explode('.', $header);
-            $relationProperty = $connection[0];
-            $relationName = $connection[1];
+            $relationName = array_pop($connection);
+            foreach ($connection as $key => $relationProperty) {
+                $relationProperty = Str::camel($relationProperty);
+                if (empty($relation)) {
+                    if (!(method_exists($model, $relationProperty))) {
+                        break;
+                    }
+                    $relation = $model->$relationProperty();
 
-            //verify that model has respective Relation
-            if (!(method_exists($model, $relationProperty))) {
-                continue;
-            }
-
-
-            $relation = $model->$relationProperty();
-            if ($relation instanceof BelongsTo) {
-                $relatedTable = $relation->getModel()->getTable();
-                $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
-                $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
-            } else if ($relation instanceof HasOne)  {
-                $relatedTable = $relation->getModel()->getTable();
-                //TODO: FIX OTHER RELATIONS
+                    if ($relation instanceof BelongsTo) {
+                        $relatedTable = $relation->getModel()->getTable();
+                        $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
+                        if (count($connection) == 1) {
+                            $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
+                        }
+                    } else if ($relation instanceof HasOne)  {
+                        $relatedTable = $relation->getModel()->getTable();
+                        //TODO: FIX OTHER RELATIONS
+                    }
+                } else {
+                    if (!(method_exists($relation->getModel(), $relationProperty))) {
+                        break;
+                    }
+                    $relation = $relation->getModel()->$relationProperty();
+                    if ($relation instanceof BelongsTo) {
+                        $relatedTable = $relation->getModel()->getTable();
+                        $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $model->{Str::camel($connection[$key-1])}()->getModel()->getTable() . '.' . $relation->getForeignKeyName());
+                        $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
+                    } else if ($relation instanceof HasOne)  {
+                        $relatedTable = $relation->getModel()->getTable();
+                        //TODO: FIX OTHER RELATIONS
+                    }
+                }
             }
         }
 
@@ -156,11 +229,16 @@ trait UseDatabase
 
         $connection = explode('.', $column);
         $relationProperty = $connection[0];
-        $relationName = $connection[1];
-
-        $relation = $query->getModel()->$relationProperty();
+        $relationName = array_pop($connection);
+        foreach ($connection as $relationProperty) {
+            $relationProperty = Str::camel($relationProperty);
+            if (empty($relation)) {
+                $relation = $query->getModel()->$relationProperty();
+            } else {
+                $relation = $relation->getModel()->$relationProperty();
+            }
+        }
         $relatedTable = $relation->getModel()->getTable();
-
         return $relatedTable . '.' . $relationName;
     }
 }
