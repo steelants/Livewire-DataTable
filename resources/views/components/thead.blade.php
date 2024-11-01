@@ -2,7 +2,7 @@
     <tr>
         @foreach ($headers as $key => $header)
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
-            <th scope="col">
+            <th scope="col" calass="text-nowrap">
                 <span
                     @if ($sortable && in_array($key, $sortableColumns)) class="datatable-head-sort"
                         @if ($key != $sortBy)
