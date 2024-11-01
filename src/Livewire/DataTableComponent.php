@@ -2,6 +2,7 @@
 
 namespace SteelAnts\DataTable\Livewire;
 
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
@@ -84,7 +85,9 @@ class DataTableComponent extends Component
 
     public function headers(): array
     {
-        return array_keys($this->dataset[0]);
+        $keys = array_keys($this->dataset()[0]);
+        $headers = array_combine($keys, $keys);
+        return $headers;
     }
 
     public function footers(): array
@@ -154,11 +157,52 @@ class DataTableComponent extends Component
             $dataset = array_slice($dataset, $from,  $this->itemsPerPage);
         }
 
-        if ($this->filterable && !empty($this->headerFilter)) {
+        if (($this->filterable && !empty($this->headerFilter)) || ($this->searchable && !empty($this->searchValue))) {
             foreach ($dataset as $key => $item) {
                 foreach ($item as $key2 => $property) {
-                    if (!empty($this->headerFilter[$key2]) && !str_contains($property, $this->headerFilter[$key2])) {
-                        unset($dataset[$key]);
+                    if($this->filterable){
+                        if (!empty($this->headerFilter[$key2])) {
+                            $type = $this->headerFilters()[$key2]['type'];
+                            if ($type == "text") {
+                                if (!str_contains($property, $this->headerFilter[$key2])) {
+                                    unset($dataset[$key]);
+                                    break;
+                                }
+                            } else if ($type == "select") {
+                                if ($property != $this->headerFilter[$key2]) {
+                                    unset($dataset[$key]);
+                                    break;
+                                }
+                            } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
+                                $date1 = Carbon::parse($property);
+                                if (!empty($this->headerFilter[$key2]['from']) && !empty($this->headerFilter[$key2]['to'])) {
+                                    $date2 = Carbon::parse($this->headerFilter[$key2]['from']);
+                                    $date3 = Carbon::parse($this->headerFilter[$key2]['to']);
+                                    if ($date1->gte($date2) && $date1->lte($date3)) {
+                                        unset($dataset[$key]);
+                                        break;
+                                    }
+                                } else if (!empty($this->headerFilter[$key2]['from'])) {
+                                    $date2 = Carbon::parse($this->headerFilter[$key2]['from']);
+                                    if ($date1->gte($date2)) {
+                                        unset($dataset[$key]);
+                                        break;
+                                    }
+                                } else if (!empty($this->headerFilter[$key2]['from'])) {
+                                    $date3 = Carbon::parse($this->headerFilter[$key2]['to']);
+                                    if ($date1->lte($date3)) {
+                                        unset($dataset[$key]);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if ($this->searchable) {
+                        if (!empty($this->searchValue) && !str_contains($property, $this->searchValue)) {
+                            unset($dataset[$key]);
+                            break;
+                        }
                     }
                 }
             }
@@ -214,7 +258,6 @@ class DataTableComponent extends Component
     private function setDefaults()
     {
         $this->actions = [];
-        
         if ($this->sortable == true && $this->sortableColumns == []) {
             $this->sortableColumns = array_keys($this->getHeader());
         }
