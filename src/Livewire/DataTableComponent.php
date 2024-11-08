@@ -131,7 +131,7 @@ class DataTableComponent extends Component
     {
         $queryStrings = [];
         if ($this->paginated == true) {
-            $queryStrings[] = 'currentPage';
+            $queryStrings['currentPage'] = ['except' => 0];
         }
         if ($this->searchable == true) {
             $queryStrings[] = 'searchValue';
