@@ -167,34 +167,28 @@ trait UseDatabase
             foreach ($connection as $key => $relationProperty) {
                 $relationProperty = Str::camel($relationProperty);
                 if (empty($relation)) {
-                    if (!(method_exists($model, $relationProperty))) {
-                        break;
-                    }
-                    $relation = $model->$relationProperty();
-
-                    if ($relation instanceof BelongsTo) {
-                        $relatedTable = $relation->getModel()->getTable();
-                        $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->getModel()->getTable() . '.' . $relation->getForeignKeyName());
-                        if (count($connection) == 1) {
-                            $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
-                        }
-                    } else if ($relation instanceof HasOne)  {
-                        $relatedTable = $relation->getModel()->getTable();
-                        //TODO: FIX OTHER RELATIONS
-                    }
+                    $usingModel = $model;
                 } else {
-                    if (!(method_exists($relation->getModel(), $relationProperty))) {
-                        break;
+                    $usingModel = $relation->getModel();
+                }
+
+                if (!(method_exists($usingModel, $relationProperty))) {
+                    break;
+                }
+
+                $relation = $usingModel->$relationProperty();
+
+                if ($relation instanceof BelongsTo) {
+                    $relatedTable = $relation->getModel()->getTable();
+                    if ($query->getQuery()->joins == null || !array_key_exists($relatedTable,array_column($query->getQuery()->joins, null, 'table') ?? [])) {
+                        $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->{$key > 0 ? Str::camel($connection[$key-1]) . '()->getModel' : 'getModel'}()->getTable() . '.' . $relation->getForeignKeyName());
                     }
-                    $relation = $relation->getModel()->$relationProperty();
-                    if ($relation instanceof BelongsTo) {
-                        $relatedTable = $relation->getModel()->getTable();
-                        $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $model->{Str::camel($connection[$key-1])}()->getModel()->getTable() . '.' . $relation->getForeignKeyName());
+                    if (count($connection) == 1) {
                         $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
-                    } else if ($relation instanceof HasOne)  {
-                        $relatedTable = $relation->getModel()->getTable();
-                        //TODO: FIX OTHER RELATIONS
                     }
+                } else if ($relation instanceof HasOne)  {
+                    $relatedTable = $relation->getModel()->getTable();
+                    //TODO: FIX OTHER RELATIONS
                 }
             }
         }
