@@ -95,13 +95,9 @@ trait UseDatabase
 
             foreach ($tempRow as $key => $property) {
                     $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key)));
-                $ModelProperty = Str::camel(str_replace('.', '->', $key));
-
+                $ModelProperty = str_replace('.', '->', $key);
                 $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($item->$ModelProperty) : $property);
             }
-
-            // TODO: do i need this?
-            // $tempRow['__key'] = $item->{$this->keyPropery};
 
             $datasetFromDB[] = $tempRow;
         }
