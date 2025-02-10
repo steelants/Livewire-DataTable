@@ -159,6 +159,7 @@ class DataTableComponent extends Component
 
         if (($this->filterable && !empty($this->headerFilter)) || ($this->searchable && !empty($this->searchValue))) {
             foreach ($dataset as $key => $item) {
+                $searchable = false;
                 foreach ($item as $key2 => $property) {
                     if($this->filterable){
                         if (!empty($this->headerFilter[$key2])) {
@@ -198,12 +199,15 @@ class DataTableComponent extends Component
                             }
                         }
                     }
-                    if ($this->searchable) {
-                        if (!empty($this->searchValue) && !str_contains($property, $this->searchValue)) {
-                            unset($dataset[$key]);
+                    if ($this->searchable && in_array($key2, $this->searchableColumns)) {
+                        if (!empty($this->searchValue) && str_contains($property, $this->searchValue)) {
+                            $searchable = true;
                             break;
                         }
                     }
+                }
+                if ($this->searchable && !empty($this->searchValue) && !$searchable) {
+                    unset($dataset[$key]);
                 }
             }
         }
