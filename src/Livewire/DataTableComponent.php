@@ -200,7 +200,7 @@ class DataTableComponent extends Component
                         }
                     }
                     if ($this->searchable && in_array($key2, $this->searchableColumns)) {
-                        if (!empty($this->searchValue) && str_contains($property, $this->searchValue)) {
+                        if (!empty($this->searchValue) && str_contains(strtolower($property), strtolower($this->searchValue))) {
                             $searchable = true;
                             break;
                         }
