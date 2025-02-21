@@ -1,4 +1,4 @@
-<thead>
+<thead class="position-sticked top-0">
     <tr>
         @foreach ($headers as $key => $header)
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}

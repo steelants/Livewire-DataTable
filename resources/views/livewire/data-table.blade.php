@@ -39,7 +39,7 @@
             </div>
         </div>
     </div>
-    <div class="table-responsive">
+    <div class="table-responsive-md">
         <table class="{{ $tableClass }}">
 
             @if($showHeader)
