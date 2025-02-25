@@ -185,6 +185,38 @@ public function renderColumnFoo(mixed $value, array $row) : string
     }
 ```
 
+## Development
+
+1. Create subfolder `/packages` at root of your laravel project
+
+2. clone repository to sub folder `/packages` (you need to be positioned at root of your laravel project in your terminal)
+```bash
+git clone https://github.com/steelants/Livewire-DataTable.git ./packages/Livewire-DataTable
+```
+
+3. edit composer.json file
+```json
+"autoload": {
+	"psr-4": {
+		"SteelAnts\\Modal\\": "packages/Livewire-Modal/src/"
+	}
+}
+```
+
+4. Add provider to `bootstrap/providers.php`
+```php
+return [
+	...
+     SteelAnts\DataTable\DataTableServiceProvider::class,
+	...
+];
+```
+
+## Contributors
+<a href="https://github.com/steelants/Livewire-DataTable/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=steelants/Livewire-DataTable" />
+</a>
+
 ## Other Packages
 [steelants/laravel-auth](https://github.com/steelants/laravel-auth)
 
