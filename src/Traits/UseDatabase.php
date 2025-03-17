@@ -151,6 +151,15 @@ trait UseDatabase
     private function getRelationJoins(Builder $query): Builder
     {
         $selects = [$query->getModel()->getTable() . '.*'];
+
+        //Account For Count and other types of computed columns
+        foreach ($query->getQuery()->columns as $header) {
+            if ($header instanceof Expression){
+                $selects[] = $header;
+            }
+        }
+
+        //Rest of relations and so on
         foreach ($this->getHeader() as $header => $headerName) {
             $relation = null;
             if (strpos($header, ".") === false) {
