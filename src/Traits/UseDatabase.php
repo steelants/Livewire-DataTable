@@ -153,9 +153,11 @@ trait UseDatabase
         $selects = [$query->getModel()->getTable() . '.*'];
 
         //Account For Count and other types of computed columns
-        foreach ($query->getQuery()->columns as $header) {
-            if ($header instanceof Expression){
-                $selects[] = $header;
+        if (!empty($query->getQuery()->columns)) {
+            foreach ($query->getQuery()->columns as $header) {
+                if ($header instanceof Expression){
+                    $selects[] = $header;
+                }
             }
         }
 
