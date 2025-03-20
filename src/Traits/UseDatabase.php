@@ -200,7 +200,9 @@ trait UseDatabase
             }
         }
 
-        return $query->select($selects);
+        //Account for Select Bad behavior
+        $query->getQuery()->columns = $selects;
+        return $query;
     }
 
     private function getRelation(QueryBuilder $query)
