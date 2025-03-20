@@ -155,7 +155,7 @@ trait UseDatabase
         //Account For Count and other types of computed columns
         if (!empty($query->getQuery()->columns)) {
             foreach ($query->getQuery()->columns as $header) {
-                if ($header instanceof Expression){
+                if (!is_string($header) && get_class($header) == 'Illuminate\Database\Query\Expression' ){
                     $selects[] = $header;
                 }
             }
