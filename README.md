@@ -3,6 +3,17 @@
 
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 
+#### Docker Build
+* is handeled by gittea server
+```bash
+  git checkout master
+  git pull origin master
+  git pull origin dev
+  git tag 2.3.2
+  git push --tags
+  git checkout dev
+```
+
 ## Usage
 
 ```php
