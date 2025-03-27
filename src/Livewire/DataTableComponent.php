@@ -227,7 +227,7 @@ class DataTableComponent extends Component
         }
 
         if ($this->sortable && !empty($this->sortBy)) {
-            $dataset = collect($dataset)->sortBy($this->sortBy, SORT_REGULAR, ($this->sortDirection == "desc"))->toArray();
+            $dataset = collect($dataset)->sortBy($this->sortBy, SORT_REGULAR, ($this->sortDirection == "desc"))->values()->toArray();
         }
         return $dataset;
     }
