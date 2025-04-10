@@ -73,6 +73,11 @@ class UserTable extends DataTableComponent
         return '<b>'.e($value).'</b>';
     }
 
+    // Transform order column on raw order column (optional)
+    public function orderColumnName(){
+         return 'CAST(name AS STRING)';
+    }
+
     // Livewire actions
     public function remove($id){
         User::find($id)->delete();
@@ -127,9 +132,6 @@ SteelAnts\DataTable\DataTableServiceProvider::class,
 ```php
 // Enable sorting
 public bool $sortable = true;
-
-// Use raw ordering for specific column for example "text"
-public array $sortByRaw = ['text' => 'CAST(SUBSTR(text, INSTR(text, \' \') + 1) AS INTEGER)'];
 
 // Enable pagination
 public bool $paginated = true;

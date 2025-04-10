@@ -16,6 +16,12 @@ trait UseDatabase
     //      return Model::where('id','>',0)->limit(100);
     // }
 
+    // Transform order column on raw order column (optional)
+    // public function orderColumnFoo() : mixed
+    // {
+    //      return 'CAST(string_id AS INTEGER)';
+    // }
+
     public function headers(): array
     {
         $keys = $this->query()->getModel()->getFillable();
@@ -79,8 +85,9 @@ trait UseDatabase
                 $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
             }
 
-            if (!empty($this->sortByRaw[$orderByColumn])) {
-                $query->orderByRaw($this->sortByRaw[$orderByColumn] . " " . strtoupper($this->sortDirection));
+            $method = "orderColumn" . ucfirst(Str::camel(str_replace('.', '_', $orderByColumn)));
+            if (method_exists($this, $method)) {
+                $query->orderByRaw($this->{$method}() . " " . strtoupper($this->sortDirection));
             } else {
                 $query->orderBy($orderByColumn, $this->sortDirection);
             }
