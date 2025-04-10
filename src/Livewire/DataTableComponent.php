@@ -22,6 +22,7 @@ class DataTableComponent extends Component
     public array $sortableColumns = [];
     public string $sortBy = '';
     public string $sortDirection = 'asc';
+    public array $sortByRaw = [];
 
     // Enable pagination
     public bool $paginated = true;

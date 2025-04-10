@@ -79,7 +79,11 @@ trait UseDatabase
                 $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
             }
 
-            $query->orderBy($orderByColumn, $this->sortDirection);
+            if (!empty($this->sortByRaw[$orderByColumn])) {
+                $query->orderByRaw($this->sortByRaw[$orderByColumn] . " " . strtoupper($this->sortDirection));
+            } else {
+                $query->orderBy($orderByColumn, $this->sortDirection);
+            }
         }
 
         if ($this->paginated != false) {
