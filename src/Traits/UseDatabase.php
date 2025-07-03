@@ -172,6 +172,8 @@ trait UseDatabase
             }
         }
 
+        $i = 0;
+
         //Rest of relations and so on
         foreach ($this->getHeader() as $header => $headerName) {
             $relation = null;
@@ -198,17 +200,19 @@ trait UseDatabase
 
                 if ($relation instanceof BelongsTo) {
                     $relatedTable = $relation->getModel()->getTable();
+                    $asName = $relatedTable . '_' . $i;
                     if ($query->getQuery()->joins == null || !array_key_exists($relatedTable,array_column($query->getQuery()->joins, null, 'table') ?? [])) {
-                        $query->leftJoin($relatedTable, $relatedTable . '.' . $relation->getOwnerKeyName(), '=', $query->{$key > 0 ? Str::camel($connection[$key-1]) . '()->getModel' : 'getModel'}()->getTable() . '.' . $relation->getForeignKeyName());
+                        $query->leftJoin($relatedTable . ' as ' . $asName, $asName . '.' . $relation->getOwnerKeyName(), '=', $query->{$key > 0 ? Str::camel($connection[$key-1]) . '()->getModel' : 'getModel'}()->getTable() . '.' . $relation->getForeignKeyName());
                     }
                     if (count($connection) == 1) {
-                        $selects[] = $relatedTable . '.' . $relationName . ' AS ' . $header;
+                        $selects[] = $asName . '.' . $relationName . ' AS ' . $header;
                     }
                 } else if ($relation instanceof HasOne)  {
                     $relatedTable = $relation->getModel()->getTable();
                     //TODO: FIX OTHER RELATIONS
                 }
             }
+            $i ++;
         }
 
         //Account for Select Bad behavior
