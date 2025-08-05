@@ -294,12 +294,10 @@ class DataTableComponent extends Component
     // {
     //     return [
     //         [
-    //             'type' => "route",
-    //             'class' => "danger",
-    //             'name' => 'task.show',
-    //             'parameters' => [
-    //                 'task' => $item['id'],
-    //             ],
+    //             'type' => "url",
+    //             'url' => route('test.form', ['modelId' => $item['id']]),
+    //             'text' => "edit",
+    //             'iconClass' => 'fas fa-pen',
     //         ],
     //         [
     //             'type' => "livewire",
