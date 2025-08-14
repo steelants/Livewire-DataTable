@@ -83,6 +83,9 @@ class DataTableComponent extends Component
         return [];
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     public function headers(): array
     {
         $data = $this->dataset();
