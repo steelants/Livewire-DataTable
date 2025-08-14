@@ -163,14 +163,15 @@ trait UseDatabase
 
         //Rest of relations and so on
         foreach ($this->getHeader() as $header => $headerName) {
-            $relation = null;
             if (strpos($header, ".") === false) {
                 continue;
             }
 
+            $relation = null;
             $model = $query->getModel();
             $connection = explode('.', $header);
             $relationName = array_pop($connection);
+
             foreach ($connection as $key => $relationProperty) {
                 $relationProperty = Str::camel($relationProperty);
                 $usingModel = empty($relation) ? $model : $relation->getModel();
@@ -182,18 +183,28 @@ trait UseDatabase
                 $relation = $usingModel->$relationProperty();
 
                 if ($relation instanceof BelongsTo) {
-                    $relatedTable = $relation->getModel()->getTable();
-                    $asName = $relatedTable . '_' . $i;
-                    if ($query->getQuery()->joins == null || !array_key_exists($relatedTable,array_column($query->getQuery()->joins, null, 'table') ?? [])) {
-                        $query->leftJoin($relatedTable . ' as ' . $asName, $asName . '.' . $relation->getOwnerKeyName(), '=', $query->{$key > 0 ? Str::camel($connection[$key-1]) . '()->getModel' : 'getModel'}()->getTable() . '.' . $relation->getForeignKeyName());
-                    }
-
                     $path = implode('.', array_slice($connection, 0, $key + 1));
-                    if (!isset($this->relationAliases[$path])) {
+
+                    if (isset($this->relationAliases[$path])) {
+                        $asName = $this->relationAliases[$path];
+                    } else {
+                        $relatedTable = $relation->getModel()->getTable();
+                        $asName = $relatedTable . '_' . $i++;
+                        $parentAlias = $key === 0
+                            ? $query->getModel()->getTable()
+                            : $this->relationAliases[implode('.', array_slice($connection, 0, $key))];
+
+                        $query->leftJoin(
+                            $relatedTable . ' as ' . $asName,
+                            $asName . '.' . $relation->getOwnerKeyName(),
+                            '=',
+                            $parentAlias . '.' . $relation->getForeignKeyName()
+                        );
+
                         $this->relationAliases[$path] = $asName;
                     }
 
-                    if (count($connection) == 1) {
+                    if ($key === count($connection) - 1) {
                         $selects[] = $asName . '.' . $relationName . ' AS ' . $header;
                     }
                 } elseif ($relation instanceof HasOne) {
@@ -201,7 +212,6 @@ trait UseDatabase
                     //TODO: FIX OTHER RELATIONS
                 }
             }
-            $i ++;
         }
 
         //Account for Select Bad behavior
