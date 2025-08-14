@@ -86,8 +86,13 @@ class DataTableComponent extends Component
     public function headers(): array
     {
         $data = $this->dataset();
-        if (empty($data)) throw new \RuntimeException('DataTable dataset cannot be empty.');
+
+        if (empty($data)) {
+            throw new \RuntimeException('DataTable dataset cannot be empty.');
+        }
+
         $keys = array_keys($data[0]);
+
         return array_combine($keys, $keys);
     }
 
@@ -277,14 +282,7 @@ class DataTableComponent extends Component
         $this->currentPage = $value;
     }
 
-    public function getHeader(): array
-    {
-        if (!method_exists($this, 'headers')) {
-            return [];
-        }
-
-        return $this->headers();
-    }
+    public function getHeader(): array { return $this->headers(); }
 
     // public function actions($item): array
     // {
