@@ -86,12 +86,9 @@ class DataTableComponent extends Component
     public function headers(): array
     {
         $data = $this->dataset();
-        if (empty($data)) {
-            throw new \RuntimeException('DataTable dataset cannot be empty.');
-        }
+        if (empty($data)) throw new \RuntimeException('DataTable dataset cannot be empty.');
         $keys = array_keys($data[0]);
-        $headers = array_combine($keys, $keys);
-        return $headers;
+        return array_combine($keys, $keys);
     }
 
     public function footers(): array
