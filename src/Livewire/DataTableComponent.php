@@ -121,7 +121,7 @@ class DataTableComponent extends Component
         return array_fill_keys(array_keys($this->getHeader()), ['type' => 'text']);
     }
 
-    public function updatedHeaderfilter(){
+    public function updatedHeaderFilter(){
 
     }
 
@@ -159,86 +159,106 @@ class DataTableComponent extends Component
 
     private function getDatasetFromArray($dataset): array
     {
-        $this->itemsTotal = count($dataset);
-
-        if ($this->paginated != false) {
-            $from = $this->itemsPerPage * ($this->currentPage - 1);
-            $dataset = array_slice($dataset, $from,  $this->itemsPerPage);
+        // Cache headers and filter metadata once
+        $headers = array_keys($this->getHeader());
+        $filtersMeta = $this->filterable ? $this->headerFilters() : [];
+        $filterTypes = [];
+        foreach ($headers as $h) {
+            $filterTypes[$h] = $filtersMeta[$h]['type'] ?? 'text';
         }
 
-        if (($this->filterable && !empty($this->headerFilter)) || ($this->searchable && !empty($this->searchValue))) {
-            foreach ($dataset as $key => $item) {
-                $searchable = false;
-                foreach ($item as $key2 => $property) {
-                    if($this->filterable){
-                        if (!empty($this->headerFilter[$key2])) {
-                            $type = $this->headerFilters()[$key2]['type'];
-                            if ($type == "text") {
-                                if (!str_contains($property, $this->headerFilter[$key2])) {
-                                    unset($dataset[$key]);
-                                    break;
-                                }
-                            } else if ($type == "select") {
-                                if ($property != $this->headerFilter[$key2]) {
-                                    unset($dataset[$key]);
-                                    break;
-                                }
-                            } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
-                                $date1 = Carbon::parse($property);
-                                if (!empty($this->headerFilter[$key2]['from']) && !empty($this->headerFilter[$key2]['to'])) {
-                                    $date2 = Carbon::parse($this->headerFilter[$key2]['from']);
-                                    $date3 = Carbon::parse($this->headerFilter[$key2]['to']);
-                                    if ($date1->gte($date2) && $date1->lte($date3)) {
-                                        unset($dataset[$key]);
-                                        break;
-                                    }
-                                } else if (!empty($this->headerFilter[$key2]['from'])) {
-                                    $date2 = Carbon::parse($this->headerFilter[$key2]['from']);
-                                    if ($date1->gte($date2)) {
-                                        unset($dataset[$key]);
-                                        break;
-                                    }
-                                } else if (!empty($this->headerFilter[$key2]['from'])) {
-                                    $date3 = Carbon::parse($this->headerFilter[$key2]['to']);
-                                    if ($date1->lte($date3)) {
-                                        unset($dataset[$key]);
-                                        break;
-                                    }
-                                }
-                            }
+        $searchActive = $this->searchable && $this->searchValue !== '';
+        $searchNeedle = $searchActive ? mb_strtolower($this->searchValue) : '';
+        $searchableSet = $this->searchable ? array_flip($this->searchableColumns) : [];
+
+        // Filter and search first
+        $filtered = [];
+        if (($this->filterable && !empty($this->headerFilter)) || $searchActive) {
+            foreach ($dataset as $row) {
+                $keep = true;
+
+                if ($this->filterable && !empty($this->headerFilter)) {
+                    foreach ($row as $col => $value) {
+                        if (!array_key_exists($col, $this->headerFilter)) {
+                            continue;
                         }
-                    }
-                    if ($this->searchable && in_array($key2, $this->searchableColumns)) {
-                        if (!empty($this->searchValue) && str_contains(strtolower($property), strtolower($this->searchValue))) {
-                            $searchable = true;
-                            break;
+                        $type = $filterTypes[$col] ?? 'text';
+                        $filterVal = $this->headerFilter[$col];
+                        if ($type === 'text') {
+                            if ($filterVal !== '' && mb_stripos((string)$value, (string)$filterVal) === false) { $keep = false; break; }
+                        } elseif ($type === 'select') {
+                            if ($filterVal !== '' && $value != $filterVal) { $keep = false; break; }
+                        } elseif (in_array($type, ['date','time','datetime-local'], true)) {
+                            $valTs = is_numeric($value) ? (int)$value : @strtotime((string)$value);
+                            $fromTs = (is_array($filterVal) && !empty($filterVal['from'])) ? @strtotime((string)$filterVal['from']) : null;
+                            $toTs   = (is_array($filterVal) && !empty($filterVal['to']))   ? @strtotime((string)$filterVal['to'])   : null;
+                            if ($fromTs !== null && $valTs !== false && $valTs < $fromTs) { $keep = false; break; }
+                            if ($toTs !== null   && $valTs !== false && $valTs > $toTs)   { $keep = false; break; }
                         }
                     }
                 }
-                if ($this->searchable && !empty($this->searchValue) && !$searchable) {
-                    unset($dataset[$key]);
+
+                if ($keep && $searchActive) {
+                    $matched = false;
+                    foreach ($row as $col => $value) {
+                        if (!isset($searchableSet[$col])) { continue; }
+                        if ($value !== null && $value !== '' && mb_stripos((string)$value, $searchNeedle) !== false) { $matched = true; break; }
+                    }
+                    if (!$matched) { $keep = false; }
                 }
+
+                if ($keep) { $filtered[] = $row; }
             }
+        } else {
+            $filtered = $dataset;
         }
 
-        if (method_exists($this, "row")) {
-            foreach ($dataset as $key => $item) {
+        // Transform rows/columns once, with cached column method lookups
+        if (method_exists($this, 'row')) {
+            $columnMethodCache = [];
+            foreach ($headers as $header) {
+                $method = 'column' . ucfirst(Str::camel(str_replace('.', '_', $header)));
+                $columnMethodCache[$header] = method_exists($this, $method) ? $method : null;
+            }
+
+            foreach ($filtered as $idx => $item) {
                 $tempRow = $this->row($item);
-                foreach ($tempRow as $key2 => $property) {
-                    $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key2)));
-                    if (!method_exists($this, $method)) {
-                        continue;
+                foreach ($tempRow as $col => $property) {
+                    $method = $columnMethodCache[$col] ?? null;
+                    if ($method) {
+                        $tempRow[$col] = $this->{$method}($property);
                     }
-                    $tempRow[$key2] = $this->{$method}($property);
                 }
-                $dataset[$key] = $tempRow;
+                $filtered[$idx] = $tempRow;
             }
         }
 
+        // Sort on the transformed dataset
         if ($this->sortable && !empty($this->sortBy)) {
-            $dataset = collect($dataset)->sortBy($this->sortBy, SORT_REGULAR, ($this->sortDirection == "desc"))->values()->toArray();
+            $sortBy = $this->sortBy;
+            $dir = strtolower($this->sortDirection) === 'desc' ? -1 : 1;
+            usort($filtered, function ($a, $b) use ($sortBy, $dir) {
+                $av = $this->valueByDot($a, $sortBy);
+                $bv = $this->valueByDot($b, $sortBy);
+                if (is_numeric($av) && is_numeric($bv)) {
+                    $cmp = (float)$av <=> (float)$bv;
+                } else {
+                    $cmp = strcmp((string)$av, (string)$bv);
+                }
+                return $cmp * $dir;
+            });
         }
-        return $dataset;
+
+        // Update totals before pagination
+        $this->itemsTotal = count($filtered);
+
+        // Paginate last
+        if ($this->paginated != false) {
+            $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
+            $filtered = array_slice($filtered, $from, $this->itemsPerPage);
+        }
+
+        return array_values($filtered);
     }
 
     private function getData($force = false): array
@@ -318,5 +338,22 @@ class DataTableComponent extends Component
 
     public function updatedSearchValue(){
         $this->currentPage = 1;
+    }
+
+    private function valueByDot(array $row, string $key)
+    {
+        if ($key === '' || strpos($key, '.') === false) {
+            return $row[$key] ?? null;
+        }
+        static $splitCache = [];
+        $parts = $splitCache[$key] ??= explode('.', $key);
+        $value = $row;
+        foreach ($parts as $p) {
+            if (!is_array($value) || !array_key_exists($p, $value)) {
+                return null;
+            }
+            $value = $value[$p];
+        }
+        return $value;
     }
 }
