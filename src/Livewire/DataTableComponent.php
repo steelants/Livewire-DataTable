@@ -282,13 +282,8 @@ class DataTableComponent extends Component
 
     public function getHeader(): array
     {
-
-        if (!method_exists($this, "headers")) {
+        if (!method_exists($this, 'headers')) {
             return [];
-        }
-
-        if ($this->dataset == []) {
-            return $this->headers();
         }
 
         return $this->headers();
