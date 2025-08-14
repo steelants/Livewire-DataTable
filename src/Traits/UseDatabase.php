@@ -11,6 +11,12 @@ use Illuminate\Support\Str;
 
 trait UseDatabase
 {
+    /**
+     * Mapping of relation paths to their join aliases.
+     *
+     * @var array<string,string>
+     */
+    protected array $relationAliases = [];
     // public function query(): Builder
     // {
     //      return Model::where('id','>',0)->limit(100);
@@ -141,6 +147,7 @@ trait UseDatabase
 
     private function getRelationJoins(Builder $query): Builder
     {
+        $this->relationAliases = [];
         $selects = [$query->getModel()->getTable() . '.*'];
 
         //Account For Count and other types of computed columns
@@ -166,13 +173,9 @@ trait UseDatabase
             $relationName = array_pop($connection);
             foreach ($connection as $key => $relationProperty) {
                 $relationProperty = Str::camel($relationProperty);
-                if (empty($relation)) {
-                    $usingModel = $model;
-                } else {
-                    $usingModel = $relation->getModel();
-                }
+                $usingModel = empty($relation) ? $model : $relation->getModel();
 
-                if (!(method_exists($usingModel, $relationProperty))) {
+                if (!method_exists($usingModel, $relationProperty)) {
                     break;
                 }
 
@@ -184,10 +187,16 @@ trait UseDatabase
                     if ($query->getQuery()->joins == null || !array_key_exists($relatedTable,array_column($query->getQuery()->joins, null, 'table') ?? [])) {
                         $query->leftJoin($relatedTable . ' as ' . $asName, $asName . '.' . $relation->getOwnerKeyName(), '=', $query->{$key > 0 ? Str::camel($connection[$key-1]) . '()->getModel' : 'getModel'}()->getTable() . '.' . $relation->getForeignKeyName());
                     }
+
+                    $path = implode('.', array_slice($connection, 0, $key + 1));
+                    if (!isset($this->relationAliases[$path])) {
+                        $this->relationAliases[$path] = $asName;
+                    }
+
                     if (count($connection) == 1) {
                         $selects[] = $asName . '.' . $relationName . ' AS ' . $header;
                     }
-                } else if ($relation instanceof HasOne)  {
+                } elseif ($relation instanceof HasOne) {
                     $relatedTable = $relation->getModel()->getTable();
                     //TODO: FIX OTHER RELATIONS
                 }
@@ -224,18 +233,22 @@ trait UseDatabase
         if (strpos($column, ".") === false) {
             throw new ErrorException($column .  " is not a relation column!");
         }
-
         $connection = explode('.', $column);
-        $relationProperty = $connection[0];
         $relationName = array_pop($connection);
+        $path = implode('.', $connection);
+
+        if (isset($this->relationAliases[$path])) {
+            return $this->relationAliases[$path] . '.' . $relationName;
+        }
+
+        // Fallback to resolving table directly when alias is missing
         foreach ($connection as $relationProperty) {
             $relationProperty = Str::camel($relationProperty);
-            if (empty($relation)) {
-                $relation = $query->getModel()->$relationProperty();
-            } else {
-                $relation = $relation->getModel()->$relationProperty();
-            }
+            $relation = empty($relation)
+                ? $query->getModel()->$relationProperty()
+                : $relation->getModel()->$relationProperty();
         }
+
         $relatedTable = $relation->getModel()->getTable();
         return $relatedTable . '.' . $relationName;
     }
