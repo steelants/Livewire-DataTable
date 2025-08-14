@@ -192,7 +192,7 @@ public function renderColumnFoo(mixed $value, array $row) : string
     }
 
     //Add actions to header filters edit
-    public function updatedHeaderfilter(){
+    public function updatedHeaderFilter(){
         $this->validate([
             'headerFilter.column1Key' => 'nullable|string',
             'headerFilter.column2Key' => 'nullable|string',
