@@ -36,23 +36,7 @@ trait UseDatabase
         if ($this->searchable && !empty($this->searchValue)) {
             $query->where(function ($q) {
                 foreach ($this->searchableColumns as $i => $name) {
-                    if ($i == 0) {
-                        if (strpos($name, ".") === false) {
-                            $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $this->searchValue . '%');
-                        } else {
-                            $names = explode('.', $name);
-                            $column = array_pop($names);
-                            $q->whereRelation(implode(".", $names), $column, 'LIKE', '%' . $this->searchValue . '%');
-                        }
-                    } else {
-                        if (strpos($name, ".") === false) {
-                            $q->orWhere($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $this->searchValue . '%');
-                        } else {
-                            $names = explode('.', $name);
-                            $column = array_pop($names);
-                            $q->orWhereRelation(implode(".", $names), $column, 'LIKE', '%' . $this->searchValue . '%');
-                        }
-                    }
+                    $this->applyWhere($q, $name, 'LIKE', '%' . $this->searchValue . '%', $i === 0 ? 'where' : 'orWhere');
                 }
             });
         }
@@ -63,9 +47,9 @@ trait UseDatabase
                     if (is_array($value)) {
                         foreach ($value as $key => $val) {
                             $nameLocal = $name . "." . $key;
-                            while(is_array($val)){
+                            while (is_array($val)) {
                                 $firstKey = array_key_first($val);
-                                $nameLocal = $nameLocal . "." . $firstKey;
+                                $nameLocal .= "." . $firstKey;
                                 $val = $val[$firstKey];
                             }
                             $this->getFiltersWhere($q, $nameLocal, $val);
@@ -77,7 +61,7 @@ trait UseDatabase
             });
         }
 
-        $this->itemsTotal = $query->count();
+        $this->itemsTotal = (clone $query)->count();
 
         if ($this->sortable && !empty($this->sortBy)) {
             $orderByColumn = $this->sortBy;
@@ -100,14 +84,21 @@ trait UseDatabase
             }
         }
 
-        foreach ($query->get() as $item) {
+        $columnMethodCache = [];
+        $columnPropertyCache = [];
+        foreach (array_keys($this->getHeader()) as $header) {
+            $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $header)));
+            $columnMethodCache[$header] = method_exists($this, $method) ? $method : null;
+            $columnPropertyCache[$header] = str_replace('.', '->', $header);
+        }
 
+        foreach ($query->get() as $item) {
             $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
 
             foreach ($tempRow as $key => $property) {
-                    $method = "column" . ucfirst(Str::camel(str_replace('.', '_', $key)));
-                $ModelProperty = str_replace('.', '->', $key);
-                $tempRow[$key] = (method_exists($this, $method) ? $this->{$method}($item->$ModelProperty) : $property);
+                $method = $columnMethodCache[$key] ?? null;
+                $modelProperty = $columnPropertyCache[$key] ?? str_replace('.', '->', $key);
+                $tempRow[$key] = $method ? $this->{$method}($item->$modelProperty) : $property;
             }
 
             $datasetFromDB[] = $tempRow;
@@ -120,42 +111,31 @@ trait UseDatabase
         if (empty($value)) {
             return;
         }
+
         $type = $this->headerFilters()[$name]['type'];
-        if ($type == "text") {
-            if (strpos($name, ".") === false) {
-                $q->where($q->getModel()->getTable() . "." . $name, 'LIKE', '%' . $value . '%');
-            } else {
-                $names = explode('.', $name);
-                $column = array_pop($names);
-                $q->whereRelation(implode(".", $names), $column, 'LIKE', '%' . $value . '%');
+        if ($type === "text") {
+            $this->applyWhere($q, $name, 'LIKE', '%' . $value . '%');
+        } elseif ($type === "select") {
+            $this->applyWhere($q, $name, '=', $value);
+        } elseif (in_array($type, ["date", "time", "datetime-local"], true)) {
+            if (!empty($value['from'])) {
+                $this->applyWhere($q, $name, '>=', $value['from']);
             }
-        } else if ($type == "select") {
-            if (strpos($name, ".") === false) {
-                $q->where($q->getModel()->getTable() . "." . $name, '=', $value);
-            } else {
-                $names = explode('.', $name);
-                $column = array_pop($names);
-                $q->whereRelation(implode(".", $names), $column, '=', $value);
+            if (!empty($value['to'])) {
+                $this->applyWhere($q, $name, '<=', $value['to']);
             }
-        } else if ($type == "date" || $type == "time" || $type == "datetime-local") {
-            if (strpos($name, ".") === false) {
-                if (!empty($value['from'])) {
-                    $q->where($q->getModel()->getTable() . "." . $name, '>=', $value['from']);
-                }
-                if (!empty($value['to'])) {
-                    $q->where($q->getModel()->getTable() . "." . $name, '<=', $value['to']);
-                }
-            } else {
-                $names = explode('.', $name);
-                $column = array_pop($names);
-                $table = implode(".", $names);
-                if (!empty($value['from'])) {
-                    $q->whereRelation($table, $column, '>=', $value['from']);
-                }
-                if (!empty($value['to'])) {
-                    $q->whereRelation($table, $column, '<=', $value['to']);
-                }
-            }
+        }
+    }
+
+    private function applyWhere($q, string $name, string $operator, $value, string $boolean = 'where'): void
+    {
+        $method = $boolean;
+        if (strpos($name, ".") === false) {
+            $q->{$method}($q->getModel()->getTable() . "." . $name, $operator, $value);
+        } else {
+            $names = explode('.', $name);
+            $column = array_pop($names);
+            $q->{$method . 'Relation'}(implode(".", $names), $column, $operator, $value);
         }
     }
 
