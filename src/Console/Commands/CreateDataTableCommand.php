@@ -30,7 +30,8 @@ class CreateDataTableCommand extends Command
         $this->saveDataTable($this->argument('name'), $content);
     }
 
-    private function getHead($className) {
+    private function getHead($className)
+    {
         return "<?php
 
         namespace App\Livewire\Components;
@@ -42,12 +43,14 @@ class CreateDataTableCommand extends Command
         ";
     }
 
-    private function getFoot() {
+    private function getFoot()
+    {
         return "\n\n}
         ";
     }
 
-    private function generateMethod($name) {
+    private function generateMethod($name)
+    {
         return "
         public function $name()
         {
@@ -56,13 +59,16 @@ class CreateDataTableCommand extends Command
         ";
     }
 
-    private function saveDataTable($name, $content) {
-        if(empty($content)) return;
+    private function saveDataTable($name, $content)
+    {
+        if (empty($content)) {
+            return;
+        }
 
         $testFilePath = base_path() . '/app/Livewire/Components/'.$name.'.php';
 
-        $fp = fopen($testFilePath , 'w');
-        fwrite($fp,  $this->getHead($name).$content.$this->getFoot());
+        $fp = fopen($testFilePath, 'w');
+        fwrite($fp, $this->getHead($name).$content.$this->getFoot());
         fclose($fp);
 
         $this->info("DataTable generated:  /app/Livewire/Components/$name.php");

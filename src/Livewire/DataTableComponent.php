@@ -2,7 +2,6 @@
 
 namespace SteelAnts\DataTable\Livewire;
 
-use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
@@ -121,8 +120,8 @@ class DataTableComponent extends Component
         return array_fill_keys(array_keys($this->getHeader()), ['type' => 'text']);
     }
 
-    public function updatedHeaderFilter(){
-
+    public function updatedHeaderFilter()
+    {
     }
 
     public function updatedItemsPerPage()
@@ -185,15 +184,27 @@ class DataTableComponent extends Component
                         $type = $filterTypes[$col] ?? 'text';
                         $filterVal = $this->headerFilter[$col];
                         if ($type === 'text') {
-                            if ($filterVal !== '' && mb_stripos((string)$value, (string)$filterVal) === false) { $keep = false; break; }
+                            if ($filterVal !== '' && mb_stripos((string)$value, (string)$filterVal) === false) {
+                                $keep = false;
+                                break;
+                            }
                         } elseif ($type === 'select') {
-                            if ($filterVal !== '' && $value != $filterVal) { $keep = false; break; }
-                        } elseif (in_array($type, ['date','time','datetime-local'], true)) {
+                            if ($filterVal !== '' && $value != $filterVal) {
+                                $keep = false;
+                                break;
+                            }
+                        } elseif (in_array($type, ['date', 'time', 'datetime-local'], true)) {
                             $valTs = is_numeric($value) ? (int)$value : @strtotime((string)$value);
                             $fromTs = (is_array($filterVal) && !empty($filterVal['from'])) ? @strtotime((string)$filterVal['from']) : null;
-                            $toTs   = (is_array($filterVal) && !empty($filterVal['to']))   ? @strtotime((string)$filterVal['to'])   : null;
-                            if ($fromTs !== null && $valTs !== false && $valTs < $fromTs) { $keep = false; break; }
-                            if ($toTs !== null   && $valTs !== false && $valTs > $toTs)   { $keep = false; break; }
+                            $toTs   = (is_array($filterVal) && !empty($filterVal['to'])) ? @strtotime((string)$filterVal['to']) : null;
+                            if ($fromTs !== null && $valTs !== false && $valTs < $fromTs) {
+                                $keep = false;
+                                break;
+                            }
+                            if ($toTs !== null && $valTs !== false && $valTs > $toTs) {
+                                $keep = false;
+                                break;
+                            }
                         }
                     }
                 }
@@ -201,13 +212,22 @@ class DataTableComponent extends Component
                 if ($keep && $searchActive) {
                     $matched = false;
                     foreach ($row as $col => $value) {
-                        if (!isset($searchableSet[$col])) { continue; }
-                        if ($value !== null && $value !== '' && mb_stripos((string)$value, $searchNeedle) !== false) { $matched = true; break; }
+                        if (!isset($searchableSet[$col])) {
+                            continue;
+                        }
+                        if ($value !== null && $value !== '' && mb_stripos((string)$value, $searchNeedle) !== false) {
+                            $matched = true;
+                            break;
+                        }
                     }
-                    if (!$matched) { $keep = false; }
+                    if (!$matched) {
+                        $keep = false;
+                    }
                 }
 
-                if ($keep) { $filtered[] = $row; }
+                if ($keep) {
+                    $filtered[] = $row;
+                }
             }
         } else {
             $filtered = $dataset;
@@ -301,11 +321,15 @@ class DataTableComponent extends Component
     }
 
     #[On('updatedCurrentPage')]
-    public function updatedCurrentPage(int $value){
+    public function updatedCurrentPage(int $value)
+    {
         $this->currentPage = $value;
     }
 
-    public function getHeader(): array { return $this->headers(); }
+    public function getHeader(): array
+    {
+        return $this->headers();
+    }
 
     // public function actions($item): array
     // {
@@ -329,14 +353,15 @@ class DataTableComponent extends Component
     public function render()
     {
         return view($this->viewName, [
-            'dataset' => $this->getData(),
-            'headers' => $this->getHeader(),
-            'footers' => $this->footers(),
+            'dataset'       => $this->getData(),
+            'headers'       => $this->getHeader(),
+            'footers'       => $this->footers(),
             'headerFilters' => !empty($this->filterable) ? $this->headerFilters() : null,
         ]);
     }
 
-    public function updatedSearchValue(){
+    public function updatedSearchValue()
+    {
         $this->currentPage = 1;
     }
 

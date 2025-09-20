@@ -11,7 +11,7 @@ class Pagination extends Component
     public $startPage = 1;
     public $endPage = 1;
     private $span = 2;
-        
+
     public function __construct(
         public int $currentPage,
         public int $itemsPerPage,

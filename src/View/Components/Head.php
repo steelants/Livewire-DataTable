@@ -12,7 +12,7 @@ class Head extends Component
         public array $headers,
         public bool|null $sortable,
         public string|null $sortBy,
-        public string|null  $sortDirection,
+        public string|null $sortDirection,
         public array|null $sortableColumns,
         public array|null $headerFilters,
     ) {

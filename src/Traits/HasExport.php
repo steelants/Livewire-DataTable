@@ -8,11 +8,13 @@ trait HasExport
 {
     public string $filename = "NoName";
 
-    public function setFilename(string $filename){
+    public function setFilename(string $filename)
+    {
         $this->filename = $filename;
     }
 
-    private function exportHeaders($filename) : array{
+    private function exportHeaders($filename): array
+    {
         return [
             'Pragma'                    => 'public',
             'Expires'                   => '0',
@@ -25,7 +27,8 @@ trait HasExport
         ];
     }
 
-    public function serv(): StreamedResponse {
+    public function serv(): StreamedResponse
+    {
         $data = $this->dataset;
         $callback = function () use ($data) {
             //open file pointer to standard output

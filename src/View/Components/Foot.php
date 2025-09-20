@@ -11,7 +11,6 @@ class Foot extends Component
     public function __construct(
         public array $footers,
     ) {
-
     }
 
     /**

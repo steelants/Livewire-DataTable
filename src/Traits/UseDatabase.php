@@ -153,7 +153,7 @@ trait UseDatabase
         //Account For Count and other types of computed columns
         if (!empty($query->getQuery()->columns)) {
             foreach ($query->getQuery()->columns as $header) {
-                if (!is_string($header) && get_class($header) == 'Illuminate\Database\Query\Expression' ){
+                if (!is_string($header) && get_class($header) == 'Illuminate\Database\Query\Expression') {
                     $selects[] = $header;
                 }
             }
@@ -190,9 +190,7 @@ trait UseDatabase
                     } else {
                         $relatedTable = $relation->getModel()->getTable();
                         $asName = $relatedTable . '_' . $i++;
-                        $parentAlias = $key === 0
-                            ? $query->getModel()->getTable()
-                            : $this->relationAliases[implode('.', array_slice($connection, 0, $key))];
+                        $parentAlias = $key === 0 ? $query->getModel()->getTable() : $this->relationAliases[implode('.', array_slice($connection, 0, $key))];
 
                         $query->leftJoin(
                             $relatedTable . ' as ' . $asName,
@@ -241,7 +239,7 @@ trait UseDatabase
     private function getRelationSortColumn(Builder $query, string $column): string
     {
         if (strpos($column, ".") === false) {
-            throw new ErrorException($column .  " is not a relation column!");
+            throw new ErrorException($column . " is not a relation column!");
         }
         $connection = explode('.', $column);
         $relationName = array_pop($connection);
@@ -254,9 +252,7 @@ trait UseDatabase
         // Fallback to resolving table directly when alias is missing
         foreach ($connection as $relationProperty) {
             $relationProperty = Str::camel($relationProperty);
-            $relation = empty($relation)
-                ? $query->getModel()->$relationProperty()
-                : $relation->getModel()->$relationProperty();
+            $relation = empty($relation) ? $query->getModel()->$relationProperty() : $relation->getModel()->$relationProperty();
         }
 
         $relatedTable = $relation->getModel()->getTable();
