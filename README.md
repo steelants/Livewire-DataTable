@@ -3,6 +3,17 @@
 
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 
+#### Docker Build
+* is handeled by gittea server
+```bash
+  git checkout master
+  git pull origin master
+  git pull origin dev
+  git tag 2.3.2
+  git push --tags
+  git checkout dev
+```
+
 ## Usage
 
 ```php
@@ -60,6 +71,11 @@ class UserTable extends DataTableComponent
     // Custom render of 'name' column
     public function renderColumnName($value, $row){
         return '<b>'.e($value).'</b>';
+    }
+
+    // Transform order column on raw order column (optional)
+    public function orderColumnName(){
+         return 'CAST(name AS STRING)';
     }
 
     // Livewire actions
@@ -176,7 +192,7 @@ public function renderColumnFoo(mixed $value, array $row) : string
     }
 
     //Add actions to header filters edit
-    public function updatedHeaderfilter(){
+    public function updatedHeaderFilter(){
         $this->validate([
             'headerFilter.column1Key' => 'nullable|string',
             'headerFilter.column2Key' => 'nullable|string',
@@ -184,6 +200,38 @@ public function renderColumnFoo(mixed $value, array $row) : string
         ]);
     }
 ```
+
+## Development
+
+1. Create subfolder `/packages` at root of your laravel project
+
+2. clone repository to sub folder `/packages` (you need to be positioned at root of your laravel project in your terminal)
+```bash
+git clone https://github.com/steelants/Livewire-DataTable.git ./packages/Livewire-DataTable
+```
+
+3. edit composer.json file
+```json
+"autoload": {
+	"psr-4": {
+		"SteelAnts\\Modal\\": "packages/Livewire-Modal/src/"
+	}
+}
+```
+
+4. Add provider to `bootstrap/providers.php`
+```php
+return [
+	...
+     SteelAnts\DataTable\DataTableServiceProvider::class,
+	...
+];
+```
+
+## Contributors
+<a href="https://github.com/steelants/Livewire-DataTable/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=steelants/Livewire-DataTable" />
+</a>
 
 ## Other Packages
 [steelants/laravel-auth](https://github.com/steelants/laravel-auth)
