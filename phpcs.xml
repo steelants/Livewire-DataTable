@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PHP_CodeSniffer"
+    xsi:noNamespaceSchemaLocation="phpcs.xsd">
+    <description>The coding standard for Steelants</description>
+
+    <arg name="basepath" value="." />
+    <arg name="colors" />
+    <arg name="parallel" value="75" />
+    <arg value="np" />
+
+    <file>src</file>
+
+    <!-- Our base rule: set to PSR12 -->
+    <rule ref="PSR12">
+        <exclude name="Generic.WhiteSpace.DisallowTabIndent" />
+        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceBefore" />
+        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter" />
+        <exclude name="PSR12.Traits.UseDeclaration" />
+        <exclude-pattern>./config/*</exclude-pattern>
+    </rule>
+
+
+    <!-- Pravidlo pro zajištění správných mezer kolem operátoru `=>` -->
+    <rule ref="Squiz.WhiteSpace.OperatorSpacing" />
+
+    <!-- Pravidlo pro správné odsazení v polích -->
+    <rule ref="Generic.Arrays.ArrayIndent" />
+
+    <!-- Fix Array Indentations -->
+    <rule ref="Squiz.Arrays.ArrayDeclaration">
+        <exclude name="Squiz.Arrays.ArrayDeclaration.KeyNotAligned" />
+        <exclude name="Squiz.Arrays.ArrayDeclaration.ValueNotAligned" />
+        <exclude name="Squiz.Arrays.ArrayDeclaration.CloseBraceNotAligned" />
+        <exclude name="Squiz.Arrays.ArrayDeclaration.CloseBraceNewLine" />
+    </rule>
+
+    <!-- Add rules from slevomat
+    https://cylab.be/blog/169/detect-unnecessary-use-statements-with-php-codesniffer -->
+    <config name="installed_paths" value="../../slevomat/coding-standard" />
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses" />
+    <rule ref="SlevomatCodingStandard.Arrays.TrailingArrayComma" />
+    <rule ref="SlevomatCodingStandard.Classes.TraitUseSpacing">
+          <properties>
+            <property name="linesCountBeforeFirstUse" value="0" />
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Functions.NamedArgumentSpacing" />
+    <rule ref="SlevomatCodingStandard.Variables.UselessVariable" />
+    <rule ref="SlevomatCodingStandard.Namespaces.UselessAlias" />
+    <rule ref="SlevomatCodingStandard.Whitespaces.DuplicateSpaces">
+        <properties>
+            <property name="ignoreSpacesBeforeAssignment" value="true" />
+            <property name="ignoreSpacesInMatch" value="true" />
+            <property name="ignoreSpacesInParameters" value="true" />
+            <property name="ignoreSpacesInComment" value="true" />
+            <property name="ignoreSpacesInAnnotation" value="true" />
+        </properties>
+    </rule>
+
+    <!-- Pravidlo pro kontrolu názvů funkcí -->
+    <rule ref="Generic.NamingConventions.CamelCapsFunctionName">
+        <properties>
+            <!-- Povolit pouze funkce začínající malým písmenem -->
+            <property name="strict" value="false" />
+        </properties>
+        <exclude-pattern>./tests/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR1.Methods.CamelCapsMethodName">
+        <exclude-pattern>./tests/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <exclude-pattern>./tests/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>./database/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR12.Files.FileHeader.IncorrectOrder">
+        <exclude-pattern>./app/Config/*</exclude-pattern>
+    </rule>
+
+    <rule ref="PEAR.Functions.ValidDefaultValue">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Generic.Files.LineEndings">
+        <properties>
+            <!-- očekávej Unixové LF -->
+            <property name="eolChar" value="\n" />
+        </properties>
+    </rule>
+</ruleset>

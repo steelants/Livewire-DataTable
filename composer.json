@@ -1,28 +1,45 @@
 {
-    "name": "steelants/livewire-datatable",
-    "description": "Simple Datatable class based on Laravel and livewire",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "SteelAnts\\DataTable\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "SteelAnts"
-        }
-    ],
-    "require": {
-        "laravel/framework": "^11.0",
-        "livewire/livewire": "^3.0"
-    },
-    "minimum-stability": "stable",
-    "extra": {
-        "laravel": {
-            "providers": [
-                "SteelAnts\\DataTable\\DataTableServiceProvider"
-            ]
-        }
-    }
+	"name": "steelants/livewire-datatable",
+	"description": "Simple Datatable class based on Laravel and livewire",
+	"type": "library",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {
+			"SteelAnts\\DataTable\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "SteelAnts"
+		}
+	],
+	"require": {
+		"laravel/framework": "^11.0",
+		"livewire/livewire": "^3.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.3|^10.4",
+		"barryvdh/laravel-debugbar": "^3.9",
+		"orchestra/testbench": "^7.0|^8.0|^9.0",
+		"squizlabs/php_codesniffer": "^4.0",
+		"slevomat/coding-standard": "^8.19"
+	},
+	"minimum-stability": "stable",
+	"extra": {
+		"laravel": {
+			"providers": [
+				"SteelAnts\\DataTable\\DataTableServiceProvider"
+			]
+		}
+	},
+	"scripts": {
+		"check-static": "phpstan --memory-limit=2g",
+		"format": "phpcbf -v -d memory_limit=512M",
+		"lint": "phpcs"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
 }
