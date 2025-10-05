@@ -21,14 +21,14 @@
                 @endif
 
                 @if ($startPage > 1)
-                    <li class="page-item">
+                    <li class="page-item hide-mobile">
                         <button type="button" class="page-link" wire:click="$set('currentPage', {{ 1 }})" wire:key="page-1">
                             1
                         </button>
                     </li>
                 @endif
                 @if ($startPage > 2)
-                    <li class="page-item disabled">
+                    <li class="page-item disabled hide-mobile">
                         <span class="page-link">
                             ...
                         </span>
@@ -37,7 +37,7 @@
 
 
                 @for ($i = $startPage; $i <= $endPage; $i++)
-                    <li class="page-item">
+                    <li class="page-item @if ($i != $currentPage) hide-mobile @endif">
                         <button type="button" class="page-link @if ($i == $currentPage) active @endif" wire:key="page-{{ $i }}" @if ($i != $currentPage) wire:click="$set('currentPage', {{ $i }})" @endif>
                             {{ number_format($i,0, '.', ' ') }}
                         </button>
@@ -46,13 +46,13 @@
 
                 @if ($pagesTotal > $endPage)
                     @if ($pagesTotal > $endPage + 1)
-                        <li class="page-item disabled">
+                        <li class="page-item disabled hide-mobile">
                             <span class="page-link">
                                 ...
                             </span>
                         </li>
                     @endif
-                    <li class="page-item">
+                    <li class="page-item hide-mobile">
                         <button type="button" class="page-link" wire:click="$set('currentPage', {{ $pagesTotal }})" wire:key="page-{{ $pagesTotal }}">
                             {{ number_format($pagesTotal,0, '.', ' ') }}
                         </button>
@@ -80,7 +80,7 @@
                 @endif
                 of {{ number_format($itemsTotal,0, '.', ' ') }}
             </span>
-            <span class="me-2">Per page: </span>
+            <span class="me-2 hide-mobile">Per page: </span>
             <select class="form-select" wire:model.live="itemsPerPage">
                 @foreach ([10, 20, 50, 100, 1000] as $itemsPerPage)
                     <option value="{{ $itemsPerPage }}">
