@@ -49,7 +49,7 @@
                                             <span>{{ __($action['text']) }}</span>
                                         </button>
                                     @else
-                                        {{ __('datatable::ui.actions.not_implemented') }}
+                                        {{ __('Actions not implemented!') }}
                                     @endif
                                 @endforeach
                             </div>
