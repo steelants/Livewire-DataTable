@@ -6,7 +6,6 @@ trait UseLoadOnScroll
 {
     public bool $canLoadMore = true;
 
-    // Called on "bootUsedTraits"
     public function bootUseLoadOnScroll()
     {
         $this->paginated = true;

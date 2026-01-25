@@ -1,6 +1,6 @@
 <tbody>
     @foreach ($dataset as $idx => $row)
-        <tr>
+        <tr wire:key="row-{{ $idx }}">
             @if (method_exists($this, 'renderRow'))
                 @php($row = $this->renderRow($row))
 
