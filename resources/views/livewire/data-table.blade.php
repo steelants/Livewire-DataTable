@@ -70,11 +70,8 @@
     </div>
 
 	@if ($canLoadMore == true)
-		<div x-intersect="$wire.loadMore()"> asdasdsad </div>
-    @endif
-
-
-    @if ($paginated == true && !isset($canLoadMore))
+		<div x-intersect="$wire.loadMore()">{{ __(('Load more')) }}</div>
+    @elseif ($paginated == true && !isset($canLoadMore))
         <x-datatable-pagination :currentPage="$currentPage" :itemsPerPage="$itemsPerPage" :pagesTotal="$pagesTotal" :itemsTotal="$itemsTotal"/>
     @endif
 </div>
