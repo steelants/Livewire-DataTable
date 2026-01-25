@@ -90,7 +90,7 @@ class DataTableComponent extends Component
         $data = $this->dataset();
 
         if (empty($data)) {
-            throw new \RuntimeException('DataTable dataset cannot be empty.');
+            throw new \RuntimeException(__('DataTable dataset cannot be empty.'));
         }
 
         $keys = array_keys($data[0]);

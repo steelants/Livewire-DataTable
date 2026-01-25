@@ -239,7 +239,7 @@ trait UseDatabase
     private function getRelationSortColumn(Builder $query, string $column): string
     {
         if (strpos($column, ".") === false) {
-            throw new ErrorException($column . " is not a relation column!");
+            throw new ErrorException(__(":column is not a relation column!", ['column' => $column]));
         }
         $connection = explode('.', $column);
         $relationName = array_pop($connection);
