@@ -10,7 +10,9 @@
             @else
                 @foreach (array_keys($headers) as $key)
                     @php($method = 'renderColumn' . ucfirst(Str::camel(str_replace('.', '_', $key))))
-                    @if (method_exists($this, $method))
+                    @if (isset($renderCasts[$key]))
+                        <td>{!! app($renderCasts[$key])->render($key, Arr::get($row, $key), $row) !!}</td>
+                    @elseif (method_exists($this, $method))
                         <td>{!! $this->{$method}(Arr::get($row, $key), $row) !!}</td>
                     @else
                         <td>{{ Arr::get($row, $key) }}</td>

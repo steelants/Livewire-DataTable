@@ -54,7 +54,7 @@
             @endif
 
             @if ($dataset != null)
-                <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" />
+                <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" :renderCasts="$renderCasts" />
             @endif
 
             @if (!empty($footers))

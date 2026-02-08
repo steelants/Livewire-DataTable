@@ -12,6 +12,7 @@ class Body extends Component
         public array $dataset,
         public array $actions,
         public array $headers,
+        public array $renderCasts,
     ) {
     }
 
