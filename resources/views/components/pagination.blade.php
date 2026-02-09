@@ -78,9 +78,9 @@
                 @else
                     {{ number_format($itemsPerPage * $currentPage,0, '.', ' ') }}
                 @endif
-                of {{ number_format($itemsTotal,0, '.', ' ') }}
+                {{ __('of :number', ['number' => number_format($itemsTotal,0, '.', ' ')]) }}
             </span>
-            <span class="me-2 hide-mobile">Per page: </span>
+            <span class="me-2 hide-mobile">{{ __('Per page:') }} </span>
             <select class="form-select" wire:model.live="itemsPerPage">
                 @foreach ([10, 20, 50, 100, 1000] as $itemsPerPage)
                     <option value="{{ $itemsPerPage }}">

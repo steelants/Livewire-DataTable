@@ -90,7 +90,7 @@ class DataTableComponent extends Component
         $data = $this->dataset();
 
         if (empty($data)) {
-            throw new \RuntimeException('DataTable dataset cannot be empty.');
+            throw new \RuntimeException(__('DataTable dataset cannot be empty.'));
         }
 
         $keys = array_keys($data[0]);
@@ -331,6 +331,11 @@ class DataTableComponent extends Component
         return $this->headers();
     }
 
+	public function renderCasts(): array
+    {
+        return [];
+    }
+
     // public function actions($item): array
     // {
     //     return [
@@ -357,6 +362,7 @@ class DataTableComponent extends Component
             'headers'       => $this->getHeader(),
             'footers'       => $this->footers(),
             'headerFilters' => !empty($this->filterable) ? $this->headerFilters() : null,
+			'renderCasts' => $this->renderCasts(),
         ]);
     }
 

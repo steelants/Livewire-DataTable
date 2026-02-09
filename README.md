@@ -27,7 +27,7 @@ use SteelAnts\DataTable\Traits\UseDatabase;
 class UserTable extends DataTableComponent
 {
     Use UseDatabase;
-    
+
     // Get model query
     public function query(): Builder
     {
@@ -37,7 +37,7 @@ class UserTable extends DataTableComponent
     // Set headers
     public function headers(): array
     {
-        return [    
+        return [
             'id' => 'ID',
             'name' => 'Name',
             'email' => 'E-mail',
@@ -87,16 +87,16 @@ class UserTable extends DataTableComponent
 
 ### Using without query / models
 ```php
-    // instead of method query() implement dataset() 
+    // instead of method query() implement dataset()
     public function dataset(): array
     {
         return [
-            [    
+            [
                 'id' => '1',
                 'name' => 'Name 1',
                 'email' => 'E-mail 1',
             ],
-            [    
+            [
                 'id' => '2',
                 'name' => 'Name 2',
                 'email' => 'E-mail 2',
@@ -144,10 +144,37 @@ public bool $searchableColumns = [];
 public bool $filterable = true;
 ```
 
+## Render casts
+New preferred way to customize render.
+```php
+// Define cast by header key
+public function renderCasts(): array
+{
+	return [
+		'is_active' => BoolAsIcon::class,
+	];
+}
+```
+
+Example render cast
+```php
+use SteelAnts\DataTable\RenderCasts\RenderCast;
+
+class BoolAsIcon implements RenderCast
+{
+    public function render($key, $value, $model)
+    {
+        return '<i class="' . ($value ? 'far fa-check-circle text-success' : 'far fa-times-circle text-danger') . '"></i>';
+    }
+}
+```
+
+
 ## Optional transforms methods
+Original render customization.
 ``` php
 // Transformace whole row on input (optional)
-// Returns associative array 
+// Returns associative array
 public function row(Model $row) : array
 {
     return [
