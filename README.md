@@ -27,6 +27,7 @@ use SteelAnts\DataTable\Traits\UseDatabase;
 class UserTable extends DataTableComponent
 {
     Use UseDatabase;
+	// or UseDatabaseEloquent, if you want to receive model instead ov serialized array
 
     // Get model query
     public function query(): Builder
