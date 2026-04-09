@@ -18,11 +18,18 @@
 		"livewire/livewire": "^3.0"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "^9.3|^10.4",
+		"phpunit/phpunit": "^11.0",
+		"pestphp/pest": "^3.0",
+		"pestphp/pest-plugin-laravel": "^3.0",
 		"barryvdh/laravel-debugbar": "^3.9",
-		"orchestra/testbench": "^7.0|^8.0|^9.0",
+		"orchestra/testbench": "^9.0",
 		"squizlabs/php_codesniffer": "^4.0",
 		"slevomat/coding-standard": "^8.19"
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/"
+		}
 	},
 	"minimum-stability": "stable",
 	"extra": {
@@ -39,7 +46,8 @@
 	},
 	"config": {
 		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"pestphp/pest-plugin": true
 		}
 	}
 }
