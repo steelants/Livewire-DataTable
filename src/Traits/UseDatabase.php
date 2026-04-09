@@ -6,7 +6,9 @@ use ErrorException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
@@ -79,6 +81,8 @@ trait UseDatabase
             $method = "orderColumn" . ucfirst(Str::camel(str_replace('.', '_', $orderByColumn)));
             if (method_exists($this, $method)) {
                 $query->orderByRaw($this->{$method}() . " " . strtoupper($this->sortDirection));
+            } elseif (str_starts_with($orderByColumn, '(')) {
+                $query->orderByRaw($orderByColumn . " " . strtoupper($this->sortDirection));
             } else {
                 $query->orderBy($orderByColumn, $this->sortDirection);
             }
@@ -255,6 +259,7 @@ trait UseDatabase
         if (strpos($column, ".") === false) {
             throw new ErrorException(__(":column is not a relation column!", ['column' => $column]));
         }
+
         $connection = explode('.', $column);
         $relationName = array_pop($connection);
         $path = implode('.', $connection);
@@ -263,12 +268,36 @@ trait UseDatabase
             return $this->relationAliases[$path] . '.' . $relationName;
         }
 
-        // Fallback to resolving table directly when alias is missing
+        // Try to resolve the relation to build a COUNT subquery for HasMany/MorphMany
+        $relation = null;
         foreach ($connection as $relationProperty) {
             $relationProperty = Str::camel($relationProperty);
-            $relation = empty($relation) ? $query->getModel()->$relationProperty() : $relation->getModel()->$relationProperty();
+            $usingModel = empty($relation) ? $query->getModel() : $relation->getModel();
+            if (!method_exists($usingModel, $relationProperty)) {
+                break;
+            }
+            $relation = $usingModel->$relationProperty();
         }
 
+        if ($relation instanceof MorphMany) {
+            $relatedTable = $relation->getModel()->getTable();
+            $foreignKey = $relation->getForeignKeyName();
+            $localKey = $relation->getLocalKeyName();
+            $morphType = $relation->getMorphType();
+            $morphClass = str_replace("'", "''", $query->getModel()->getMorphClass());
+            $parentTable = $query->getModel()->getTable();
+            return "(SELECT COUNT(*) FROM \"{$relatedTable}\" WHERE \"{$relatedTable}\".\"{$foreignKey}\" = \"{$parentTable}\".\"{$localKey}\" AND \"{$relatedTable}\".\"{$morphType}\" = '{$morphClass}')";
+        }
+
+        if ($relation instanceof HasMany) {
+            $relatedTable = $relation->getModel()->getTable();
+            $foreignKey = $relation->getForeignKeyName();
+            $localKey = $relation->getLocalKeyName();
+            $parentTable = $query->getModel()->getTable();
+            return "(SELECT COUNT(*) FROM \"{$relatedTable}\" WHERE \"{$relatedTable}\".\"{$foreignKey}\" = \"{$parentTable}\".\"{$localKey}\")";
+        }
+
+        // Fallback to resolving table directly when alias is missing
         $relatedTable = $relation->getModel()->getTable();
         return $relatedTable . '.' . $relationName;
     }
