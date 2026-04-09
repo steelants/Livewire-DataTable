@@ -8,6 +8,7 @@ use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 trait UseDatabase
 {
@@ -67,7 +68,7 @@ trait UseDatabase
             });
         }
 
-        $this->itemsTotal = (clone $query)->count();
+        $this->itemsTotal = $this->getCount($query);
 
         if ($this->sortable && !empty($this->sortBy)) {
             $orderByColumn = $this->sortBy;
@@ -99,17 +100,30 @@ trait UseDatabase
         }
 
         foreach ($query->get() as $item) {
-            $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
-
-            foreach ($tempRow as $key => $property) {
-                $method = $columnMethodCache[$key] ?? null;
-                $modelProperty = $columnPropertyCache[$key] ?? str_replace('.', '->', $key);
-                $tempRow[$key] = $method ? $this->{$method}($item->$modelProperty) : $property;
-            }
-
-            $datasetFromDB[] = $tempRow;
+            $datasetFromDB[] = $this->buildRow($item, $columnMethodCache, $columnPropertyCache);
         }
         return $datasetFromDB;
+    }
+
+    protected function buildRow($item, array $columnMethodCache, array $columnPropertyCache): mixed
+    {
+        $tempRow = (method_exists($this, "row") ? $this->{"row"}($item) : $item->toArray());
+
+        foreach ($tempRow as $key => $property) {
+            $method = $columnMethodCache[$key] ?? null;
+            $modelProperty = $columnPropertyCache[$key] ?? str_replace('.', '->', $key);
+            $tempRow[$key] = $method ? $this->{$method}($item->$modelProperty) : $property;
+        }
+
+        return $tempRow;
+    }
+
+    private function getCount($query): int
+    {
+        $clone = clone $query;
+        return $clone->getQuery()->groups
+            ? DB::query()->fromSub($clone, 'sq')->count()
+            : $clone->count();
     }
 
     private function getFiltersWhere(&$q, $name, $value)
