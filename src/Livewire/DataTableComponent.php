@@ -43,6 +43,8 @@ class DataTableComponent extends Component
     // TODO: do i need this?
     public string $keyPropery = 'id';
 
+    public $useUrl = null;
+
     // Transformace whole row on input (optional)
     // Returns associative array
     // public function row(Model $row) : array
@@ -75,7 +77,10 @@ class DataTableComponent extends Component
     //     return e($value);
     // }
 
-
+    public function mount()
+    {
+        $this->useUrl ??= !request()->hasHeader('X-Livewire');
+    }
 
     public function dataset(): array
     {
@@ -137,6 +142,8 @@ class DataTableComponent extends Component
 
     public function queryString(): array
     {
+        if(!$this->useUrl) return [];
+
         $queryStrings = [];
         if ($this->paginated == true) {
             $queryStrings['currentPage'] = ['except' => 0];
@@ -302,7 +309,7 @@ class DataTableComponent extends Component
         }
 
         if ($this->currentPage > $this->pagesTotal) {
-            $this->dispatch('updatedCurrentPage', $this->pagesTotal);
+            $this->updatedCurrentPage($this->pagesTotal);
         }
 
         return $this->dataset;
@@ -320,7 +327,6 @@ class DataTableComponent extends Component
         }
     }
 
-    #[On('updatedCurrentPage')]
     public function updatedCurrentPage(int $value)
     {
         $this->currentPage = $value;
