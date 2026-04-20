@@ -46,6 +46,13 @@
                                     @endforeach
                                 @endif
                             </select>
+						@elseif($headerFilters[$key]['type'] == "multiselect")
+                            <select multiple class="form-select form-select-sm"
+                                    wire:model.change="{{ $headerFilters[$key]['wire_model'] ?? 'headerFilter.' . $key }}">
+                                @foreach($headerFilters[$key]['values'] ?? [] as $value => $name)
+                                    <option value="{{ $value }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
                         @elseif($headerFilters[$key]['type'] == "date" || $headerFilters[$key]['type'] == "time" || $headerFilters[$key]['type'] == "datetime-local")
                             <div class="input-group">
                                 <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}.from" />
