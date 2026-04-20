@@ -34,7 +34,7 @@
                             <div class="dropdown-menu">
                                 @foreach ($actions[$idx] as $action)
                                     @if ($action['type'] == 'url')
-                                        <a class="dropdown-item {{ $action['actionClass'] ?? '' }}" href="{{ $action['url'] }}">
+                                        <a class="dropdown-item {{ $action['actionClass'] ?? '' }}" href="{{ $action['url'] }}" @attrs($action['attributes'] ?? null)>
                                             @if (!empty($action['iconClass']))
                                                 <i class="dropdown-item-icon {{ $action['iconClass'] }}"></i>
                                             @endif
@@ -44,6 +44,7 @@
                                         <button type="button" class="dropdown-item {{ $action['actionClass'] ?? '' }}"
                                             wire:click='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'
                                             @if(!empty($action['confirm'])) wire:confirm="{{__($action['confirm'])}}" @endif
+											@attrs($action['attributes'] ?? null)
                                         >
                                             @if (!empty($action['iconClass']))
                                                 <i class="dropdown-item-icon {{ $action['iconClass'] }}"></i>
@@ -53,6 +54,7 @@
                                     @elseif ($action['type'] == 'onclick')
                                         <button type="button" class="dropdown-item {{ $action['actionClass'] ?? '' }}"
                                             onclick='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'
+											@attrs($action['attributes'] ?? null)
                                         >
                                             @if (!empty($action['iconClass']))
                                                 <i class="dropdown-item-icon {{ $action['iconClass'] }}"></i>
