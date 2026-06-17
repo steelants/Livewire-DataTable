@@ -73,11 +73,7 @@
         <div class="d-flex align-items-center text-nowrap">
             <span class="me-4">
                 {{ number_format($itemsPerPage * ($currentPage - 1) + 1,0, '.', ' ') }} -
-                @if ($currentPage == $endPage)
-                    {{ number_format($itemsTotal % ($itemsPerPage * $endPage),0, '.', ' ') }}
-                @else
-                    {{ number_format($itemsPerPage * $currentPage,0, '.', ' ') }}
-                @endif
+                {{ number_format(min($itemsPerPage * $currentPage, $itemsTotal),0, '.', ' ') }}
                 {{ __('of :number', ['number' => number_format($itemsTotal,0, '.', ' ')]) }}
             </span>
             <span class="me-2 hide-mobile">{{ __('Per page:') }} </span>
