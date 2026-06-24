@@ -88,6 +88,13 @@ trait UseDatabase
             }
         }
 
+        // Sekundarni deterministicky klic (primarni klic modelu). Bez nej je u radku se
+        // shodnou hodnotou radiciho sloupce poradi mezi strankami nestabilni a OFFSET
+        // pagination radky vynechava nebo duplikuje.
+        if (method_exists($query, 'getModel')) {
+            $query->orderBy($query->getModel()->getQualifiedKeyName(), $this->sortDirection ?: 'asc');
+        }
+
         if ($this->paginated != false) {
             $query->limit($this->itemsPerPage);
             if ($this->currentPage > 1) {
