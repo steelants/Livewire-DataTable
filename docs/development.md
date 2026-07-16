@@ -1,40 +1,108 @@
 # Development
 
-## Dev Environment
+This document describes how to develop and test SteelAnts DataTable locally.
 
-1. Clone repository to `[LARAVEL-ROOT]/packages/`
 
-You need to be positioned at the root of your Laravel project in your terminal.
+## Local Development Setup
+
+If you want to modify the package source code or contribute to the project,
+you can install the package locally inside a Laravel application.
+
+
+## Clone Repository
+
+Create a `packages` directory in the root of your Laravel project.
+
+Example:
+
+```
+your-laravel-project/
+├── app/
+├── bootstrap/
+├── packages/
+└── composer.json
+```
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/steelants/Livewire-DataTable.git ./packages/Livewire-DataTable
 ```
 
-2. Modify `composer.json`
+
+## Configure Composer
+
+Add the package namespace to your application's `composer.json`:
 
 ```json
-"autoload": {
-    "psr-4": {
-        "SteelAnts\\DataTable\\": "packages/Livewire-DataTable/src/"
+{
+    "autoload": {
+        "psr-4": {
+            "SteelAnts\\DataTable\\": "packages/Livewire-DataTable/src/"
+        }
     }
 }
 ```
 
-3. Add provider to `bootstrap/providers.php`
+Refresh Composer autoload files:
+
+```bash
+composer dump-autoload
+```
+
+
+## Register Service Provider
+
+Add the package provider to:
+
+```
+bootstrap/providers.php
+```
+
+Example:
 
 ```php
 return [
     ...
     SteelAnts\DataTable\DataTableServiceProvider::class,
-    ...
 ];
 ```
 
----
 
-## Docker Build
+# Testing
 
-Docker build and release process is handled by Gitea server.
+The package uses Pest with Orchestra Testbench and an in-memory SQLite database.
+
+
+## Install Dependencies
+
+```bash
+composer install
+```
+
+
+## Run Tests
+
+Run all tests:
+
+```bash
+./vendor/bin/pest
+```
+
+
+Run only sorting tests:
+
+```bash
+./vendor/bin/pest tests/Feature/SortingTest.php
+```
+
+
+# Release Process
+
+Package releases are handled through the SteelAnts Gitea server.
+
+
+Example release flow:
 
 ```bash
 git checkout master
@@ -46,28 +114,4 @@ git tag 2.3.2
 git push --tags
 
 git checkout dev
-```
-
----
-
-## Testing
-
-The package uses [Pest](https://pestphp.com/) with [Orchestra Testbench](https://packages.tools/testbench) and an in-memory SQLite database.
-
-Install dev dependencies:
-
-```bash
-composer install
-```
-
-Run all tests:
-
-```bash
-./vendor/bin/pest
-```
-
-Run only sorting tests:
-
-```bash
-./vendor/bin/pest tests/Feature/SortingTest.php
 ```
