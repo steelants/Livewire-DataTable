@@ -1,65 +1,75 @@
 # Configuration
 
-SteelAnts DataTable can be configured directly in your DataTable component.
+SteelAnts DataTable provides several configuration options that control table
+behavior.
 
-The following properties control the main table behavior.
+Configuration is done directly in your DataTable component by defining public
+properties.
 
 
 ## Sorting
 
-Enable or disable sorting:
+Sorting can be enabled or disabled.
+
+Enable sorting:
 
 ```php
 public bool $sortable = true;
 ```
 
-You can optionally restrict sortable columns:
+You can also restrict which columns are allowed to be sorted:
 
 ```php
 public array $sortableColumns = [
     'name',
-    'score',
-    'published',
+    'email',
 ];
 ```
+
+For detailed sorting options see:
+
+[Sorting documentation](sorting.md)
 
 
 ## Pagination
 
-Enable or disable pagination:
+Pagination can be enabled or disabled:
 
 ```php
 public bool $paginated = true;
 ```
 
 
-## Searching
+## Search
 
-Enable or disable full-text search:
+Enable full text search:
 
 ```php
 public bool $searchable = true;
 ```
 
-You can optionally define searchable columns:
+You can optionally restrict searchable columns:
 
 ```php
-public array $searchableColumns = [];
+public array $searchableColumns = [
+    'name',
+    'email',
+];
 ```
 
 
-## Filtering
+## Filters
 
-Enable or disable filters:
+Enable table filters:
 
 ```php
 public bool $filterable = true;
 ```
 
 
-## Example Configuration
+## Complete Example
 
-Example DataTable component configuration:
+Example DataTable configuration:
 
 ```php
 class UserTable extends DataTableComponent
@@ -70,17 +80,12 @@ class UserTable extends DataTableComponent
 
     public bool $searchable = true;
 
-    public bool $filterable = true;
-
-    public array $sortableColumns = [
-        'name',
-        'email',
-    ];
-
     public array $searchableColumns = [
         'name',
         'email',
     ];
+
+    public bool $filterable = true;
 }
 ```
 
@@ -89,5 +94,8 @@ class UserTable extends DataTableComponent
 
 Continue with:
 
+- [Usage](usage.md)
+- [Sorting](sorting.md)
+- [Filtering](filtering.md)
+- [Rendering](rendering.md)
 - [Development](development.md)
-```
