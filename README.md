@@ -23,6 +23,7 @@ Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
 </p>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
+
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 
 </div>
@@ -100,40 +101,7 @@ Render the component:
 ```
 
 
-## Features
-
-### Sorting
-
-Supports:
-
-- Standard columns
-- BelongsTo relationships
-- HasMany relationship counts
-- Custom sorting expressions
-
-
-### Filtering
-
-Supports:
-
-- Text filters
-- Select filters
-- Date filters
-
-
-### Rendering
-
-Customize your table output using:
-
-- Render methods
-- Render casts
-- Row transformations
-- Column transformations
-
-
 ## Documentation
-
-Full documentation:
 
 - [Installation](docs/installation.md)
 - [Usage](docs/usage.md)
@@ -149,11 +117,11 @@ Full documentation:
 Please see [CHANGELOG.md](CHANGELOG.md) for information about recent changes.
 
 
-## Development
+## Contributing
 
-For package development and testing instructions see:
+Contributions are welcome.
 
-[Development Guide](docs/development.md)
+Please see the [Development Guide](docs/development.md).
 
 
 ## Contributors
