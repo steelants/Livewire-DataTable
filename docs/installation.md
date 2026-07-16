@@ -2,13 +2,11 @@
 
 ## Requirements
 
-SteelAnts DataTable requires:
+Before installing SteelAnts DataTable, make sure your application meets the required dependencies.
 
 - PHP 8.1+
-- Laravel 10+
-- Livewire 3+
-
-Make sure your Laravel application is installed and working before installing the package.
+- Laravel
+- Livewire
 
 
 ## Install via Composer
@@ -20,31 +18,16 @@ composer require steelants/datatable
 ```
 
 
-## Service Provider
+## Package Discovery
 
-The package service provider is registered automatically by Laravel package discovery.
+The package uses Laravel package discovery.
 
-No manual configuration is required.
-
-
-## Publish Configuration
-
-If you need to customize the package configuration, publish the configuration file:
-
-```bash
-php artisan vendor:publish --tag=datatable-config
-```
-
-The configuration file will be available at:
-
-```
-config/datatable.php
-```
+After installation, Laravel will automatically register the package service provider.
 
 
 ## Verify Installation
 
-After installation, you can create your first DataTable component.
+After installing the package, you can create your first DataTable component.
 
 Continue with:
 
