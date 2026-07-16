@@ -1,6 +1,3 @@
-# Livewire DataTable
-### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
-
 <div align="left">
     <a href="https://steelants.cz">
 	    <picture>
@@ -15,9 +12,11 @@
 	    </picture>
 	</a>
 
-<h1>Display and filter data with Livewire DataTables</h1>
+# Livewire DataTable
+* Display and filter data with Livewire DataTables
+### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
 
-[![Latest Version on Packagist]([https://img.shields.io/packagist/v/spatie/laravel-permission.svg](https://img.shields.io/packagist/dt/steelants/datatable.svg)?style=flat-square)]([https://packagist.org/packages/spatie/laravel-permission](https://packagist.org/packages/steelants/datatable))
+[![Latest Version on Packagist](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
     
 </div>
