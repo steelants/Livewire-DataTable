@@ -121,4 +121,4 @@ Render the component:
 
 ## License
 
-The MIT License (MIT).
+This package is open-sourced software licensed under the [License](LICENSE).
