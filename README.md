@@ -109,7 +109,7 @@ Render the component:
 
 ## Other Packages
 
-- [Laravel-Auth](https://github.com/steelants/laravel-auth)
+- [Laravel-Auth](https://github.com/steelants/Laravel-Auth)
 - [Laravel-Boilerplate.Warehouse](https://github.com/steelants/Laravel-Boilerplate.Warehouse)
 - [Laravel-Boilerplate](https://github.com/steelants/Laravel-Boilerplate)
 - [Laravel-Form](https://github.com/steelants/Laravel-Form)
