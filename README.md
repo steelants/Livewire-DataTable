@@ -1,7 +1,7 @@
 <div align="center">
     <a href="https://steelants.cz">
         <img
-            src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
+            src="https://steelants.cz/wp-content/uploads/2020/02/black_3-1-170x90.png"
             alt="SteelAnts"
             width="180">
     </a>
