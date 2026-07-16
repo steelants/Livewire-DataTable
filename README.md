@@ -1,15 +1,11 @@
 <div align="center">
     <a href="https://steelants.cz">
-	    <picture>
-	        <source
-	            media="(prefers-color-scheme: dark)"
-	            srcset="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo-dark.png">
-	        <img
-	            src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
-	            alt="SteelAnts"
-	            width="180">
-	    </picture>
-	</a>
+        <img
+            src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
+            alt="SteelAnts"
+            width="180"
+            style="background:#ffffff;padding:16px 24px;border-radius:12px;">
+    </a>
 
 # Livewire DataTable
 
