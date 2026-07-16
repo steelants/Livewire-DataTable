@@ -32,7 +32,7 @@ Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
 Install the package using Composer:
 
 ```bash
-composer require steelants/datatable
+composer require steelants/livewire-datatable
 ```
 
 See the full installation guide:
