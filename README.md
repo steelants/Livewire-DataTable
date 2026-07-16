@@ -57,45 +57,6 @@ composer require steelants/datatable
 ```
 
 
-## Basic Usage
-
-Create your Livewire DataTable component:
-
-```php
-namespace App\Livewire;
-
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use SteelAnts\DataTable\Livewire\DataTableComponent;
-use SteelAnts\DataTable\Traits\UseDatabase;
-
-class UserTable extends DataTableComponent
-{
-    use UseDatabase;
-
-    public function query(): Builder
-    {
-        return User::query();
-    }
-
-    public function headers(): array
-    {
-        return [
-            'id' => 'ID',
-            'name' => 'Name',
-            'email' => 'E-mail',
-        ];
-    }
-}
-```
-
-Render the component:
-
-```blade
-@livewire('user-table')
-```
-
-
 ## Documentation
 
 - [Installation](docs/installation.md)
