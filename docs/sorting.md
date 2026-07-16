@@ -1,44 +1,129 @@
 # Sorting
 
-Sorting is enabled by default. Set `$sortable = true` and optionally restrict which columns are sortable via `$sortableColumns`.
+SteelAnts DataTable supports sorting table columns.
 
-## Simple columns
+Sorting is enabled by default and can be configured using the DataTable component properties.
 
-Sorting by any direct column (string, int, bool) works out of the box:
+
+## Enable Sorting
+
+To enable sorting explicitly:
 
 ```php
 public bool $sortable = true;
-public array $sortableColumns = ['name', 'score', 'published'];
 ```
 
-## BelongsTo relation
-
-Use dot notation — the package resolves the join automatically:
+You can also restrict sortable columns:
 
 ```php
-// headers
-'user.name' => 'User'
-
-// sortBy
-$sortBy = 'user.name';
+public array $sortableColumns = [
+    'name',
+    'score',
+    'published',
+];
 ```
 
-## HasMany / MorphMany — sort by count
 
-Same dot notation. The package detects the relation type and generates a COUNT subquery:
+## Simple Columns
+
+Sorting by direct database columns works automatically.
+
+Example:
 
 ```php
-// headers
-'comments.id' => 'Comments'  // sorts by number of comments
-'reactions.id' => 'Reactions' // sorts by number of reactions (morph-aware)
+public function headers(): array
+{
+    return [
+        'id' => 'ID',
+        'name' => 'Name',
+        'score' => 'Score',
+        'published' => 'Published',
+    ];
+}
+```
 
-// sortBy
+Supported column types:
+
+- string
+- integer
+- boolean
+
+
+## BelongsTo Relationships
+
+Relationships can be sorted using dot notation.
+
+Example model relationship:
+
+```php
+User belongsTo Company
+```
+
+Headers:
+
+```php
+public function headers(): array
+{
+    return [
+        'id' => 'ID',
+        'name' => 'User',
+        'company.name' => 'Company',
+    ];
+}
+```
+
+The package automatically resolves the relationship and creates the required join.
+
+The sorting column:
+
+```php
+$sortBy = 'company.name';
+```
+
+
+## HasMany and MorphMany Relationships
+
+The package supports sorting relationships by their count.
+
+Example:
+
+```php
+public function headers(): array
+{
+    return [
+        'name' => 'Name',
+        'comments.id' => 'Comments',
+        'reactions.id' => 'Reactions',
+    ];
+}
+```
+
+The package will sort by the number of related records.
+
+Supported relations:
+
+- HasMany
+- MorphMany
+
+
+Example:
+
+```php
 $sortBy = 'comments.id';
 ```
 
-## Custom sort expression
+For morph relations:
 
-Override `orderColumn{Name}()` to return a raw SQL expression:
+```php
+$sortBy = 'reactions.id';
+```
+
+
+## Custom Sort Expressions
+
+For advanced sorting requirements, you can override the order method.
+
+Example:
 
 ```php
 public function orderColumnName(): string
@@ -46,3 +131,14 @@ public function orderColumnName(): string
     return 'LOWER(name)';
 }
 ```
+
+This allows using custom SQL expressions for ordering.
+
+
+## Next Steps
+
+Continue with:
+
+- [Filtering](filtering.md)
+- [Rendering](rendering.md)
+- [Configuration](configuration.md)
