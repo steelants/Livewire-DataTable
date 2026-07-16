@@ -26,7 +26,7 @@ public function renderCasts(): array
 
 Each column can have its own render cast.
 
-The class must implement:
+The render cast class must implement:
 
 ```php
 SteelAnts\DataTable\RenderCasts\RenderCast
@@ -60,7 +60,7 @@ The `render()` method receives:
 |---|---|
 | `$key` | Column key |
 | `$value` | Current column value |
-| `$model` | Original data model |
+| `$model` | Original row data |
 
 
 ## Row Transformation
@@ -120,7 +120,7 @@ public function renderRow(array $row): array
 }
 ```
 
-> Values are rendered using `{!! !!}`.
+> Values are rendered using `{!! !!}`.  
 > Always escape values manually.
 
 
@@ -170,5 +170,6 @@ Make sure values are escaped when inserting user data.
 
 Continue with:
 
+- [Actions](actions.md)
 - [Configuration](configuration.md)
 - [Development](development.md)
