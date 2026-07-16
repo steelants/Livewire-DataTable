@@ -53,7 +53,7 @@ Render the table in your Blade template:
 ```
 
 
-# Using Eloquent Models
+## Using Eloquent Models
 
 By default, `UseDatabase` loads data from your query and transforms it into
 table data.
@@ -99,7 +99,7 @@ class UserTable extends DataTableComponent
 ```
 
 
-# Using Without Models
+## Using Without Models
 
 You can provide your own dataset without using an Eloquent query.
 
@@ -124,7 +124,7 @@ public function dataset(): array
 ```
 
 
-# Headers
+## Headers
 
 The `headers()` method defines table columns.
 
@@ -146,7 +146,7 @@ The array key represents the data field.
 The array value represents the displayed column name.
 
 
-# Actions
+## Actions
 
 You can add custom actions for each row.
 
@@ -171,7 +171,7 @@ For detailed information about actions see:
 [Actions documentation](actions.md)
 
 
-# Custom Column Rendering
+## Custom Column Rendering
 
 You can customize individual column output:
 
@@ -187,7 +187,7 @@ For advanced rendering options see:
 [Rendering documentation](rendering.md)
 
 
-# Next Steps
+## Next Steps
 
 Continue with:
 
