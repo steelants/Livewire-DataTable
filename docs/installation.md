@@ -4,9 +4,9 @@
 
 Before installing SteelAnts DataTable, make sure your application meets the required dependencies.
 
-- PHP 8.1+
-- Laravel
-- Livewire
+- PHP 8.2+
+- Laravel 11+
+- Livewire 3+
 
 
 ## Install via Composer
