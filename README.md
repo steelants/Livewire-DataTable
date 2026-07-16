@@ -1,7 +1,26 @@
 # Livewire DataTable
 ### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
 
+<div align="left">
+    <a href="https://steelants.cz">
+	    <picture>
+	        <source
+	            media="(prefers-color-scheme: dark)"
+	            srcset="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
+	        >
+	        <img
+	            src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
+	            alt="SteelAnts logo"
+	        >
+	    </picture>
+	</a>
+
+<h1>Display and filter data with Livewire DataTables</h1>
+
+[![Latest Version on Packagist]([https://img.shields.io/packagist/v/spatie/laravel-permission.svg](https://img.shields.io/packagist/dt/steelants/datatable.svg)?style=flat-square)]([https://packagist.org/packages/spatie/laravel-permission](https://packagist.org/packages/steelants/datatable))
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
+    
+</div>
 
 #### Docker Build
 * is handeled by gittea server
