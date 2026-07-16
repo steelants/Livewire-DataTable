@@ -3,8 +3,7 @@
         <img
             src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
             alt="SteelAnts"
-            width="180"
-            style="background:#f5f5f5;padding:16px 24px;border-radius:12px;border:1px solid #ddd;">
+            width="180">
     </a>
 
 # Livewire DataTable
