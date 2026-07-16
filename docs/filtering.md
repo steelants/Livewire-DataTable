@@ -1,149 +1,179 @@
-# Filtering
+# Sorting
 
-SteelAnts DataTable supports filtering data directly from table headers.
+SteelAnts DataTable provides built-in sorting support for table columns.
 
-Filters allow users to narrow down displayed records without creating custom
-filter forms.
+Sorting works with:
+
+- Simple database columns
+- BelongsTo relationships
+- HasMany and MorphMany relationships
+- Custom SQL expressions
 
 
-## Enable Filtering
+## Enable Sorting
 
-Filtering can be enabled using the DataTable component property:
+Sorting is enabled by default.
+
+You can explicitly enable or disable sorting:
 
 ```php
-public bool $filterable = true;
+public bool $sortable = true;
+```
+
+Disable sorting:
+
+```php
+public bool $sortable = false;
 ```
 
 
-## Header Filters
+## Restrict Sortable Columns
 
-Define filters for specific columns using the `headerFilters()` method.
+By default, all available columns can be sorted.
+
+You can limit sortable columns:
+
+```php
+public array $sortableColumns = [
+    'name',
+    'email',
+    'created_at',
+];
+```
+
+Only columns listed in `$sortableColumns` will be sortable.
+
+
+## Simple Columns
+
+Sorting works automatically with direct database columns.
 
 Example:
 
 ```php
-public function headerFilters(): array
+public array $sortableColumns = [
+    'name',
+    'score',
+    'published',
+];
+```
+
+Supported values include:
+
+- strings
+- integers
+- booleans
+- other standard database column types
+
+
+## Sorting BelongsTo Relationships
+
+Relationships can be sorted using dot notation.
+
+Example model relationship:
+
+```php
+public function user()
 {
-    return [
-        'name' => [
-            'type' => 'text',
-        ],
+    return $this->belongsTo(User::class);
+}
+```
 
-        'status' => [
-            'type' => 'select',
-            'values' => [
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-            ],
-        ],
+Header definition:
 
-        'created_at' => [
-            'type' => 'date',
-        ],
+```php
+'user.name' => 'User',
+```
+
+Sort column:
+
+```php
+$sortBy = 'user.name';
+```
+
+The package automatically creates the required join.
+
+
+## Sorting HasMany Relationships
+
+HasMany relationships are sorted by related record count.
+
+Example:
+
+```php
+'comments.id' => 'Comments',
+```
+
+The package detects the relationship and generates a count query.
+
+Example:
+
+```php
+$sortBy = 'comments.id';
+```
+
+This sorts rows by the number of related comments.
+
+
+## Sorting MorphMany Relationships
+
+MorphMany relationships are supported using the same dot notation.
+
+Example:
+
+```php
+'reactions.id' => 'Reactions',
+```
+
+The package creates the required count query while respecting the morph relationship.
+
+
+## Custom Sorting Expression
+
+For special cases, you can define a custom sorting expression.
+
+Override:
+
+```php
+public function orderColumnName(): string
+{
+    return 'LOWER(name)';
+}
+```
+
+The returned value is used as the raw SQL order expression.
+
+
+## Example DataTable
+
+Example:
+
+```php
+class UserTable extends DataTableComponent
+{
+    use UseDatabase;
+
+    public bool $sortable = true;
+
+    public array $sortableColumns = [
+        'name',
+        'email',
+        'comments.id',
     ];
-}
-```
 
-## Available Filter Types
+    public function query(): Builder
+    {
+        return User::query();
+    }
 
-### Text Filter
-
-Creates a text input:
-
-```php
-'name' => [
-    'type' => 'text',
-]
-```
-
-
-### Select Filter
-
-Creates a select input:
-
-```php
-'status' => [
-    'type' => 'select',
-    'values' => [
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-    ],
-]
-```
-
-
-### Date Filter
-
-Creates a date filter:
-
-```php
-'created_at' => [
-    'type' => 'date',
-]
-```
-
-Date filters support range values:
-
-```php
-[
-    'from',
-    'to',
-]
-```
-
-
-## Filter Validation
-
-You can validate filter values when they are updated using:
-
-```php
-public function updatedHeaderFilter()
-{
-    $this->validate([
-        'headerFilter.name' => 'nullable|string',
-
-        'headerFilter.status' => 'nullable|string',
-
-        'headerFilter.created_at.*' => 'nullable|date',
-    ]);
-}
-```
-
-
-## Example Component
-
-Complete example:
-
-```php
-public function headerFilters(): array
-{
-    return [
-        'name' => [
-            'type' => 'text',
-        ],
-
-        'role' => [
-            'type' => 'select',
-            'values' => [
-                'admin' => 'Administrator',
-                'user' => 'User',
-            ],
-        ],
-
-        'created_at' => [
-            'type' => 'date',
-        ],
-    ];
-}
-
-
-public function updatedHeaderFilter()
-{
-    $this->validate([
-        'headerFilter.name' => 'nullable|string',
-        'headerFilter.role' => 'nullable|string',
-        'headerFilter.created_at.*' => 'nullable|date',
-    ]);
+    public function headers(): array
+    {
+        return [
+            'name' => 'Name',
+            'email' => 'Email',
+            'comments.id' => 'Comments',
+        ];
+    }
 }
 ```
 
@@ -152,5 +182,8 @@ public function updatedHeaderFilter()
 
 Continue with:
 
+- [Usage](usage.md)
+- [Filtering](filtering.md)
 - [Rendering](rendering.md)
 - [Configuration](configuration.md)
+- [Development](development.md)
