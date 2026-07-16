@@ -1,26 +1,19 @@
 # Development
 
-This document describes how to develop and test SteelAnts DataTable locally.
+This guide describes how to develop and test SteelAnts DataTable locally.
 
+## Local Package Development
 
-## Local Development Setup
-
-If you want to modify the package source code or contribute to the project,
-you can install the package locally inside a Laravel application.
+To develop the package inside a Laravel application, clone the repository into
+the application's `packages` directory.
 
 
 ## Clone Repository
 
-Create a `packages` directory in the root of your Laravel project.
+Create a packages directory in your Laravel project root:
 
-Example:
-
-```
-your-laravel-project/
-├── app/
-├── bootstrap/
-├── packages/
-└── composer.json
+```bash
+mkdir packages
 ```
 
 Clone the repository:
@@ -30,9 +23,9 @@ git clone https://github.com/steelants/Livewire-DataTable.git ./packages/Livewir
 ```
 
 
-## Configure Composer
+## Configure Composer Autoload
 
-Add the package namespace to your application's `composer.json`:
+Add the package namespace to your Laravel application's `composer.json`:
 
 ```json
 {
@@ -44,7 +37,7 @@ Add the package namespace to your application's `composer.json`:
 }
 ```
 
-Refresh Composer autoload files:
+After updating `composer.json`, refresh the autoloader:
 
 ```bash
 composer dump-autoload
@@ -53,7 +46,7 @@ composer dump-autoload
 
 ## Register Service Provider
 
-Add the package provider to:
+Add the service provider to:
 
 ```
 bootstrap/providers.php
@@ -63,25 +56,27 @@ Example:
 
 ```php
 return [
-    ...
+    App\Providers\AppServiceProvider::class,
+
     SteelAnts\DataTable\DataTableServiceProvider::class,
 ];
 ```
 
 
-# Testing
+## Testing
 
-The package uses Pest with Orchestra Testbench and an in-memory SQLite database.
+The package uses:
+
+- Pest
+- Orchestra Testbench
+- SQLite in-memory database
 
 
-## Install Dependencies
+Install dependencies:
 
 ```bash
 composer install
 ```
-
-
-## Run Tests
 
 Run all tests:
 
@@ -89,18 +84,16 @@ Run all tests:
 ./vendor/bin/pest
 ```
 
-
-Run only sorting tests:
+Run specific tests:
 
 ```bash
 ./vendor/bin/pest tests/Feature/SortingTest.php
 ```
 
 
-# Release Process
+## Docker Build
 
-Package releases are handled through the SteelAnts Gitea server.
-
+Docker build and release process is handled by the Gitea server.
 
 Example release flow:
 
@@ -108,10 +101,32 @@ Example release flow:
 git checkout master
 
 git pull origin master
+
 git pull origin dev
 
 git tag 2.3.2
+
 git push --tags
 
 git checkout dev
 ```
+
+
+## Development Workflow
+
+Recommended workflow:
+
+1. Create a feature branch.
+2. Implement changes.
+3. Add or update tests.
+4. Run the test suite.
+5. Merge changes into the development branch.
+
+
+## Next Steps
+
+Continue with:
+
+- [Usage](usage.md)
+- [Configuration](configuration.md)
+- [Testing](testing.md)
