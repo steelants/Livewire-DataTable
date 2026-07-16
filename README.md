@@ -29,11 +29,6 @@ Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
 </div>
 
 
-## Documentation, Installation and Usage
-
-See the [documentation](docs/README.md) for detailed instructions about installation, configuration and usage.
-
-
 ## What It Does
 
 SteelAnts DataTable is a Laravel Livewire component for creating dynamic,
@@ -110,18 +105,6 @@ Render the component:
 - [Rendering](docs/rendering.md)
 - [Configuration](docs/configuration.md)
 - [Development](docs/development.md)
-
-
-## Changelog
-
-Please see [CHANGELOG.md](CHANGELOG.md) for information about recent changes.
-
-
-## Contributing
-
-Contributions are welcome.
-
-Please see the [Development Guide](docs/development.md).
 
 
 ## Contributors
