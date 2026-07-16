@@ -1,17 +1,19 @@
 # Usage
 
-SteelAnts DataTable allows you to create dynamic data tables using Laravel
-Livewire components.
+SteelAnts DataTable provides a Livewire component for displaying and managing
+dynamic data tables.
 
-The table can be powered by:
+You can use data from:
 
-- Eloquent queries
+- Eloquent models
 - Custom datasets
 
 
 ## Creating a DataTable Component
 
-Create a Livewire component that extends `DataTableComponent`:
+Create a Livewire component extending `DataTableComponent`.
+
+Example:
 
 ```php
 namespace App\Livewire;
@@ -25,17 +27,11 @@ class UserTable extends DataTableComponent
 {
     use UseDatabase;
 
-    /**
-     * Define data source.
-     */
     public function query(): Builder
     {
         return User::query();
     }
 
-    /**
-     * Define table headers.
-     */
     public function headers(): array
     {
         return [
@@ -50,18 +46,64 @@ class UserTable extends DataTableComponent
 
 ## Rendering the Component
 
-Render the DataTable component in your Blade template:
+Render the table in your Blade template:
 
 ```blade
 @livewire('user-table', [], key('data-table'))
 ```
 
 
-## Using Without Models
+# Using Eloquent Models
 
-If you do not want to use an Eloquent model, you can provide your own dataset.
+By default, `UseDatabase` loads data from your query and transforms it into
+table data.
 
-Instead of implementing `query()`, implement `dataset()`:
+Example:
+
+```php
+use SteelAnts\DataTable\Traits\UseDatabase;
+
+class UserTable extends DataTableComponent
+{
+    use UseDatabase;
+
+    public function query(): Builder
+    {
+        return User::query();
+    }
+}
+```
+
+
+## Using Original Eloquent Models
+
+If you need to work with the original Eloquent model instance instead of
+serialized row data, use:
+
+```php
+use SteelAnts\DataTable\Traits\UseDatabaseEloquent;
+```
+
+Example:
+
+```php
+class UserTable extends DataTableComponent
+{
+    use UseDatabaseEloquent;
+
+    public function query(): Builder
+    {
+        return User::query();
+    }
+}
+```
+
+
+# Using Without Models
+
+You can provide your own dataset without using an Eloquent query.
+
+Implement the `dataset()` method:
 
 ```php
 public function dataset(): array
@@ -70,27 +112,43 @@ public function dataset(): array
         [
             'id' => 1,
             'name' => 'Name 1',
-            'email' => 'E-mail 1',
+            'email' => 'email1@example.com',
         ],
         [
             'id' => 2,
             'name' => 'Name 2',
-            'email' => 'E-mail 2',
+            'email' => 'email2@example.com',
         ],
     ];
 }
 ```
 
 
-## Actions
+# Headers
 
-You can add custom actions to your rows.
+The `headers()` method defines table columns.
 
-Actions can be:
+Example:
 
-- Livewire actions
-- URL actions
+```php
+public function headers(): array
+{
+    return [
+        'id' => 'ID',
+        'name' => 'Name',
+        'email' => 'E-mail',
+    ];
+}
+```
 
+The array key represents the data field.
+
+The array value represents the displayed column name.
+
+
+# Actions
+
+You can add custom actions for each row.
 
 Example:
 
@@ -103,58 +161,37 @@ public function actions($item): array
             'action' => 'remove',
             'parameters' => $item['id'],
             'text' => 'Remove',
-            'actionClass' => 'text-danger',
-            'iconClass' => 'fas fa-trash',
-            'confirm' => 'Are you sure you want to delete this post?',
-        ],
-        [
-            'type' => 'url',
-            'url' => route('user.show', [
-                'id' => $item['id']
-            ]),
-            'text' => 'Show',
-            'iconClass' => 'fas fa-eye',
         ],
     ];
 }
 ```
 
+For detailed information about actions see:
 
-## Custom Column Rendering
+[Actions documentation](actions.md)
 
-You can customize the output of individual columns:
+
+# Custom Column Rendering
+
+You can customize individual column output:
 
 ```php
 public function renderColumnName($value, $row)
 {
-    return '<b>'.e($value).'</b>';
+    return '<strong>'.e($value).'</strong>';
 }
 ```
 
+For advanced rendering options see:
 
-## Database Model Output
-
-By default, the package can work with serialized database results.
-
-If you need the original model instance, use:
-
-```php
-use SteelAnts\DataTable\Traits\UseDatabaseEloquent;
-```
-
-instead of:
-
-```php
-use SteelAnts\DataTable\Traits\UseDatabase;
-```
-
-This allows you to work directly with the Eloquent model.
+[Rendering documentation](rendering.md)
 
 
-## Next Steps
+# Next Steps
 
-Learn more about available features:
+Continue with:
 
+- [Actions](actions.md)
 - [Sorting](sorting.md)
 - [Filtering](filtering.md)
 - [Rendering](rendering.md)
