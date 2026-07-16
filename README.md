@@ -119,3 +119,5 @@ Render the component:
 ## License
 
 This package is open-sourced software licensed under the [Apache License 2.0](LICENSE).
+
+Copyright 2023-2026 SteelAnts s.r.o.
