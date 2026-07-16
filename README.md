@@ -29,31 +29,63 @@ Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
 </div>
 
 
-## What It Does
-
-SteelAnts DataTable is a Laravel Livewire component for creating dynamic,
-sortable and filterable data tables.
-
-The package allows you to:
-
-- Display Eloquent model data
-- Use custom datasets without models
-- Sort table columns
-- Sort relationships
-- Filter data
-- Search records
-- Paginate results
-- Add custom actions
-- Customize column rendering
-- Transform row and column data
-
-
 ## Installation
 
-Install the package via Composer:
+Install the package using Composer:
 
 ```bash
 composer require steelants/datatable
+```
+
+See the full installation guide:
+
+[Installation documentation](docs/installation.md)
+
+
+## Features
+
+SteelAnts DataTable provides:
+
+- Livewire based data tables
+- Eloquent model support
+- Custom dataset support
+- Sorting
+- Filtering
+- Searching
+- Pagination
+- Custom column rendering
+- Row actions
+
+
+## Usage
+
+Create a DataTable component:
+
+```php
+class UserTable extends DataTableComponent
+{
+    use UseDatabase;
+
+    public function query(): Builder
+    {
+        return User::query();
+    }
+
+    public function headers(): array
+    {
+        return [
+            'id' => 'ID',
+            'name' => 'Name',
+            'email' => 'E-mail',
+        ];
+    }
+}
+```
+
+Render the component:
+
+```blade
+@livewire('user-table', [], key('data-table'))
 ```
 
 
@@ -61,11 +93,13 @@ composer require steelants/datatable
 
 - [Installation](docs/installation.md)
 - [Usage](docs/usage.md)
+- [Configuration](docs/configuration.md)
+- [Actions](docs/actions.md)
 - [Sorting](docs/sorting.md)
 - [Filtering](docs/filtering.md)
 - [Rendering](docs/rendering.md)
-- [Configuration](docs/configuration.md)
 - [Development](docs/development.md)
+- [Testing](docs/testing.md)
 
 
 ## Contributors
@@ -76,6 +110,7 @@ composer require steelants/datatable
 
 
 ## Other Packages
+
 - [steelants/laravel-auth](https://github.com/steelants/laravel-auth)
 - [steelants/laravel-boilerplate](https://github.com/steelants/Laravel-Boilerplate)
 - [steelants/datatable](https://github.com/steelants/Livewire-DataTable)
@@ -86,4 +121,4 @@ composer require steelants/datatable
 
 ## License
 
-MIT License
+The MIT License (MIT).
