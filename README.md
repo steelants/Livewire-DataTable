@@ -12,10 +12,10 @@
 	</picture>
 </a>
 
-<h1>Build dynamic data tables with Laravel Livewire</h1>
+<h1>Livewire-DataTable</h1>
 
 <p>
-A powerful and customizable DataTable component for Laravel Livewire.
+A powerful DataTable component for Laravel Livewire with sorting, filtering, and custom rendering.
 </p>
 
 <p>
