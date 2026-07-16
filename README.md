@@ -1,20 +1,30 @@
 <div align="center">
-    <a href="https://steelants.cz">
-	    <picture>
-	      <source media="(prefers-color-scheme: dark)" srcset="https://steelants.cz/wp-content/uploads/2026/07/white_3.png">
-	      <img src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png" alt="SteelAnts" width="180">
-	    </picture>
-	  </a>
 
-# Livewire DataTable
+<a href="https://steelants.cz">
+	<picture>	
+		<source 
+			media="(prefers-color-scheme: dark)" 
+			srcset="https://steelants.cz/wp-content/uploads/2026/07/white_3.png">
+		<img 
+			src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
+			alt="SteelAnts"
+			width="180">
+	</picture>
+</a>
 
-*Display and filter data with Livewire DataTables.*
+<h1>Build dynamic data tables with Laravel Livewire</h1>
 
-### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
+<p>
+A powerful and customizable DataTable component for Laravel Livewire.
+</p>
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
+<p>
+Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
+</p>
+
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
-    
+
 </div>
 
 #### Docker Build
