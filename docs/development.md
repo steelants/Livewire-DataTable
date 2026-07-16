@@ -65,30 +65,9 @@ return [
 
 ## Testing
 
-The package uses:
+For information about running tests see:
 
-- Pest
-- Orchestra Testbench
-- SQLite in-memory database
-
-
-Install dependencies:
-
-```bash
-composer install
-```
-
-Run all tests:
-
-```bash
-./vendor/bin/pest
-```
-
-Run specific tests:
-
-```bash
-./vendor/bin/pest tests/Feature/SortingTest.php
-```
+[Testing documentation](testing.md)
 
 
 ## Docker Build
