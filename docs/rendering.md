@@ -1,16 +1,42 @@
-# Render casts
-New preferred way to customize render.
+# Rendering
+
+SteelAnts DataTable provides several ways to customize how data is displayed.
+
+You can customize rendering using:
+
+- Render casts
+- Row transformations
+- Column transformations
+
+
+## Render Casts
+
+Render casts are the preferred way to customize the output of specific columns.
+
+Define casts using the `renderCasts()` method:
+
 ```php
-// Define cast by header key
 public function renderCasts(): array
 {
-	return [
-		'is_active' => BoolAsIcon::class,
-	];
+    return [
+        'is_active' => BoolAsIcon::class,
+    ];
 }
 ```
 
-Example render cast
+Each column can have its own render cast.
+
+The class must implement:
+
+```php
+SteelAnts\DataTable\RenderCasts\RenderCast
+```
+
+
+## Creating a Render Cast
+
+Example render cast:
+
 ```php
 use SteelAnts\DataTable\RenderCasts\RenderCast;
 
@@ -18,44 +44,131 @@ class BoolAsIcon implements RenderCast
 {
     public function render($key, $value, $model)
     {
-        return '<i class="' . ($value ? 'far fa-check-circle text-success' : 'far fa-times-circle text-danger') . '"></i>';
+        return '<i class="' .
+            ($value
+                ? 'far fa-check-circle text-success'
+                : 'far fa-times-circle text-danger'
+            )
+            . '"></i>';
     }
 }
 ```
 
+The `render()` method receives:
 
-# Optional transforms methods
-Original render customization.
-``` php
-// Transformace whole row on input (optional)
-// Returns associative array
-public function row(Model $row) : array
+| Parameter | Description |
+|---|---|
+| `$key` | Column key |
+| `$value` | Current column value |
+| `$model` | Original data model |
+
+
+## Row Transformation
+
+You can transform the whole row when data is loaded.
+
+The method returns an associative array:
+
+```php
+public function row(Model $row): array
 {
     return [
         'id' => $row->id,
     ];
 }
+```
 
-// Transform one column on input (optional)
-public function columnFoo(mixed $column) : mixed
+
+## Column Transformation
+
+You can transform individual columns when data is loaded:
+
+```php
+public function columnFoo(mixed $column): mixed
 {
     return $column;
 }
+```
+
+The method name is based on the column name.
+
+Example:
+
+Column:
+
+```php
+'name'
+```
+
+Method:
+
+```php
+columnName()
+```
 
 
-// Transform whole row on output (optional)
-// !!! NOTE: values are rendered with {!! !!}, manually escape values
-public function renderRow(array $row) : array
+## Render Row Transformation
+
+You can modify the complete row before output.
+
+```php
+public function renderRow(array $row): array
 {
     return [
-        'id' => e($row['id'])
+        'id' => e($row['id']),
     ];
 }
+```
 
-// Transform one column on output (optional)
-// !!! NOTE: values are rendered with {!! !!}, manually escape values
-public function renderColumnFoo(mixed $value, array $row) : string
+> Values are rendered using `{!! !!}`.
+> Always escape values manually.
+
+
+## Render Column Transformation
+
+You can customize individual column output:
+
+```php
+public function renderColumnFoo(
+    mixed $value,
+    array $row
+): string
 {
     return e($value);
 }
 ```
+
+Example:
+
+Column:
+
+```php
+'name'
+```
+
+Method:
+
+```php
+renderColumnName()
+```
+
+
+## Rendering HTML
+
+Some rendering methods return HTML.
+
+Example:
+
+```php
+return '<strong>'.e($value).'</strong>';
+```
+
+Make sure values are escaped when inserting user data.
+
+
+## Next Steps
+
+Continue with:
+
+- [Configuration](configuration.md)
+- [Development](development.md)
