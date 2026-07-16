@@ -1,19 +1,54 @@
 # Sorting
 
-SteelAnts DataTable supports sorting table columns.
+SteelAnts DataTable provides built-in sorting support for table columns.
 
-Sorting is enabled by default and can be configured using the DataTable component properties.
+Sorting works with:
+
+- Simple database columns
+- BelongsTo relationships
+- HasMany and MorphMany relationships
+- Custom SQL expressions
 
 
 ## Enable Sorting
 
-To enable sorting explicitly:
+Sorting is enabled by default.
+
+You can explicitly enable or disable sorting:
 
 ```php
 public bool $sortable = true;
 ```
 
-You can also restrict sortable columns:
+Disable sorting:
+
+```php
+public bool $sortable = false;
+```
+
+
+## Restrict Sortable Columns
+
+By default, all available columns can be sorted.
+
+You can limit sortable columns:
+
+```php
+public array $sortableColumns = [
+    'name',
+    'email',
+    'created_at',
+];
+```
+
+Only columns listed in `$sortableColumns` will be sortable.
+
+
+## Simple Columns
+
+Sorting works automatically with direct database columns.
+
+Example:
 
 ```php
 public array $sortableColumns = [
@@ -23,88 +58,53 @@ public array $sortableColumns = [
 ];
 ```
 
+Supported values include:
 
-## Simple Columns
-
-Sorting by direct database columns works automatically.
-
-Example:
-
-```php
-public function headers(): array
-{
-    return [
-        'id' => 'ID',
-        'name' => 'Name',
-        'score' => 'Score',
-        'published' => 'Published',
-    ];
-}
-```
-
-Supported column types:
-
-- string
-- integer
-- boolean
+- strings
+- integers
+- booleans
+- other standard database column types
 
 
-## BelongsTo Relationships
+## Sorting BelongsTo Relationships
 
 Relationships can be sorted using dot notation.
 
 Example model relationship:
 
 ```php
-User belongsTo Company
-```
-
-Headers:
-
-```php
-public function headers(): array
+public function user()
 {
-    return [
-        'id' => 'ID',
-        'name' => 'User',
-        'company.name' => 'Company',
-    ];
+    return $this->belongsTo(User::class);
 }
 ```
 
-The package automatically resolves the relationship and creates the required join.
-
-The sorting column:
+Header definition:
 
 ```php
-$sortBy = 'company.name';
+'user.name' => 'User',
 ```
 
+Sort column:
 
-## HasMany and MorphMany Relationships
+```php
+$sortBy = 'user.name';
+```
 
-The package supports sorting relationships by their count.
+The package automatically creates the required join.
+
+
+## Sorting HasMany Relationships
+
+HasMany relationships are sorted by related record count.
 
 Example:
 
 ```php
-public function headers(): array
-{
-    return [
-        'name' => 'Name',
-        'comments.id' => 'Comments',
-        'reactions.id' => 'Reactions',
-    ];
-}
+'comments.id' => 'Comments',
 ```
 
-The package will sort by the number of related records.
-
-Supported relations:
-
-- HasMany
-- MorphMany
-
+The package detects the relationship and generates a count query.
 
 Example:
 
@@ -112,18 +112,27 @@ Example:
 $sortBy = 'comments.id';
 ```
 
-For morph relations:
-
-```php
-$sortBy = 'reactions.id';
-```
+This sorts rows by the number of related comments.
 
 
-## Custom Sort Expressions
+## Sorting MorphMany Relationships
 
-For advanced sorting requirements, you can override the order method.
+MorphMany relationships are supported using the same dot notation.
 
 Example:
+
+```php
+'reactions.id' => 'Reactions',
+```
+
+The package creates the required count query while respecting the morph relationship.
+
+
+## Custom Sorting Expression
+
+For special cases, you can define a custom sorting expression.
+
+Override:
 
 ```php
 public function orderColumnName(): string
@@ -132,13 +141,49 @@ public function orderColumnName(): string
 }
 ```
 
-This allows using custom SQL expressions for ordering.
+The returned value is used as the raw SQL order expression.
+
+
+## Example DataTable
+
+Example:
+
+```php
+class UserTable extends DataTableComponent
+{
+    use UseDatabase;
+
+    public bool $sortable = true;
+
+    public array $sortableColumns = [
+        'name',
+        'email',
+        'comments.id',
+    ];
+
+    public function query(): Builder
+    {
+        return User::query();
+    }
+
+    public function headers(): array
+    {
+        return [
+            'name' => 'Name',
+            'email' => 'Email',
+            'comments.id' => 'Comments',
+        ];
+    }
+}
+```
 
 
 ## Next Steps
 
 Continue with:
 
+- [Usage](usage.md)
 - [Filtering](filtering.md)
 - [Rendering](rendering.md)
 - [Configuration](configuration.md)
+- [Development](development.md)
