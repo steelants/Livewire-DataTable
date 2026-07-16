@@ -1,19 +1,20 @@
-<div align="left">
+<div align="center">
     <a href="https://steelants.cz">
 	    <picture>
 	        <source
 	            media="(prefers-color-scheme: dark)"
-	            srcset="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
-	        >
+	            srcset="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo-dark.png">
 	        <img
 	            src="https://steelants.cz/wp-content/themes/wp_steelants_v5/img/logo.png"
-	            alt="SteelAnts logo"
-	        >
+	            alt="SteelAnts"
+	            width="180">
 	    </picture>
 	</a>
 
 # Livewire DataTable
-* Display and filter data with Livewire DataTables
+
+*Display and filter data with Livewire DataTables.*
+
 ### Created by: [SteelAnts s.r.o.](https://www.steelants.cz/)
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
