@@ -27,39 +27,61 @@ Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
 
 </div>
 
-#### Docker Build
-* is handeled by gittea server
+
+## Documentation, Installation and Usage
+
+See the [documentation](docs/README.md) for detailed instructions about installation, configuration and usage.
+
+
+## What It Does
+
+SteelAnts DataTable is a Laravel Livewire component for creating dynamic,
+sortable and filterable data tables.
+
+The package allows you to:
+
+- Display Eloquent model data
+- Use custom datasets without models
+- Sort table columns
+- Sort relationships
+- Filter data
+- Search records
+- Paginate results
+- Add custom actions
+- Customize column rendering
+- Transform row and column data
+
+
+## Installation
+
+Install the package via Composer:
+
 ```bash
-  git checkout master
-  git pull origin master
-  git pull origin dev
-  git tag 2.3.2
-  git push --tags
-  git checkout dev
+composer require steelants/datatable
 ```
 
-## Usage
+
+## Basic Usage
+
+Create your Livewire DataTable component:
 
 ```php
 namespace App\Livewire;
 
 use App\Models\User;
-use SteelAnts\DataTable\Livewire\DataTableComponent;
 use Illuminate\Database\Eloquent\Builder;
+use SteelAnts\DataTable\Livewire\DataTableComponent;
 use SteelAnts\DataTable\Traits\UseDatabase;
 
 class UserTable extends DataTableComponent
 {
-    Use UseDatabase;
-	// or UseDatabaseEloquent, if you want to receive model instead ov serialized array
+    use UseDatabase;
 
-    // Get model query
     public function query(): Builder
     {
         return User::query();
     }
 
-    // Set headers
     public function headers(): array
     {
         return [
@@ -68,299 +90,81 @@ class UserTable extends DataTableComponent
             'email' => 'E-mail',
         ];
     }
-
-    // Set actions
-    public function actions($item) : array
-    {
-        return [
-            [
-                // livewire action
-                'type' => "livewire",
-                'action' => "remove",
-                'parameters' => $item['id'],
-                'text' => "Remove",
-                'actionClass' => 'text-danger',
-                'iconClass' => 'fas fa-trash',
-                'confirm' => 'Are you sure you want to delete this post?',
-            ],
-            [
-                // url action
-                'type' => "url",
-                'url' => rounte('user.show', [id => $item['id']]),
-                'text' => "Show",
-                'iconClass' => 'fas fa-eye',
-            ]
-        ];
-    }
-
-    // Custom render of 'name' column
-    public function renderColumnName($value, $row){
-        return '<b>'.e($value).'</b>';
-    }
-
-    // Transform order column on raw order column (optional)
-    public function orderColumnName(){
-         return 'CAST(name AS STRING)';
-    }
-
-    // Livewire actions
-    public function remove($id){
-        User::find($id)->delete();
-    }
 }
 ```
 
-### Using without query / models
-```php
-    // instead of method query() implement dataset()
-    public function dataset(): array
-    {
-        return [
-            [
-                'id' => '1',
-                'name' => 'Name 1',
-                'email' => 'E-mail 1',
-            ],
-            [
-                'id' => '2',
-                'name' => 'Name 2',
-                'email' => 'E-mail 2',
-            ],
-            // ...
-        ];
-    }
-```
+Render the component:
 
-### Render
 ```blade
-@livewire('user-table', [], key('data-table'))
-```
-
-### Dev Enviroment
-1) Clone Repo to `[LARVEL-ROOT]/packages/`
-2) Modify ;composer.json`
-```json
-    "autoload": {
-        "psr-4": {
-            ...
-            "SteelAnts\\DataTable\\": "packages/Livewire-DataTable/src/"
-            ...
-        }
-    },
-```
-3) Add (code below) to: `[LARVEL-ROOT]/bootstrap/providers.php`
-```php
-SteelAnts\DataTable\DataTableServiceProvider::class,
-```
-
-## Sorting
-
-Sorting is enabled by default. Set `$sortable = true` and optionally restrict which columns are sortable via `$sortableColumns`.
-
-### Simple columns
-
-Sorting by any direct column (string, int, bool) works out of the box:
-
-```php
-public bool $sortable = true;
-public array $sortableColumns = ['name', 'score', 'published'];
-```
-
-### BelongsTo relation
-
-Use dot notation — the package resolves the join automatically:
-
-```php
-// headers
-'user.name' => 'User'
-
-// sortBy
-$sortBy = 'user.name';
-```
-
-### HasMany / MorphMany — sort by count
-
-Same dot notation. The package detects the relation type and generates a COUNT subquery:
-
-```php
-// headers
-'comments.id' => 'Comments'  // sorts by number of comments
-'reactions.id' => 'Reactions' // sorts by number of reactions (morph-aware)
-
-// sortBy
-$sortBy = 'comments.id';
-```
-
-### Custom sort expression
-
-Override `orderColumn{Name}()` to return a raw SQL expression:
-
-```php
-public function orderColumnName(): string
-{
-    return 'LOWER(name)';
-}
-```
-
----
-
-## Testing
-
-The package uses [Pest](https://pestphp.com/) with [Orchestra Testbench](https://packages.tools/testbench) and an in-memory SQLite database.
-
-Install dev dependencies:
-
-```bash
-composer install
-```
-
-Run all tests:
-
-```bash
-./vendor/bin/pest
-```
-
-Run only sorting tests:
-
-```bash
-./vendor/bin/pest tests/Feature/SortingTest.php
-```
-
----
-
-## Configuration
-```php
-// Enable sorting
-public bool $sortable = true;
-
-// Enable pagination
-public bool $paginated = true;
-
-// Enable fulltext search
-public bool $searchable = true;
-public bool $searchableColumns = [];
-
-//Enable filters
-public bool $filterable = true;
-```
-
-## Render casts
-New preferred way to customize render.
-```php
-// Define cast by header key
-public function renderCasts(): array
-{
-	return [
-		'is_active' => BoolAsIcon::class,
-	];
-}
-```
-
-Example render cast
-```php
-use SteelAnts\DataTable\RenderCasts\RenderCast;
-
-class BoolAsIcon implements RenderCast
-{
-    public function render($key, $value, $model)
-    {
-        return '<i class="' . ($value ? 'far fa-check-circle text-success' : 'far fa-times-circle text-danger') . '"></i>';
-    }
-}
+@livewire('user-table')
 ```
 
 
-## Optional transforms methods
-Original render customization.
-``` php
-// Transformace whole row on input (optional)
-// Returns associative array
-public function row(Model $row) : array
-{
-    return [
-        'id' => $row->id,
-    ];
-}
+## Features
 
-// Transform one column on input (optional)
-public function columnFoo(mixed $column) : mixed
-{
-    return $column;
-}
+### Sorting
+
+Supports:
+
+- Standard columns
+- BelongsTo relationships
+- HasMany relationship counts
+- Custom sorting expressions
 
 
-// Transform whole row on output (optional)
-// !!! NOTE: values are rendered with {!! !!}, manually escape values
-public function renderRow(array $row) : array
-{
-    return [
-        'id' => e($row['id'])
-    ];
-}
+### Filtering
 
-// Transform one column on output (optional)
-// !!! NOTE: values are rendered with {!! !!}, manually escape values
-public function renderColumnFoo(mixed $value, array $row) : string
-{
-    return e($value);
-}
-```
+Supports:
 
-## Filters methods
-``` php
-    //Add filters to header for specific columns
-    public function headerFilters(): array
-    {
-        return [
-            'column1Key' => ['type' => 'text'], //input type
-            'column2Key' => ['type' => 'select', 'values' => ['value' => 'name', 'value2' => 'name2']], //this for select
-            'column3Key' => ['type' => 'date'], //double input type (date,time,datetime-local)
-        ];
-    }
+- Text filters
+- Select filters
+- Date filters
 
-    //Add actions to header filters edit
-    public function updatedHeaderFilter(){
-        $this->validate([
-            'headerFilter.column1Key' => 'nullable|string',
-            'headerFilter.column2Key' => 'nullable|string',
-            'headerFilter.column3Key.*' => 'nullable|date', //have two parameters "from" and "to"
-        ]);
-    }
-```
+
+### Rendering
+
+Customize your table output using:
+
+- Render methods
+- Render casts
+- Row transformations
+- Column transformations
+
+
+## Documentation
+
+Full documentation:
+
+- [Installation](docs/installation.md)
+- [Usage](docs/usage.md)
+- [Sorting](docs/sorting.md)
+- [Filtering](docs/filtering.md)
+- [Rendering](docs/rendering.md)
+- [Configuration](docs/configuration.md)
+- [Development](docs/development.md)
+
+
+## Changelog
+
+Please see [CHANGELOG.md](CHANGELOG.md) for information about recent changes.
+
 
 ## Development
 
-1. Create subfolder `/packages` at root of your laravel project
+For package development and testing instructions see:
 
-2. clone repository to sub folder `/packages` (you need to be positioned at root of your laravel project in your terminal)
-```bash
-git clone https://github.com/steelants/Livewire-DataTable.git ./packages/Livewire-DataTable
-```
+[Development Guide](docs/development.md)
 
-3. edit composer.json file
-```json
-"autoload": {
-	"psr-4": {
-		"SteelAnts\\Modal\\": "packages/Livewire-Modal/src/"
-	}
-}
-```
-
-4. Add provider to `bootstrap/providers.php`
-```php
-return [
-	...
-     SteelAnts\DataTable\DataTableServiceProvider::class,
-	...
-];
-```
 
 ## Contributors
+
 <a href="https://github.com/steelants/Livewire-DataTable/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=steelants/Livewire-DataTable" />
 </a>
 
+
 ## Other Packages
+
 [steelants/laravel-auth](https://github.com/steelants/laravel-auth)
 
 [steelants/laravel-boilerplate](https://github.com/steelants/Laravel-Boilerplate)
@@ -373,3 +177,7 @@ return [
 
 [steelants/laravel-tenant](https://github.com/steelants/Laravel-Tenant)
 
+
+## License
+
+MIT License
