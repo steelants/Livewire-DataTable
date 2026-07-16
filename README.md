@@ -14,6 +14,8 @@
 
 <h1>Livewire-DataTable</h1>
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable) [![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
+
 <p>
 A powerful DataTable component for Laravel Livewire with sorting, filtering, and custom rendering.
 </p>
@@ -21,10 +23,6 @@ A powerful DataTable component for Laravel Livewire with sorting, filtering, and
 <p>
 Created by <a href="https://steelants.cz">SteelAnts s.r.o.</a>
 </p>
-
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
-
-[![Total Downloads](https://img.shields.io/packagist/dt/steelants/datatable.svg?style=flat-square)](https://packagist.org/packages/steelants/datatable)
 
 </div>
 
