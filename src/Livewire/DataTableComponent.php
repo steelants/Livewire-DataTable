@@ -151,7 +151,9 @@ class DataTableComponent extends Component
         if ($this->searchable == true) {
             $queryStrings[] = 'searchValue';
         }
-        if ($this->itemsPerPage != 0) {
+        // Pri load-on-scroll itemsPerPage narusta s kazdym doskrolovanim - v URL
+        // by se nascitalo a po refreshi by se rovnou natahly stovky radku.
+        if ($this->itemsPerPage != 0 && !method_exists($this, 'loadMore')) {
             $queryStrings[] = 'itemsPerPage';
         }
         if ($this->sortable != false) {
@@ -308,8 +310,12 @@ class DataTableComponent extends Component
             $this->refreshSelectionState($this->dataset);
         }
 
+        if (method_exists($this, 'refreshLoadMoreState')) {
+            $this->refreshLoadMoreState();
+        }
+
         if ($this->paginated != false && $this->itemsPerPage != 0) {
-            $this->pagesTotal = round(ceil($this->itemsTotal / $this->itemsPerPage));
+            $this->pagesTotal = (int) ceil($this->itemsTotal / $this->itemsPerPage);
         }
 
         if ($this->currentPage > $this->pagesTotal) {
@@ -367,19 +373,25 @@ class DataTableComponent extends Component
 
     public function render()
     {
-        $hasBulkActions = method_exists($this, 'bulkActions');
+        // Vyber je k dispozici jen s traitem HasBulkActions; selectionEnabled()
+        // navic respektuje canSelect(), takze se da podminit opravnenim.
+        $hasBulkActions = method_exists($this, 'bulkActions') && method_exists($this, 'selectionEnabled');
+        $selectable = $hasBulkActions && $this->selectionEnabled();
 
         return view($this->viewName, [
-            'dataset'       => $this->getData(),
-            'headers'       => $this->getHeader(),
-            'footers'       => $this->footers(),
-            'headerFilters' => !empty($this->filterable) ? $this->headerFilters() : null,
+            'dataset'              => $this->getData(),
+            'headers'              => $this->getHeader(),
+            'footers'              => $this->footers(),
+            'headerFilters'        => !empty($this->filterable) ? $this->headerFilters() : null,
 			'renderCasts' => $this->renderCasts(),
-            'selectable'    => $hasBulkActions && $this->selectable,
-            'selected'      => $hasBulkActions ? $this->selected : [],
-            'selectPage'    => $hasBulkActions ? $this->selectPage : false,
-            'bulkActions'   => $hasBulkActions ? $this->bulkActions() : [],
-            'keyPropery'    => $this->keyPropery,
+            'selectable'           => $selectable,
+            'selected'             => $selectable ? $this->selected : [],
+            'selectPage'           => $selectable && $this->selectPage,
+            'bulkActions'          => $selectable ? $this->bulkActions() : [],
+            'selectAllAcrossPages' => $selectable && $this->selectAllAcrossPages,
+            'keyPropery'           => $this->keyPropery,
+            // Explicitni priznak misto detekce podle existence promenne canLoadMore ve view.
+            'loadOnScroll'         => method_exists($this, 'loadMore'),
         ]);
     }
 

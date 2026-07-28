@@ -37,11 +37,18 @@ trait UseDatabase
         return array_combine($keys, $keys);
     }
 
-    public function datasetFromDB($query): array
+    /**
+     * Aplikuje fulltext hledani a hodnoty z headerFilter na dotaz.
+     *
+     * Zamerne oddelene od datasetFromDB(), aby stejne omezeni slo pouzit i mimo
+     * vykreslovani radku - typicky pro HasBulkActions::selectAllFiltered(),
+     * ktere potrebuje klice celeho filtrovaneho vyberu bez razeni a strankovani.
+     *
+     * POZOR: nepridava joiny relaci (getRelationJoins), takze filtry nad
+     * relacemi jdou pres whereRelation / whereHas.
+     */
+    protected function applyFilters($query)
     {
-        $datasetFromDB = [];
-        $query = $this->getRelationJoins($query);
-
         if ($this->searchable && !empty($this->searchValue)) {
             $query->where(function ($q) {
                 foreach ($this->searchableColumns as $i => $name) {
@@ -69,6 +76,14 @@ trait UseDatabase
                 }
             });
         }
+
+        return $query;
+    }
+
+    public function datasetFromDB($query): array
+    {
+        $datasetFromDB = [];
+        $query = $this->applyFilters($this->getRelationJoins($query));
 
         $this->itemsTotal = $this->getCount($query);
 

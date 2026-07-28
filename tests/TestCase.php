@@ -4,7 +4,9 @@ namespace Tests;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use SteelAnts\DataTable\DataTableServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -30,6 +32,20 @@ abstract class TestCase extends BaseTestCase
             $table->morphs('reactable');
             $table->string('type');
         });
+    }
+
+    /**
+     * Potrebne pro testy, ktere renderuji blade komponenty balicku
+     * (x-datatable-selection-cell a spol.).
+     *
+     * @return list<class-string>
+     */
+    protected function getPackageProviders($app): array
+    {
+        return [
+            LivewireServiceProvider::class,
+            DataTableServiceProvider::class,
+        ];
     }
 
     protected function getEnvironmentSetUp($app): void

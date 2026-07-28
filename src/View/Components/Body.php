@@ -8,6 +8,10 @@ use Illuminate\View\Component;
 
 class Body extends Component
 {
+    /**
+     * @param list<string> $selected Vybrane klice radku - kvuli renderovani
+     *                               atributu checked na serveru.
+     */
     public function __construct(
         public array $dataset,
         public array $actions,
@@ -15,6 +19,7 @@ class Body extends Component
         public array $renderCasts = [],
         public bool $selectable = false,
         public string $keyPropery = 'id',
+        public array $selected = [],
     ) {
     }
 
