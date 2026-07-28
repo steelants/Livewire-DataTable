@@ -4,19 +4,15 @@ namespace SteelAnts\DataTable\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
 use Illuminate\View\Component;
 
-class SelectionCell extends Component
+class Filters extends Component
 {
-    public mixed $rowKey;
-
     public function __construct(
-        public bool $selectable,
-        public array $row,
-        public string $keyPropery,
+        public string $id,
+        public bool $searchable = false,
+        public ?string $filename = null,
     ) {
-        $this->rowKey = Arr::get($row, $keyPropery);
     }
 
     /**
@@ -24,6 +20,6 @@ class SelectionCell extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('datatable-components::selection-cell');
+        return view('datatable-components::filters');
     }
 }

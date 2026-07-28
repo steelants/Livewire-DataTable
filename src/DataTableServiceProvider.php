@@ -11,6 +11,8 @@ use SteelAnts\DataTable\View\Components\Pagination;
 use SteelAnts\DataTable\View\Components\Head;
 use SteelAnts\DataTable\View\Components\Body;
 use SteelAnts\DataTable\View\Components\Foot;
+use SteelAnts\DataTable\View\Components\Filters;
+use SteelAnts\DataTable\View\Components\HeaderFilters;
 use SteelAnts\DataTable\View\Components\SelectionHeader;
 use SteelAnts\DataTable\View\Components\SelectionCell;
 
@@ -25,6 +27,8 @@ class DataTableServiceProvider extends ServiceProvider
         Blade::component('datatable-foot', Foot::class);
         Blade::component('datatable-head', Head::class);
         Blade::component('datatable-body', Body::class);
+        Blade::component('datatable-filters', Filters::class);
+        Blade::component('datatable-header-filters', HeaderFilters::class);
         Blade::component('datatable-selection-header', SelectionHeader::class);
         Blade::component('datatable-selection-cell', SelectionCell::class);
 
