@@ -60,7 +60,7 @@ describe('HasBulkActions selection state', function () {
         $table = new ArrayDataTable(bulkActionsRows());
         $table->refreshSelectionState($table->currentPageRows()); // page 1: ids 1, 2
 
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         expect($table->selected)->toEqualCanonicalizing(['1', '2']);
     });
@@ -70,7 +70,7 @@ describe('HasBulkActions selection state', function () {
         $table->selected = ['1', '2', '3'];
         $table->refreshSelectionState($table->currentPageRows()); // page 1: ids 1, 2
 
-        $table->updatedSelectPage(false);
+        $table->toggleSelectPage();
 
         expect($table->selected)->toEqualCanonicalizing(['3']);
     });
@@ -80,7 +80,7 @@ describe('HasBulkActions selection state', function () {
 
         // Page 1: select all visible rows.
         $table->refreshSelectionState($table->currentPageRows()); // ids 1, 2
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         expect($table->selected)->toEqualCanonicalizing(['1', '2']);
 
@@ -90,10 +90,10 @@ describe('HasBulkActions selection state', function () {
 
         // Page 1 selection must survive the page change.
         expect($table->selected)->toEqualCanonicalizing(['1', '2'])
-            ->and($table->selectPage)->toBeFalse();
+            ->and($table->pageSelected())->toBeFalse();
 
         // Select page 2 as well.
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         expect($table->selected)->toEqualCanonicalizing(['1', '2', '3', '4']);
 
@@ -101,19 +101,49 @@ describe('HasBulkActions selection state', function () {
         $table->currentPage = 1;
         $table->refreshSelectionState($table->currentPageRows());
 
-        expect($table->selectPage)->toBeTrue()
+        expect($table->pageSelected())->toBeTrue()
             ->and($table->selected)->toEqualCanonicalizing(['1', '2', '3', '4']);
     });
 
     it('clears the whole selection', function () {
         $table = new ArrayDataTable(bulkActionsRows());
         $table->refreshSelectionState($table->currentPageRows());
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         $table->clearSelection();
 
         expect($table->selected)->toBe([])
-            ->and($table->selectPage)->toBeFalse();
+            ->and($table->pageSelected())->toBeFalse();
+    });
+
+    it('reports a partially selected page', function () {
+        $table = new ArrayDataTable(bulkActionsRows());
+        $table->selected = ['1'];
+        $table->refreshSelectionState($table->currentPageRows()); // ids 1, 2
+
+        expect($table->pageSelected())->toBeFalse()
+            ->and($table->pagePartiallySelected())->toBeTrue();
+    });
+
+    it('completes a partially selected page on toggle', function () {
+        $table = new ArrayDataTable(bulkActionsRows());
+        $table->selected = ['1'];
+        $table->refreshSelectionState($table->currentPageRows()); // ids 1, 2
+
+        $table->toggleSelectPage();
+
+        expect($table->selected)->toEqualCanonicalizing(['1', '2'])
+            ->and($table->pageSelected())->toBeTrue()
+            ->and($table->pagePartiallySelected())->toBeFalse();
+    });
+
+    it('reports no page state without visible rows', function () {
+        $table = new ArrayDataTable(bulkActionsRows());
+        $table->selected = ['1'];
+        $table->refreshSelectionState([]);
+
+        expect($table->pageSelected())->toBeFalse()
+            ->and($table->pagePartiallySelected())->toBeFalse();
     });
 
     it('reports whether a row is selected', function () {
@@ -135,17 +165,17 @@ describe('HasBulkActions canSelect gate', function () {
         expect($table->selectionEnabled())->toBeFalse();
 
         $table->refreshSelectionState($table->currentPageRows());
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         expect($table->selected)->toBe([])
-            ->and($table->selectPage)->toBeFalse()
+            ->and($table->pageSelected())->toBeFalse()
             ->and($table->visibleSelectionKeys)->toBe([]);
     });
 
     it('drops an existing selection when the gate closes', function () {
         $table = new ArrayDataTable(bulkActionsRows());
         $table->refreshSelectionState($table->currentPageRows());
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         expect($table->selected)->not->toBeEmpty();
 
@@ -170,7 +200,7 @@ describe('HasBulkActions clearing on filter change', function () {
     it('clears the selection when a watched property changes', function (string $property) {
         $table = new ArrayDataTable(bulkActionsRows());
         $table->refreshSelectionState($table->currentPageRows());
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         $table->updatedHasBulkActions($property, 'whatever');
 
@@ -186,7 +216,7 @@ describe('HasBulkActions clearing on filter change', function () {
     it('keeps the selection for unrelated properties', function () {
         $table = new ArrayDataTable(bulkActionsRows());
         $table->refreshSelectionState($table->currentPageRows());
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         $table->updatedHasBulkActions('currentPage', 2);
 
@@ -197,7 +227,7 @@ describe('HasBulkActions clearing on filter change', function () {
         $table = new ArrayDataTable(bulkActionsRows());
         $table->clearSelectionOnFilter = false;
         $table->refreshSelectionState($table->currentPageRows());
-        $table->updatedSelectPage(true);
+        $table->toggleSelectPage();
 
         $table->updatedHasBulkActions('searchValue', 'abc');
 

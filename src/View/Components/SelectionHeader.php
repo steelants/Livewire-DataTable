@@ -8,9 +8,14 @@ use Illuminate\View\Component;
 
 class SelectionHeader extends Component
 {
+    /**
+     * @param bool $selectPage        Je cela stranka vybrana (odvozeno na serveru).
+     * @param bool $partiallySelected Je vybrana jen cast stranky - indeterminate stav.
+     */
     public function __construct(
         public bool $selectable,
-        public bool $selectPage,
+        public bool $selectPage = false,
+        public bool $partiallySelected = false,
     ) {
     }
 

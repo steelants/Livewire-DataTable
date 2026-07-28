@@ -143,7 +143,11 @@ whole action.
 ## Selection Behaviour
 
 - A checkbox column is added to the header and every row.
-- The header checkbox selects/deselects only the rows on the **current page**.
+- The header checkbox selects/deselects only the rows on the **current page**. It
+  is an action (`toggleSelectPage()`), not a bound property — "is this page
+  selected" is derived from the selection and the visible row keys, so it cannot
+  drift out of sync. It shows an indeterminate state when only part of the page
+  is selected.
 - Selection is stored in the `$selected` property and **persists across
   pages** — selecting rows on page 1 and then navigating to page 2 keeps the
   page 1 selection intact. The `checked` attribute is rendered server side, so
@@ -214,7 +218,6 @@ public function canSelect(): bool
 |---|---|---|
 | `$selectable` | `true` once the trait boots | Renders the checkbox column |
 | `$selected` | `[]` | Selected keys, always `list<string>` |
-| `$selectPage` | `false` | Header checkbox state for the current page |
 | `$selectAllAcrossPages` | `false` | Offer "select all" beyond the current page |
 | `$selectAllLimit` | `0` | Cap for `selectAllFiltered()`, `0` = no limit |
 | `$clearSelectionOnFilter` | `true` | Drop the selection on filter/search/sort change |
@@ -232,6 +235,9 @@ public function canSelect(): bool
 | `eachSelected(Closure)` | Walks the selection in chunks, returns `BulkResult` |
 | `bulkResultMessage(BulkResult)` | Human readable summary |
 | `selectAllFiltered()` | Selects everything matching the current filters |
+| `toggleSelectPage()` | Selects or unselects every row on the current page |
+| `pageSelected()` | Whether the whole current page is selected |
+| `pagePartiallySelected()` | Whether only part of the current page is selected |
 | `clearSelection()` | Empties the selection |
 | `selectedCount()` | Number of selected rows |
 | `isSelected($key)` | Whether a given row key is selected |
