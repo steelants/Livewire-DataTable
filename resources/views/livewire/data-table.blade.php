@@ -28,9 +28,9 @@
 
     @if (!empty($loadOnScroll))
         @if ($canLoadMore)
-            {{-- wire:key podle itemsPerPage: po nacteni davky se element vymeni,
-                 cimz se x-intersect.once znovu "nabije". Bez toho by trigger, ktery
-                 zustane ve viewportu, palil requesty v cyklu. --}}
+            {{-- wire:key based on itemsPerPage: after loading a batch the element gets swapped,
+                 which "re-arms" x-intersect.once. Without this, a trigger that
+                 stays in the viewport would keep firing requests in a loop. --}}
             <div wire:key="load-more-{{ $itemsPerPage }}" class="text-center p-3 text-body-tertiary">
                 <span x-intersect.once="$wire.loadMore()" wire:loading.remove>{{ __('Load more') }}</span>
                 <span wire:loading><i class="fas fa-spinner fa-spin me-1"></i>{{ __('Loading...') }}</span>

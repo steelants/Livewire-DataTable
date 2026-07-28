@@ -14,8 +14,8 @@
                         <span>{{ __($action['text']) }}</span>
                     </a>
                 @else
-                    {{-- Dispatch podle nazvu akce, ne podle indexu: bulkActions() muze byt
-                         podmineny opravnenim a indexy se pak posouvaji. --}}
+                    {{-- Dispatch by action name, not by index: bulkActions() can be
+                         permission-conditioned and indexes then shift. --}}
                     <button type="button" class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}"
                             wire:click="callBulkAction('{{ $action['action'] }}')"
                             wire:loading.attr="disabled"

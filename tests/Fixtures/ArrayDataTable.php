@@ -12,10 +12,10 @@ class ArrayDataTable
     public int $itemsPerPage = 2;
     public int $currentPage = 1;
 
-    /** Prepinatelne, aby se dal testovat hook canSelect(). */
+    /** Toggleable, so the canSelect() hook can be tested. */
     public bool $allowSelection = true;
 
-    /** Konfigurace traitu jsou metody, ne properties - fixture je zpristupni testum. */
+    /** The trait's config values are methods, not properties - the fixture exposes them to tests. */
     public bool $clearOnFilter = true;
 
     /** @var list<array{0:list<string>,1:string}> */
@@ -23,8 +23,8 @@ class ArrayDataTable
 
     public function __construct(private readonly array $rows)
     {
-        // Livewire vola boot hook traitu pri kazdem requestu - fixture to musi
-        // delat taky, jinak by testy bezely v jinem stavu nez realna komponenta.
+        // Livewire calls the trait's boot hook on every request - the fixture must
+        // do the same, otherwise tests would run in a different state than the real component.
         $this->bootHasBulkActions();
     }
 

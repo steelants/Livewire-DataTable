@@ -9,8 +9,8 @@ trait UseLoadOnScroll
     public bool $canLoadMore = true;
 
     /**
-     * O kolik radku se navysi vyber pri kazdem doskrolovani na konec.
-     * 0 = pouzije se pocatecni itemsPerPage.
+     * By how many rows the selection grows on each scroll-to-end trigger.
+     * 0 = use the initial itemsPerPage.
      */
     public int $loadMoreStep = 0;
 
@@ -24,10 +24,10 @@ trait UseLoadOnScroll
     }
 
     /**
-     * Prepocita, jestli je jeste co nacitat. Vola se z DataTableComponent::getData()
-     * po zjisteni itemsTotal, aby se "load more" trigger nevykresloval, kdyz uz
-     * jsou nactene vsechny radky - jinak by x-intersect vypalil jeden request
-     * zbytecne, jen aby zjistil, ze uz nic neni.
+     * Recalculates whether there is anything left to load. Called from DataTableComponent::getData()
+     * after itemsTotal is known, so the "load more" trigger isn't rendered once
+     * all rows are already loaded - otherwise x-intersect would fire one request
+     * needlessly, just to find out there's nothing left.
      */
     public function refreshLoadMoreState(): void
     {

@@ -9,10 +9,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 /**
- * Lista hromadnych akci nad tabulkou.
+ * The bulk actions bar above the table.
  *
- * Samostatna komponenta zamerne: hostitelske aplikace si casto prepisuji hlavni
- * view (datatable::data-table), a bez komponenty by musely markup listy opsat.
+ * Deliberately a standalone component: host applications often override the main
+ * view (datatable::data-table), and without the component they'd have to copy the bar's markup.
  */
 class BulkBar extends Component
 {

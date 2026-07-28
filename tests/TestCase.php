@@ -35,8 +35,8 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * Potrebne pro testy, ktere renderuji blade komponenty balicku
-     * (x-datatable-selection-cell a spol.).
+     * Needed for tests that render the package's blade components
+     * (x-datatable-selection-cell and similar).
      *
      * @return list<class-string>
      */

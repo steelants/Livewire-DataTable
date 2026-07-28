@@ -16,7 +16,7 @@ describe('UseLoadOnScroll', function () {
 
         $table->loadMore();
 
-        // Drive bylo natvrdo +100, takze prvni davka 25 radku skocila na 125.
+        // It used to be hardcoded +100, so the first batch of 25 rows jumped to 125.
         expect($table->itemsPerPage)->toBe(50);
     });
 
@@ -50,8 +50,8 @@ describe('UseLoadOnScroll', function () {
     });
 
     it('knows there is nothing to load before the first loadMore call', function () {
-        // Drzi trigger schovany, takze x-intersect nevypali request jen proto,
-        // aby zjistil, ze uz nic dalsiho neni.
+        // Keeps the trigger hidden, so x-intersect doesn't fire a request just
+        // to find out there's nothing else left.
         $table = new ScrollDataTable(itemsTotal: 4, itemsPerPage: 10);
 
         $table->refreshLoadMoreState();

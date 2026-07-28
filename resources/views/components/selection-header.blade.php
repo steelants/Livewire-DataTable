@@ -1,7 +1,7 @@
 @if ($selectable)
     <th style="width: 1%">
-        {{-- Akce, ne wire:model - "je stranka vybrana" je odvozeny stav, ktery
-             se pocita na serveru z vyberu a klicu na aktualni strance. --}}
+        {{-- An action, not wire:model - "is the page selected" is a derived state
+             computed server-side from the selection and the current page's keys. --}}
         <input type="checkbox" class="form-check-input"
                wire:click="toggleSelectPage"
                @checked($selectPage)

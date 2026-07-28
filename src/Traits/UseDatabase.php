@@ -38,14 +38,14 @@ trait UseDatabase
     }
 
     /**
-     * Aplikuje fulltext hledani a hodnoty z headerFilter na dotaz.
+     * Applies fulltext search and headerFilter values to the query.
      *
-     * Zamerne oddelene od datasetFromDB(), aby stejne omezeni slo pouzit i mimo
-     * vykreslovani radku - typicky pro HasBulkActions::selectAllFiltered(),
-     * ktere potrebuje klice celeho filtrovaneho vyberu bez razeni a strankovani.
+     * Deliberately separated from datasetFromDB(), so the same restriction can be
+     * reused outside of row rendering - typically for HasBulkActions::selectAllFiltered(),
+     * which needs the keys of the entire filtered selection without sorting or pagination.
      *
-     * POZOR: nepridava joiny relaci (getRelationJoins), takze filtry nad
-     * relacemi jdou pres whereRelation / whereHas.
+     * NOTE: does not add relation joins (getRelationJoins), so filters on
+     * relations go through whereRelation / whereHas.
      */
     protected function applyFilters($query)
     {
@@ -103,9 +103,9 @@ trait UseDatabase
             }
         }
 
-        // Sekundarni deterministicky klic (primarni klic modelu). Bez nej je u radku se
-        // shodnou hodnotou radiciho sloupce poradi mezi strankami nestabilni a OFFSET
-        // pagination radky vynechava nebo duplikuje.
+        // Secondary deterministic key (the model's primary key). Without it, rows sharing
+        // the same value in the sort column have an unstable order across pages, and OFFSET
+        // pagination ends up skipping or duplicating rows.
         if (method_exists($query, 'getModel')) {
             $query->orderBy($query->getModel()->getQualifiedKeyName(), $this->sortDirection ?: 'asc');
         }

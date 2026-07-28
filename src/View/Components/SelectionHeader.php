@@ -9,8 +9,8 @@ use Illuminate\View\Component;
 class SelectionHeader extends Component
 {
     /**
-     * @param bool $selectPage        Je cela stranka vybrana (odvozeno na serveru).
-     * @param bool $partiallySelected Je vybrana jen cast stranky - indeterminate stav.
+     * @param bool $selectPage        Whether the whole page is selected (derived server-side).
+     * @param bool $partiallySelected Whether only part of the page is selected - indeterminate state.
      */
     public function __construct(
         public bool $selectable,
