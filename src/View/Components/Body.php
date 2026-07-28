@@ -9,8 +9,8 @@ use Illuminate\View\Component;
 class Body extends Component
 {
     /**
-     * @param list<string> $selected Vybrane klice radku - kvuli renderovani
-     *                               atributu checked na serveru.
+     * @param list<string> $selected Selected row keys - needed to render
+     *                               the checked attribute server-side.
      */
     public function __construct(
         public array $dataset,

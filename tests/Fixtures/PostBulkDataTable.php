@@ -7,10 +7,10 @@ use SteelAnts\DataTable\Traits\HasBulkActions;
 use SteelAnts\DataTable\Traits\UseDatabaseEloquent;
 
 /**
- * Tabulka nad Eloquentem - radky jsou modely, ne pole.
+ * A table over Eloquent - rows are models, not arrays.
  *
- * Tohle je scenar, ktery ArrayDataTable nepokryva a ve kterem se drive
- * HasBulkActions rozbil na type hintu array.
+ * This is a scenario ArrayDataTable doesn't cover and where HasBulkActions
+ * used to break on the array type hint.
  */
 class PostBulkDataTable
 {
@@ -37,14 +37,42 @@ class PostBulkDataTable
     /** @var list<array{0:list<string>,1:string}> */
     public array $bulkActionLog = [];
 
+    /** Test-toggleable knobs - the trait's config values are methods, not properties. */
+    public bool $allowSelectAll = true;
+
+    public int $selectAllCap = 0;
+
+    public bool $clearOnFilter = true;
+
+    public int $chunkSize = 100;
+
     public function __construct()
     {
         $this->bootHasBulkActions();
-        $this->selectAllAcrossPages = true;
+    }
+
+    public function selectAllAcrossPages(): bool
+    {
+        return $this->allowSelectAll;
+    }
+
+    public function selectAllLimit(): int
+    {
+        return $this->selectAllCap;
+    }
+
+    public function clearSelectionOnFilter(): bool
+    {
+        return $this->clearOnFilter;
+    }
+
+    public function bulkChunkSize(): int
+    {
+        return $this->chunkSize;
     }
 
     /**
-     * Zamerne zuzeny dotaz - testuje se, ze vyber z nej nemuze uniknout.
+     * Deliberately narrowed query - tests that the selection can't escape it.
      */
     public function query(): Builder
     {
@@ -82,7 +110,7 @@ class PostBulkDataTable
     }
 
     /**
-     * Nacte aktualni stranku stejnou cestou jako DataTableComponent::getData().
+     * Loads the current page the same way as DataTableComponent::getData().
      *
      * @return list<Post>
      */

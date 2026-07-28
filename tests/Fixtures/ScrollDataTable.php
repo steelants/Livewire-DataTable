@@ -17,7 +17,7 @@ class ScrollDataTable
     ) {
         $this->loadMoreStep = $loadMoreStep;
 
-        // Livewire vola boot hook pri kazdem requestu.
+        // Livewire calls the boot hook on every request.
         $this->bootUseLoadOnScroll();
     }
 }

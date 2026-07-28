@@ -116,20 +116,24 @@ trait:
 use SteelAnts\DataTable\Traits\HasBulkActions;
 ```
 
-Related configuration:
+Related configuration is expressed as overridable methods, because PHP cannot
+redeclare a trait property with a different default value:
 
 ```php
 // Offer "select all" beyond the current page
-public bool $selectAllAcrossPages = false;
+public function selectAllAcrossPages(): bool { return false; }
 
 // Cap for select all, 0 = no limit
-public int $selectAllLimit = 0;
+public function selectAllLimit(): int { return 0; }
 
 // Drop the selection when a filter, the search value or the sorting changes
-public bool $clearSelectionOnFilter = true;
+public function clearSelectionOnFilter(): bool { return true; }
 
 // Chunk size used when processing the selection
-public int $bulkChunkSize = 100;
+public function bulkChunkSize(): int { return 100; }
+
+// Gate the whole selection feature, e.g. by permission
+public function canSelect(): bool { return true; }
 ```
 
 For more information see:

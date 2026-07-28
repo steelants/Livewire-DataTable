@@ -16,8 +16,8 @@ class SelectionCell extends Component
     public bool $isSelected;
 
     /**
-     * @param array<string,mixed>|Model $row Radek je pole (UseDatabase, dataset())
-     *                                       nebo model (UseDatabaseEloquent).
+     * @param array<string,mixed>|Model $row The row is an array (UseDatabase, dataset())
+     *                                       or a model (UseDatabaseEloquent).
      * @param list<string> $selected
      */
     public function __construct(
@@ -32,8 +32,8 @@ class SelectionCell extends Component
             ? null
             : $value;
 
-        // Checked se renderuje na serveru zamerne: po Livewire re-renderu (napr.
-        // pri prechodu mezi strankami) neni na cem stav checkboxu obnovit.
+        // Checked is deliberately rendered server-side: after a Livewire re-render (e.g.
+        // when navigating between pages) there is nothing else to restore the checkbox state from.
         $this->isSelected = $this->rowKey !== null
             && in_array((string) $this->rowKey, $selected, true);
     }

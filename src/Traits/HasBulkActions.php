@@ -14,57 +14,73 @@ use Throwable;
 trait HasBulkActions
 {
     /**
-     * Zapina sloupec s checkboxy. Nastavuje se v bootHasBulkActions(),
-     * takze pouziti traitu vyber zapne samo.
+     * Enables the checkbox column. Set in bootHasBulkActions(),
+     * so using the trait turns on selection automatically.
      */
     public bool $selectable = false;
 
     /**
-     * Vybrane klice radku. Hodnoty z HTML jsou stringy, drzime je tak i tady.
+     * Selected row keys. Values coming from HTML are strings, so we keep them as strings here too.
      *
-     * POZOR: je to public Livewire property, takze do ni klient zapise cokoli.
-     * K datum se proto chod jen pres selectedQuery() / eachSelected().
+     * WARNING: this is a public Livewire property, so the client can write anything into it.
+     * Access to the data must therefore always go through selectedQuery() / eachSelected().
      *
      * @var list<string>
      */
     public array $selected = [];
 
     /**
-     * Klice radku na aktualni strance - podklad pro checkbox v hlavicce.
+     * Row keys on the current page - the basis for the header checkbox state.
      *
-     * Persistovat se musi: toggleSelectPage() bezi pred renderem, takze potrebuje
-     * klice z predchoziho vykresleni a znovu nacitat dataset by bylo drahe.
-     * Klient do nich muze zapsat cokoli, ale ovlivni tim jen obsah $selected,
-     * ktery se stejne vzdy validuje pres selectedQuery().
+     * Must be persisted: toggleSelectPage() runs before the render, so it needs
+     * the keys from the previous render, and reloading the dataset would be expensive.
+     * The client can write anything into it, but that only affects the contents of $selected,
+     * which is always validated through selectedQuery() anyway.
      *
      * @var list<string>
      */
     public array $visibleSelectionKeys = [];
 
     /**
-     * Povoli "vybrat vse z filtru" (napric strankami). Vypnute = vybirat lze
-     * jen po strankach, obdoba selectCurrentPageOnly() ve Filamentu.
-     */
-    public bool $selectAllAcrossPages = false;
-
-    /**
-     * Strop pro selectAllFiltered(). 0 = bez limitu.
+     * Enables "select all from filter" (across pages). Disabled = selection is possible
+     * only per page, similar to selectCurrentPageOnly() in Filament.
      *
-     * Velke vybery nafukuji Livewire payload a naraze na limit parametru
-     * prepared statementu (u MySQL kolem 65 000).
+     * Config values are deliberately methods, not properties: PHP does not allow redeclaring
+     * a trait property with a different default value (fatal error on composition),
+     * so the property couldn't be overridden in the component.
      */
-    public int $selectAllLimit = 0;
+    public function selectAllAcrossPages(): bool
+    {
+        return false;
+    }
 
     /**
-     * Zahodit vyber pri zmene filtru, hledani nebo razeni. Jinak by hromadna
-     * akce sahla na radky, ktere uzivatel uz nevidi.
+     * Cap for selectAllFiltered(). 0 = no limit.
+     *
+     * Large selections bloat the Livewire payload and can hit the parameter limit
+     * of prepared statements (around 65,000 for MySQL).
      */
-    public bool $clearSelectionOnFilter = true;
+    public function selectAllLimit(): int
+    {
+        return 0;
+    }
 
     /**
-     * Velikost davky pri zpracovani vyberu v eachSelected().
+     * Discard the selection when the filter, search, or sorting changes. Otherwise the bulk
+     * action would touch rows the user can no longer see.
      */
-    public int $bulkChunkSize = 100;
+    public function clearSelectionOnFilter(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Chunk size when processing the selection in eachSelected().
+     */
+    public function bulkChunkSize(): int
+    {
+        return 100;
+    }
 
     public function bootHasBulkActions(): void
     {
@@ -72,11 +88,11 @@ trait HasBulkActions
     }
 
     /**
-     * Definice hromadnych akci. Stejny tvar jako actions(), jen bez 'parameters'
-     * mirenych na konkretni radek.
+     * Definition of bulk actions. Same shape as actions(), just without 'parameters'
+     * targeted at a specific row.
      *
-     * Vrat prazdne pole, kdyz uzivatel nema opravneni - lista se pak nezobrazi
-     * a callBulkAction() nema co spustit.
+     * Return an empty array when the user lacks permission - the bar then won't be shown
+     * and callBulkAction() has nothing to run.
      *
      * @return list<array<string,mixed>>
      */
@@ -86,7 +102,7 @@ trait HasBulkActions
     }
 
     /**
-     * Prepis v komponente, kdyz ma byt vyber podminen opravnenim.
+     * Override in the component when selection should be gated by a permission.
      */
     public function canSelect(): bool
     {
@@ -94,7 +110,7 @@ trait HasBulkActions
     }
 
     /**
-     * Jedna brana pro vsechny mutace vyberu.
+     * A single gate for all selection mutations.
      */
     public function selectionEnabled(): bool
     {
@@ -102,11 +118,11 @@ trait HasBulkActions
     }
 
     /**
-     * Livewire trait hook - vola se po zmene jakekoli property.
+     * Livewire trait hook - called after any property changes.
      *
-     * Zamerne to NENI updatedHeaderFilter(): tu metodu deklaruje
-     * DataTableComponent i aplikacni potomci, a metoda ve tride prebije metodu
-     * z traitu, takze by se cisteni vyberu tise preskocilo.
+     * This is deliberately NOT updatedHeaderFilter(): that method is declared by
+     * DataTableComponent and application subclasses, and a class method overrides the trait's,
+     * so clearing the selection would silently be skipped.
      */
     public function updatedHasBulkActions(string $name, mixed $value): void
     {
@@ -124,12 +140,12 @@ trait HasBulkActions
     }
 
     /**
-     * Prepne vyber cele aktualni stranky.
+     * Toggles the selection of the whole current page.
      *
-     * Zamerne akce, ne wire:model property - "je stranka vybrana" je odvozeny
-     * stav z $selected a klicu na strance (viz pageSelected()). Kdyz se drzel
-     * jako persistovana property, vozil se v payloadu zbytecne a rozchazel se
-     * se skutecnym vyberem.
+     * Deliberately an action, not a wire:model property - "is the page selected" is a state
+     * derived from $selected and the page's keys (see pageSelected()). When it was kept
+     * as a persisted property, it was carried in the payload needlessly and drifted out of sync
+     * with the actual selection.
      */
     public function toggleSelectPage(): void
     {
@@ -154,8 +170,8 @@ trait HasBulkActions
     }
 
     /**
-     * Jsou vsechny radky na aktualni strance vybrane? Podklad pro stav
-     * checkboxu v hlavicce.
+     * Are all rows on the current page selected? Basis for the
+     * header checkbox state.
      */
     public function pageSelected(): bool
     {
@@ -175,7 +191,7 @@ trait HasBulkActions
     }
 
     /**
-     * Je vybrana jen cast aktualni stranky? Pro indeterminate stav hlavicky.
+     * Is only part of the current page selected? For the header's indeterminate state.
      */
     public function pagePartiallySelected(): bool
     {
@@ -206,8 +222,8 @@ trait HasBulkActions
     }
 
     /**
-     * Prepocita stav vyberu proti aktualne vykreslenym radkum. Vola se
-     * z DataTableComponent::getData() po nacteni datasetu.
+     * Recalculates the selection state against the currently rendered rows. Called
+     * from DataTableComponent::getData() after the dataset is loaded.
      *
      * @param array<int,array<string,mixed>|Model> $dataset
      */
@@ -225,11 +241,11 @@ trait HasBulkActions
     }
 
     /**
-     * Spusti hromadnou akci. Prijima nazev akce (preferovane) nebo jeji index
-     * v bulkActions() kvuli zpetne kompatibilite.
+     * Runs a bulk action. Accepts the action name (preferred) or its index
+     * in bulkActions() for backwards compatibility.
      *
-     * Akce se dohledava v aktualnim bulkActions(), takze co uzivatel nevidi,
-     * nejde ani zavolat.
+     * The action is looked up in the current bulkActions(), so what the user can't see
+     * cannot be called either.
      */
     public function callBulkAction(int|string $action): mixed
     {
@@ -273,9 +289,9 @@ trait HasBulkActions
     }
 
     /**
-     * Vybere vsechny radky odpovidajici aktualnim filtrum, i mimo aktualni stranku.
+     * Selects all rows matching the current filters, even outside the current page.
      *
-     * @return bool false = vyber se neprovedl (vypnuto nebo prekrocen selectAllLimit)
+     * @return bool false = the selection was not performed (disabled or selectAllLimit exceeded)
      */
     public function selectAllFiltered(): bool
     {
@@ -295,10 +311,10 @@ trait HasBulkActions
     }
 
     /**
-     * Dotaz omezeny na vybrane radky.
+     * Query restricted to the selected rows.
      *
-     * Vzdy vychazi z query() komponenty, takze vyber nemuze uniknout z jejiho
-     * scopu - podvrzene ID z prohlizece se sem nedostane.
+     * Always builds on the component's query(), so the selection can never escape its
+     * scope - a forged ID from the browser won't get through here.
      */
     public function selectedQuery(): Builder
     {
@@ -314,15 +330,15 @@ trait HasBulkActions
     }
 
     /**
-     * Projde vybrane radky po davkach.
+     * Iterates the selected rows in chunks.
      *
-     * Callback vraci:
-     *   true (nebo nic) = zpracovano
-     *   false           = preskoceno
-     *   string          = preskoceno s duvodem (seskupi se do BulkResult::$reasons)
+     * The callback returns:
+     *   true (or nothing) = processed
+     *   false             = skipped
+     *   string            = skipped with a reason (grouped into BulkResult::$reasons)
      *
-     * Vyjimka z callbacku oznaci radek jako failed, nahlasi ji pres report()
-     * a pokracuje dalsim radkem - jeden vadny radek neshodi celou akci.
+     * An exception from the callback marks the row as failed, reports it via report()
+     * and continues with the next row - one bad row doesn't bring down the whole action.
      */
     public function eachSelected(Closure $callback): BulkResult
     {
@@ -375,7 +391,7 @@ trait HasBulkActions
     }
 
     /**
-     * Jednotna hlaska k vysledku hromadne akce.
+     * A unified message for the bulk action result.
      */
     public function bulkResultMessage(BulkResult $result): string
     {
@@ -413,8 +429,8 @@ trait HasBulkActions
     }
 
     /**
-     * Hodnota z radku. Radek je bud pole (UseDatabase, dataset()) nebo model
-     * (UseDatabaseEloquent) - data_get() zvlada oboji vcetne teckove notace.
+     * Value from a row. The row is either an array (UseDatabase, dataset()) or a model
+     * (UseDatabaseEloquent) - data_get() handles both, including dot notation.
      *
      * @param array<string,mixed>|Model $row
      */
@@ -424,7 +440,7 @@ trait HasBulkActions
     }
 
     /**
-     * Klice radku odpovidajici aktualnim filtrum.
+     * Row keys matching the current filters.
      *
      * @return list<string>
      */
@@ -494,10 +510,10 @@ trait HasBulkActions
     }
 
     /**
-     * Deduplikuje a vzdy vraci seznam stringu.
+     * Deduplicates and always returns a list of strings.
      *
-     * PHP prevadi numericke stringy pouzite jako klice pole na inty, takze
-     * array_keys() po deduplikaci vraci inty - proto se na konci pretypovava.
+     * PHP converts numeric strings used as array keys to ints, so
+     * array_keys() after deduplication returns ints - hence the cast at the end.
      *
      * @param array<int,mixed> $keys
      * @return list<string>
@@ -523,7 +539,7 @@ trait HasBulkActions
     }
 
     /**
-     * @param int|string $action Nazev akce nebo jeji index v bulkActions().
+     * @param int|string $action Action name or its index in bulkActions().
      * @return array<string,mixed>|null
      */
     private function resolveBulkAction(int|string $action): ?array

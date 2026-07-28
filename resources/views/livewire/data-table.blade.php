@@ -1,47 +1,7 @@
 <div>
     <x-datatable-filters :id="$this->getId()" :$searchable :filename="$this->filename ?? null" />
 
-    @if (!empty($selectable) && count($selected) > 0)
-        <div class="d-flex align-items-center flex-wrap gap-3 p-2 mb-2 bg-body-tertiary rounded-2">
-            <span class="fw-semibold">
-                {{ __(':count of :total selected', ['count' => count($selected), 'total' => $itemsTotal]) }}
-            </span>
-            <div class="d-flex flex-wrap gap-2">
-                @foreach ($bulkActions as $index => $action)
-                    @if (($action['type'] ?? 'livewire') == 'url')
-                        <a class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}" href="{{ $action['url'] }}">
-                            @if (!empty($action['iconClass']))
-                                <i class="{{ $action['iconClass'] }} me-1"></i>
-                            @endif
-                            {{ __($action['text']) }}
-                        </a>
-                    @else
-                        {{-- Dispatch podle nazvu akce, ne podle indexu: bulkActions() muze byt
-                             podmineny opravnenim a indexy se pak posouvaji. --}}
-                        <button type="button" class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}"
-                            wire:click="callBulkAction('{{ $action['action'] }}')"
-                            wire:loading.attr="disabled"
-                            @if (!empty($action['confirm'])) wire:confirm="{{ __($action['confirm']) }}" @endif>
-                            @if (!empty($action['iconClass']))
-                                <i class="{{ $action['iconClass'] }} me-1"></i>
-                            @endif
-                            {{ __($action['text']) }}
-                        </button>
-                    @endif
-                @endforeach
-            </div>
-            <div class="d-flex flex-wrap gap-2 ms-auto">
-                @if (!empty($selectAllAcrossPages) && count($selected) < $itemsTotal)
-                    <button type="button" class="btn btn-sm btn-link" wire:click="selectAllFiltered">
-                        {{ __('Select all :total', ['total' => $itemsTotal]) }}
-                    </button>
-                @endif
-                <button type="button" class="btn btn-sm btn-link" wire:click="clearSelection">
-                    {{ __('Clear selection') }}
-                </button>
-            </div>
-        </div>
-    @endif
+    <x-datatable-bulk-bar :$selectable :$selected :$bulkActions :$selectAllAcrossPages :$itemsTotal />
 
     <div class="table-responsive-md">
         <table class="{{ $tableClass }}">
@@ -68,9 +28,9 @@
 
     @if (!empty($loadOnScroll))
         @if ($canLoadMore)
-            {{-- wire:key podle itemsPerPage: po nacteni davky se element vymeni,
-                 cimz se x-intersect.once znovu "nabije". Bez toho by trigger, ktery
-                 zustane ve viewportu, palil requesty v cyklu. --}}
+            {{-- wire:key based on itemsPerPage: after loading a batch the element gets swapped,
+                 which "re-arms" x-intersect.once. Without this, a trigger that
+                 stays in the viewport would keep firing requests in a loop. --}}
             <div wire:key="load-more-{{ $itemsPerPage }}" class="text-center p-3 text-body-tertiary">
                 <span x-intersect.once="$wire.loadMore()" wire:loading.remove>{{ __('Load more') }}</span>
                 <span wire:loading><i class="fas fa-spinner fa-spin me-1"></i>{{ __('Loading...') }}</span>

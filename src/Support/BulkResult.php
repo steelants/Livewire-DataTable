@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace SteelAnts\DataTable\Support;
 
 /**
- * Vysledek hromadne akce - kolik radku se zpracovalo, preskocilo a kolik spadlo.
+ * Result of a bulk action - how many rows were processed, skipped, and how many failed.
  *
- * Preskocene radky se daji seskupit podle duvodu, aby uzivatel videl nejen
- * "4 preskoceny", ale i proc.
+ * Skipped rows can be grouped by reason, so the user sees not just
+ * "4 skipped", but also why.
  */
 class BulkResult
 {
     /**
-     * @param array<string,int> $reasons Pocty preskocenych radku podle duvodu.
+     * @param array<string,int> $reasons Counts of skipped rows grouped by reason.
      */
     public function __construct(
         public readonly int $ok = 0,
@@ -34,7 +34,7 @@ class BulkResult
     }
 
     /**
-     * Neco se nepovedlo - bud preskoceno, nebo spadlo.
+     * Something went wrong - either skipped or failed.
      */
     public function hasProblems(): bool
     {
@@ -42,7 +42,7 @@ class BulkResult
     }
 
     /**
-     * Duvody preskoceni serazene od nejcastejsiho.
+     * Skip reasons sorted from most frequent.
      *
      * @return array<string,int>
      */

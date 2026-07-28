@@ -31,8 +31,8 @@ describe('HasBulkActions selection state', function () {
         $table->selected = [1];
         $table->updatedSelected();
 
-        // Numericke stringy pouzite jako klice pole se v PHP meni na inty -
-        // deduplikace proto musi hodnoty na konci vzdy pretypovat zpatky.
+        // PHP converts numeric strings used as array keys into ints -
+        // deduplication must therefore always cast the values back at the end.
         expect($table->selected)->toBe(['1']);
     });
 
@@ -306,7 +306,7 @@ describe('HasBulkActions with Eloquent rows', function () {
 
         expect($table->selectAllFiltered())->toBeTrue();
 
-        // Ctvrty post ma published = false, takze do query() nepatri.
+        // The fourth post has published = false, so it doesn't belong in query().
         expect($table->selected)->toEqualCanonicalizing(['1', '2', '3']);
     });
 
@@ -341,7 +341,7 @@ describe('HasBulkActions with Eloquent rows', function () {
     it('never returns rows outside of query() scope', function () {
         $table = new PostBulkDataTable();
 
-        // Podvrzena ID: 4 je mimo scope query(), 999 vubec neexistuje.
+        // Forged IDs: 4 is outside query()'s scope, 999 doesn't exist at all.
         $table->selected = ['1', '4', '999'];
 
         expect($table->selectedQuery()->pluck('id')->all())->toBe([1]);
@@ -422,7 +422,7 @@ describe('HasBulkActions eachSelected', function () {
         $table->selected = ['1'];
 
         $result = $table->eachSelected(function (Post $post) {
-            // zadny return
+            // no return
         });
 
         expect($result->ok)->toBe(1);
@@ -498,8 +498,8 @@ describe('selection cell rendering', function () {
             ['row' => ['id' => 7, 'title' => 'A'], 'selected' => ['7']]
         );
 
-        // Bez server-side checked by se stav vyberu po Livewire re-renderu
-        // (napr. pri prechodu mezi strankami) neobnovil.
+        // Without server-side checked, the selection state wouldn't be restored after
+        // a Livewire re-render (e.g. when navigating between pages).
         expect($html)->toContain('checked')
             ->and($html)->toContain('value="7"');
     });

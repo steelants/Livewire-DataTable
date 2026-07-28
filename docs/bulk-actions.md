@@ -170,7 +170,10 @@ By default only per-page selection is available. To offer "select all
 current page:
 
 ```php
-public bool $selectAllAcrossPages = true;
+public function selectAllAcrossPages(): bool
+{
+    return true;
+}
 ```
 
 This requires a `query()` based table. Large selections inflate the Livewire
@@ -178,8 +181,16 @@ payload and can hit the database limit on prepared statement parameters (around
 65 000 on MySQL), so the total can be capped:
 
 ```php
-public int $selectAllLimit = 5000;   // 0 = no limit
+public function selectAllLimit(): int
+{
+    return 5000;   // 0 = no limit
+}
 ```
+
+Note that all configuration is expressed as **methods, not properties**. PHP
+refuses to redeclare a trait property with a different default value (fatal
+error during class composition), so a property could not be overridden in your
+component at all.
 
 `selectAllFiltered()` returns `false` when the limit would be exceeded, so the
 component can inform the user instead of silently selecting a subset.
@@ -214,14 +225,23 @@ public function canSelect(): bool
 
 ## Configuration Reference
 
-| Property | Default | Description |
+Override these methods in your component:
+
+| Method | Default | Description |
 |---|---|---|
-| `$selectable` | `true` once the trait boots | Renders the checkbox column |
-| `$selected` | `[]` | Selected keys, always `list<string>` |
-| `$selectAllAcrossPages` | `false` | Offer "select all" beyond the current page |
-| `$selectAllLimit` | `0` | Cap for `selectAllFiltered()`, `0` = no limit |
-| `$clearSelectionOnFilter` | `true` | Drop the selection on filter/search/sort change |
-| `$bulkChunkSize` | `100` | Chunk size used by `eachSelected()` |
+| `selectAllAcrossPages()` | `false` | Offer "select all" beyond the current page |
+| `selectAllLimit()` | `0` | Cap for `selectAllFiltered()`, `0` = no limit |
+| `clearSelectionOnFilter()` | `true` | Drop the selection on filter/search/sort change |
+| `bulkChunkSize()` | `100` | Chunk size used by `eachSelected()` |
+| `canSelect()` | `true` | Gate for the whole selection feature |
+
+State properties (do not redeclare them):
+
+| Property | Description |
+|---|---|
+| `$selectable` | Set to `true` by the trait boot hook |
+| `$selected` | Selected keys, always `list<string>` |
+| `$visibleSelectionKeys` | Row keys on the current page |
 
 
 ## Methods

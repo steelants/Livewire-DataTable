@@ -45,7 +45,7 @@ class DataTableComponent extends Component
 
     public $useUrl = null;
 
-    // Transformace whole row on input (optional)
+    // Transformation of the whole row on input (optional)
     // Returns associative array
     // public function row(Model $row) : array
     // {
@@ -121,7 +121,7 @@ class DataTableComponent extends Component
         //select - ['table name' => ['type' => 'select', 'values' => ['value' => 'name', ''value2' => 'name2']]]
         //text - ['table name' => ['type' => 'text']
         //datetime - ['table name' => ['type' => 'datetime']]
-        //atd....
+        //etc....
         return array_fill_keys(array_keys($this->getHeader()), ['type' => 'text']);
     }
 
@@ -151,8 +151,8 @@ class DataTableComponent extends Component
         if ($this->searchable == true) {
             $queryStrings[] = 'searchValue';
         }
-        // Pri load-on-scroll itemsPerPage narusta s kazdym doskrolovanim - v URL
-        // by se nascitalo a po refreshi by se rovnou natahly stovky radku.
+        // With load-on-scroll, itemsPerPage keeps growing with every scroll-load - in the URL
+        // it would accumulate, and a refresh would immediately load hundreds of rows.
         if ($this->itemsPerPage != 0 && !method_exists($this, 'loadMore')) {
             $queryStrings[] = 'itemsPerPage';
         }
@@ -373,8 +373,8 @@ class DataTableComponent extends Component
 
     public function render()
     {
-        // Vyber je k dispozici jen s traitem HasBulkActions; selectionEnabled()
-        // navic respektuje canSelect(), takze se da podminit opravnenim.
+        // Selection is only available with the HasBulkActions trait; selectionEnabled()
+        // also respects canSelect(), so it can be gated by a permission.
         $hasBulkActions = method_exists($this, 'bulkActions') && method_exists($this, 'selectionEnabled');
         $selectable = $hasBulkActions && $this->selectionEnabled();
 
@@ -389,9 +389,9 @@ class DataTableComponent extends Component
             'selectPage'           => $selectable && $this->pageSelected(),
             'partiallySelected'    => $selectable && $this->pagePartiallySelected(),
             'bulkActions'          => $selectable ? $this->bulkActions() : [],
-            'selectAllAcrossPages' => $selectable && $this->selectAllAcrossPages,
+            'selectAllAcrossPages' => $selectable && $this->selectAllAcrossPages(),
             'keyPropery'           => $this->keyPropery,
-            // Explicitni priznak misto detekce podle existence promenne canLoadMore ve view.
+            // Explicit flag instead of detecting it via the existence of the canLoadMore variable in the view.
             'loadOnScroll'         => method_exists($this, 'loadMore'),
         ]);
     }
