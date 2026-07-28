@@ -37,10 +37,38 @@ class PostBulkDataTable
     /** @var list<array{0:list<string>,1:string}> */
     public array $bulkActionLog = [];
 
+    /** Prepinatelne knoby pro testy - konfigurace traitu jsou metody, ne properties. */
+    public bool $allowSelectAll = true;
+
+    public int $selectAllCap = 0;
+
+    public bool $clearOnFilter = true;
+
+    public int $chunkSize = 100;
+
     public function __construct()
     {
         $this->bootHasBulkActions();
-        $this->selectAllAcrossPages = true;
+    }
+
+    public function selectAllAcrossPages(): bool
+    {
+        return $this->allowSelectAll;
+    }
+
+    public function selectAllLimit(): int
+    {
+        return $this->selectAllCap;
+    }
+
+    public function clearSelectionOnFilter(): bool
+    {
+        return $this->clearOnFilter;
+    }
+
+    public function bulkChunkSize(): int
+    {
+        return $this->chunkSize;
     }
 
     /**

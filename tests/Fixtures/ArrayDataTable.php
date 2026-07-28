@@ -15,6 +15,9 @@ class ArrayDataTable
     /** Prepinatelne, aby se dal testovat hook canSelect(). */
     public bool $allowSelection = true;
 
+    /** Konfigurace traitu jsou metody, ne properties - fixture je zpristupni testum. */
+    public bool $clearOnFilter = true;
+
     /** @var list<array{0:list<string>,1:string}> */
     public array $bulkActionLog = [];
 
@@ -28,6 +31,11 @@ class ArrayDataTable
     public function canSelect(): bool
     {
         return $this->allowSelection;
+    }
+
+    public function clearSelectionOnFilter(): bool
+    {
+        return $this->clearOnFilter;
     }
 
     public function currentPageRows(): array
