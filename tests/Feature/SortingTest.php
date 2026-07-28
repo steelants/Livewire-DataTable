@@ -6,7 +6,7 @@ use Tests\Fixtures\Post;
 use Tests\Fixtures\PostDataTable;
 use Tests\Fixtures\Reaction;
 
-// ─── Jednoduché typy sloupců ─────────────────────────────────────────────────
+// ─── Simple column types ──────────────────────────────────────────────────────
 
 describe('sort by string column', function () {
     it('sorts ascending', function () {
@@ -164,7 +164,7 @@ describe('sort by BelongsTo column', function () {
 
         Comment::insert([
             ['post_id' => $postA->id,  'body' => 'has post'],
-            ['post_id' => 9999,        'body' => 'orphan'],   // neexistující post → LEFT JOIN → NULL
+            ['post_id' => 9999,        'body' => 'orphan'],   // non-existent post → LEFT JOIN → NULL
         ]);
 
         $table = new CommentDataTable(
@@ -176,7 +176,7 @@ describe('sort by BelongsTo column', function () {
 
         $results = $table->datasetFromDB(Comment::query());
 
-        // NULL sorts first in SQLite ASC — jen ověřujeme, že oba záznamy jsou ve výsledku
+        // NULL sorts first in SQLite ASC — just verifying both records are in the result
         expect($results)->toHaveCount(2);
     });
 });

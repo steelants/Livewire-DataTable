@@ -6,16 +6,14 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Head extends Component
+class SelectionHeader extends Component
 {
+    /**
+     * @param bool $selectPage        Whether the whole page is selected (derived server-side).
+     * @param bool $partiallySelected Whether only part of the page is selected - indeterminate state.
+     */
     public function __construct(
-        public array $headers,
-        public bool|null $sortable,
-        public string|null $sortBy,
-        public string|null $sortDirection,
-        public array|null $sortableColumns,
-        public array|null $headerFilters,
-        public bool $selectable = false,
+        public bool $selectable,
         public bool $selectPage = false,
         public bool $partiallySelected = false,
     ) {
@@ -26,6 +24,6 @@ class Head extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('datatable-components::thead');
+        return view('datatable-components::selection-header');
     }
 }

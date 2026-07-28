@@ -1,7 +1,8 @@
 <thead class="position-sticky top-0">
     <tr>
+        <x-datatable-selection-header :selectable="$selectable" :select-page="$selectPage" :partially-selected="$partiallySelected" />
         @foreach ($headers as $key => $header)
-            {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
+            {{-- Don't rely on the headers array — it can differ entirely from the property used for sorting via a function --}}
             <th scope="col" class="text-nowrap">
                 <span
                     @if ($sortable && in_array($key, $sortableColumns)) class="datatable-head-sort"
@@ -32,42 +33,5 @@
             <th class="text-end"></th>
         @endif
     </tr>
-    @if (!empty($headerFilters))
-        <tr>
-            @foreach ($headers as $key => $header)
-                <td>
-                    @if (isset($headerFilters[$key]))
-                        @if ($headerFilters[$key]['type'] == "select")
-                            <select class="form-select" wire:model.change="headerFilter.{{ $key }}">
-                                <option value="">{{ __('All') }}</option>
-                                @if (!empty($headerFilters[$key]['values']))
-                                    @foreach($headerFilters[$key]['values'] as $value => $name)
-                                        <option value="{{ $value }}">{{ $name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-						@elseif($headerFilters[$key]['type'] == "multiselect")
-                            <select multiple class="form-select form-select-sm"
-                                    wire:model.change="{{ $headerFilters[$key]['wire_model'] ?? 'headerFilter.' . $key }}">
-                                @foreach($headerFilters[$key]['values'] ?? [] as $value => $name)
-                                    <option value="{{ $value }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        @elseif($headerFilters[$key]['type'] == "date" || $headerFilters[$key]['type'] == "time" || $headerFilters[$key]['type'] == "datetime-local")
-                            <div class="input-group">
-                                <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}.from" />
-                                <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}.to" />
-                            </div>
-                        @else
-                            <input class="form-control" type="{{ $headerFilters[$key]['type'] }}" wire:model.change="headerFilter.{{ $key }}" />
-                        @endif
-                    @endif
-                </td>
-            @endforeach
-
-            @if (method_exists($this, 'actions'))
-                <td></td>
-            @endif
-        </tr>
-    @endif
+    <x-datatable-header-filters :$headers :$headerFilters :$selectable :has-actions="method_exists($this, 'actions')" />
 </thead>

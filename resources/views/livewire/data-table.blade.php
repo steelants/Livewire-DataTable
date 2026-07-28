@@ -1,60 +1,17 @@
 <div>
-    <div class="row g-2 mb-3">
-        @if($searchable)
-        <div class="col-md-6 col-lg-3 me-auto">
-            <input type="text" class="form-control" placeholder="{{ __('Search...') }}" wire:model.live.debounce="searchValue">
-        </div>
-        {{-- <div class="col-auto">
-            <button type="button" class="btn btn-outline" data-bs-toggle="collapse" data-bs-target="#filters_{{ $this->__id }}">
-                <i class="me-2 fas fa-filter"></i>
-                <span>{{ __('datatable::ui.filters') }}</span>
-                <span class="badge text-bg-secondary ms-2">3</span>
-            </button>
-        </div>
-        <div class="col-auto">
-            <button type="button" class="btn btn-outline">
-                <i class="me-2 fas fa-download"></i>
-                <span>{{ __('datatable::ui.export') }}</span>
-            </button>
-        </div> --}}
-        @endif
-        @if (!empty($this->filename))
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-light" wire:click="serv()">
-                    <span>{{ __(('Export')) }}</span>
-                </button>
-            </div>
-        @endif
-    </div>
+    <x-datatable-filters :id="$this->getId()" :$searchable :filename="$this->filename ?? null" />
 
-    <div class="collapse" id="filters_{{ $this->__id }}">
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="row gx-2 gy-3 mb-3">
-                    <div class="col-md-4 col-lg-3">
+    <x-datatable-bulk-bar :$selectable :$selected :$bulkActions :$selectAllAcrossPages :$itemsTotal />
 
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-3">
-                    <button type="button" class="btn btn-primary">
-                        <span>{{ __(('Filter actin')) }}</span>
-                    </button>
-                    <button type="button" class="btn btn-outline">
-                        <span>{{ __(('Reset filter')) }}</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="table-responsive-md">
         <table class="{{ $tableClass }}">
 
             @if($showHeader)
-                <x-datatable-head :$headers :$headerFilters :$sortable :$sortableColumns :$sortBy :$sortDirection/>
+                <x-datatable-head :$headers :$headerFilters :$sortable :$sortableColumns :$sortBy :$sortDirection :$selectable :$selectPage :$partiallySelected/>
             @endif
 
             @if ($dataset != null)
-                <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" :renderCasts="$renderCasts" />
+                <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" :renderCasts="$renderCasts" :selectable="$selectable" :keyPropery="$keyPropery" :selected="$selected" />
             @endif
 
             @if (!empty($footers))
@@ -69,9 +26,17 @@
         @endif
     </div>
 
-	@if (isset($canLoadMore) && $canLoadMore == true)
-		<div x-intersect="$wire.loadMore()">{{ __(('Load more')) }}</div>
-	@elseif ($paginated == true && !isset($canLoadMore))
+    @if (!empty($loadOnScroll))
+        @if ($canLoadMore)
+            {{-- wire:key based on itemsPerPage: after loading a batch the element gets swapped,
+                 which "re-arms" x-intersect.once. Without this, a trigger that
+                 stays in the viewport would keep firing requests in a loop. --}}
+            <div wire:key="load-more-{{ $itemsPerPage }}" class="text-center p-3 text-body-tertiary">
+                <span x-intersect.once="$wire.loadMore()" wire:loading.remove>{{ __('Load more') }}</span>
+                <span wire:loading><i class="fas fa-spinner fa-spin me-1"></i>{{ __('Loading...') }}</span>
+            </div>
+        @endif
+    @elseif ($paginated == true)
         <x-datatable-pagination :currentPage="$currentPage" :itemsPerPage="$itemsPerPage" :pagesTotal="$pagesTotal" :itemsTotal="$itemsTotal"/>
     @endif
 </div>

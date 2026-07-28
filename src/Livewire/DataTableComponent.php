@@ -45,7 +45,7 @@ class DataTableComponent extends Component
 
     public $useUrl = null;
 
-    // Transformace whole row on input (optional)
+    // Transformation of the whole row on input (optional)
     // Returns associative array
     // public function row(Model $row) : array
     // {
@@ -121,7 +121,7 @@ class DataTableComponent extends Component
         //select - ['table name' => ['type' => 'select', 'values' => ['value' => 'name', ''value2' => 'name2']]]
         //text - ['table name' => ['type' => 'text']
         //datetime - ['table name' => ['type' => 'datetime']]
-        //atd....
+        //etc....
         return array_fill_keys(array_keys($this->getHeader()), ['type' => 'text']);
     }
 
@@ -151,7 +151,9 @@ class DataTableComponent extends Component
         if ($this->searchable == true) {
             $queryStrings[] = 'searchValue';
         }
-        if ($this->itemsPerPage != 0) {
+        // With load-on-scroll, itemsPerPage keeps growing with every scroll-load - in the URL
+        // it would accumulate, and a refresh would immediately load hundreds of rows.
+        if ($this->itemsPerPage != 0 && !method_exists($this, 'loadMore')) {
             $queryStrings[] = 'itemsPerPage';
         }
         if ($this->sortable != false) {
@@ -304,8 +306,16 @@ class DataTableComponent extends Component
             }
         }
 
+        if (method_exists($this, 'refreshSelectionState')) {
+            $this->refreshSelectionState($this->dataset);
+        }
+
+        if (method_exists($this, 'refreshLoadMoreState')) {
+            $this->refreshLoadMoreState();
+        }
+
         if ($this->paginated != false && $this->itemsPerPage != 0) {
-            $this->pagesTotal = round(ceil($this->itemsTotal / $this->itemsPerPage));
+            $this->pagesTotal = (int) ceil($this->itemsTotal / $this->itemsPerPage);
         }
 
         if ($this->currentPage > $this->pagesTotal) {
@@ -363,12 +373,26 @@ class DataTableComponent extends Component
 
     public function render()
     {
+        // Selection is only available with the HasBulkActions trait; selectionEnabled()
+        // also respects canSelect(), so it can be gated by a permission.
+        $hasBulkActions = method_exists($this, 'bulkActions') && method_exists($this, 'selectionEnabled');
+        $selectable = $hasBulkActions && $this->selectionEnabled();
+
         return view($this->viewName, [
-            'dataset'       => $this->getData(),
-            'headers'       => $this->getHeader(),
-            'footers'       => $this->footers(),
-            'headerFilters' => !empty($this->filterable) ? $this->headerFilters() : null,
+            'dataset'              => $this->getData(),
+            'headers'              => $this->getHeader(),
+            'footers'              => $this->footers(),
+            'headerFilters'        => !empty($this->filterable) ? $this->headerFilters() : null,
 			'renderCasts' => $this->renderCasts(),
+            'selectable'           => $selectable,
+            'selected'             => $selectable ? $this->selected : [],
+            'selectPage'           => $selectable && $this->pageSelected(),
+            'partiallySelected'    => $selectable && $this->pagePartiallySelected(),
+            'bulkActions'          => $selectable ? $this->bulkActions() : [],
+            'selectAllAcrossPages' => $selectable && $this->selectAllAcrossPages(),
+            'keyPropery'           => $this->keyPropery,
+            // Explicit flag instead of detecting it via the existence of the canLoadMore variable in the view.
+            'loadOnScroll'         => method_exists($this, 'loadMore'),
         ]);
     }
 

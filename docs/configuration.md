@@ -107,6 +107,64 @@ For more information see:
 [Filtering documentation](filtering.md)
 
 
+## Bulk Actions
+
+Row selection and bulk actions are enabled by adding the `HasBulkActions`
+trait:
+
+```php
+use SteelAnts\DataTable\Traits\HasBulkActions;
+```
+
+Related configuration is expressed as overridable methods, because PHP cannot
+redeclare a trait property with a different default value:
+
+```php
+// Offer "select all" beyond the current page
+public function selectAllAcrossPages(): bool { return false; }
+
+// Cap for select all, 0 = no limit
+public function selectAllLimit(): int { return 0; }
+
+// Drop the selection when a filter, the search value or the sorting changes
+public function clearSelectionOnFilter(): bool { return true; }
+
+// Chunk size used when processing the selection
+public function bulkChunkSize(): int { return 100; }
+
+// Gate the whole selection feature, e.g. by permission
+public function canSelect(): bool { return true; }
+```
+
+For more information see:
+
+[Bulk Actions documentation](bulk-actions.md)
+
+
+## Load On Scroll
+
+Instead of pagination, rows can be appended as the user scrolls:
+
+```php
+use SteelAnts\DataTable\Traits\UseLoadOnScroll;
+```
+
+The trait forces `$paginated = true` and replaces the pagination controls with
+a trigger at the end of the table.
+
+```php
+// How many rows to add per step, 0 = use the initial itemsPerPage
+public int $loadMoreStep = 0;
+```
+
+`itemsPerPage` is deliberately left out of the query string in this mode -
+otherwise it would accumulate in the URL and a refresh would load hundreds of
+rows at once.
+
+Note that each step re-runs the query with a larger limit, so the whole set of
+loaded rows is fetched again. Keep `$loadMoreStep` reasonable on large tables.
+
+
 ## Headers
 
 Columns displayed in the table are defined by:
@@ -196,5 +254,6 @@ Continue with:
 - [Usage](usage.md)
 - [Sorting](sorting.md)
 - [Filtering](filtering.md)
+- [Bulk Actions](bulk-actions.md)
 - [Rendering](rendering.md)
 - [Development](development.md)

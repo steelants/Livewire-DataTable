@@ -37,11 +37,18 @@ trait UseDatabase
         return array_combine($keys, $keys);
     }
 
-    public function datasetFromDB($query): array
+    /**
+     * Applies fulltext search and headerFilter values to the query.
+     *
+     * Deliberately separated from datasetFromDB(), so the same restriction can be
+     * reused outside of row rendering - typically for HasBulkActions::selectAllFiltered(),
+     * which needs the keys of the entire filtered selection without sorting or pagination.
+     *
+     * NOTE: does not add relation joins (getRelationJoins), so filters on
+     * relations go through whereRelation / whereHas.
+     */
+    protected function applyFilters($query)
     {
-        $datasetFromDB = [];
-        $query = $this->getRelationJoins($query);
-
         if ($this->searchable && !empty($this->searchValue)) {
             $query->where(function ($q) {
                 foreach ($this->searchableColumns as $i => $name) {
@@ -70,6 +77,14 @@ trait UseDatabase
             });
         }
 
+        return $query;
+    }
+
+    public function datasetFromDB($query): array
+    {
+        $datasetFromDB = [];
+        $query = $this->applyFilters($this->getRelationJoins($query));
+
         $this->itemsTotal = $this->getCount($query);
 
         if ($this->sortable && !empty($this->sortBy)) {
@@ -88,9 +103,9 @@ trait UseDatabase
             }
         }
 
-        // Sekundarni deterministicky klic (primarni klic modelu). Bez nej je u radku se
-        // shodnou hodnotou radiciho sloupce poradi mezi strankami nestabilni a OFFSET
-        // pagination radky vynechava nebo duplikuje.
+        // Secondary deterministic key (the model's primary key). Without it, rows sharing
+        // the same value in the sort column have an unstable order across pages, and OFFSET
+        // pagination ends up skipping or duplicating rows.
         if (method_exists($query, 'getModel')) {
             $query->orderBy($query->getModel()->getQualifiedKeyName(), $this->sortDirection ?: 'asc');
         }
