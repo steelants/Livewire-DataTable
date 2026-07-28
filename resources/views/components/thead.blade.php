@@ -2,7 +2,7 @@
     <tr>
         <x-datatable-selection-header :selectable="$selectable" :select-page="$selectPage" :partially-selected="$partiallySelected" />
         @foreach ($headers as $key => $header)
-            {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
+            {{-- Don't rely on the headers array — it can differ entirely from the property used for sorting via a function --}}
             <th scope="col" class="text-nowrap">
                 <span
                     @if ($sortable && in_array($key, $sortableColumns)) class="datatable-head-sort"
