@@ -44,8 +44,15 @@ trait HasBulkActions
     /**
      * Povoli "vybrat vse z filtru" (napric strankami). Vypnute = vybirat lze
      * jen po strankach, obdoba selectCurrentPageOnly() ve Filamentu.
+     *
+     * Konfigurace jsou zamerne metody, ne properties: PHP nedovoli predeklarovat
+     * property z traitu s jinou vychozi hodnotou (fatal error pri kompozici),
+     * takze property by se v komponente nedala prepsat.
      */
-    public bool $selectAllAcrossPages = false;
+    public function selectAllAcrossPages(): bool
+    {
+        return false;
+    }
 
     /**
      * Strop pro selectAllFiltered(). 0 = bez limitu.
@@ -53,18 +60,27 @@ trait HasBulkActions
      * Velke vybery nafukuji Livewire payload a naraze na limit parametru
      * prepared statementu (u MySQL kolem 65 000).
      */
-    public int $selectAllLimit = 0;
+    public function selectAllLimit(): int
+    {
+        return 0;
+    }
 
     /**
      * Zahodit vyber pri zmene filtru, hledani nebo razeni. Jinak by hromadna
      * akce sahla na radky, ktere uzivatel uz nevidi.
      */
-    public bool $clearSelectionOnFilter = true;
+    public function clearSelectionOnFilter(): bool
+    {
+        return true;
+    }
 
     /**
      * Velikost davky pri zpracovani vyberu v eachSelected().
      */
-    public int $bulkChunkSize = 100;
+    public function bulkChunkSize(): int
+    {
+        return 100;
+    }
 
     public function bootHasBulkActions(): void
     {

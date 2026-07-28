@@ -389,7 +389,7 @@ class DataTableComponent extends Component
             'selectPage'           => $selectable && $this->pageSelected(),
             'partiallySelected'    => $selectable && $this->pagePartiallySelected(),
             'bulkActions'          => $selectable ? $this->bulkActions() : [],
-            'selectAllAcrossPages' => $selectable && $this->selectAllAcrossPages,
+            'selectAllAcrossPages' => $selectable && $this->selectAllAcrossPages(),
             'keyPropery'           => $this->keyPropery,
             // Explicitni priznak misto detekce podle existence promenne canLoadMore ve view.
             'loadOnScroll'         => method_exists($this, 'loadMore'),
