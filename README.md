@@ -93,6 +93,7 @@ Render the component:
 - [Usage](docs/usage.md)
 - [Configuration](docs/configuration.md)
 - [Actions](docs/actions.md)
+- [Bulk Actions](docs/bulk-actions.md)
 - [Sorting](docs/sorting.md)
 - [Filtering](docs/filtering.md)
 - [Rendering](docs/rendering.md)

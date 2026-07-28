@@ -163,12 +163,34 @@ class UserTable extends DataTableComponent
 ```
 
 
+## Applying Filters Outside The Table
+
+`UseDatabase` exposes the filtering step on its own:
+
+```php
+protected function applyFilters($query)
+```
+
+It applies the full text search and every value from `$headerFilter` to the
+given query and returns it. `datasetFromDB()` calls it internally, and
+[Bulk Actions](bulk-actions.md) uses it in `selectAllFiltered()` to collect the
+keys of the whole filtered set without sorting or pagination.
+
+Override it when a table needs a filtering rule the built-in types do not
+cover, and call the parent implementation so the standard filters keep working.
+
+Note that `applyFilters()` does **not** add the relation joins that
+`datasetFromDB()` sets up, so filters over relations are resolved through
+`whereRelation()` / `whereHas()`.
+
+
 ## Next Steps
 
 Continue with:
 
 - [Usage](usage.md)
 - [Sorting](sorting.md)
+- [Bulk Actions](bulk-actions.md)
 - [Rendering](rendering.md)
 - [Configuration](configuration.md)
 - [Development](development.md)

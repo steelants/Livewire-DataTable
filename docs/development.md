@@ -70,6 +70,14 @@ For information about running tests see:
 [Testing documentation](testing.md)
 
 
+## Row Types
+
+A DataTable row is either an array (`UseDatabase`, `dataset()`) or an Eloquent
+model (`UseDatabaseEloquent`). Anything reading values out of a row must accept
+both - use the `array|Model` union and read through `data_get()`, and cover both
+shapes with tests. See [Testing](testing.md).
+
+
 ## Docker Build
 
 Docker build and release process is handled by the Gitea server.

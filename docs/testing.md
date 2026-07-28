@@ -42,6 +42,35 @@ Tests run using an in-memory SQLite database.
 
 This allows tests to execute without requiring an external database server.
 
+`Tests\TestCase` registers the Livewire and DataTable service providers, so
+tests can also render the package's Blade components, for example:
+
+```php
+Blade::render(
+    '<x-datatable-selection-cell :selectable="true" :row="$row" key-propery="id" :selected="$selected" />',
+    ['row' => ['id' => 7], 'selected' => ['7']]
+);
+```
+
+
+## Covering Both Row Shapes
+
+A DataTable row is either an array (`UseDatabase`, `dataset()`) or an Eloquent
+model (`UseDatabaseEloquent`). Anything that reads values out of a row has to be
+tested against **both**, otherwise a type mismatch only shows up in the
+application. The fixtures reflect that:
+
+| Fixture | Row shape |
+|---|---|
+| `ArrayDataTable` | arrays |
+| `PostDataTable` | arrays, database backed |
+| `PostBulkDataTable` | Eloquent models, with bulk actions |
+
+Fixtures also call the trait boot hooks (`bootHasBulkActions()`,
+`bootUseLoadOnScroll()`) in their constructor, because Livewire calls them on
+every request — without that, tests would run against a state a real component
+never has.
+
 
 ## Adding New Tests
 
