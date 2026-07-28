@@ -1,6 +1,6 @@
 <thead class="position-sticky top-0">
     <tr>
-        <x-datatable-selection-header :selectable="$selectable" :select-page="$selectPage" />
+        <x-datatable-selection-header :selectable="$selectable" :select-page="$selectPage" :partially-selected="$partiallySelected" />
         @foreach ($headers as $key => $header)
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
             <th scope="col" class="text-nowrap">

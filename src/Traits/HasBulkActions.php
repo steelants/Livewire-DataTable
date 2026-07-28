@@ -20,11 +20,6 @@ trait HasBulkActions
     public bool $selectable = false;
 
     /**
-     * Stav checkboxu v hlavicce = "je cela aktualni stranka vybrana".
-     */
-    public bool $selectPage = false;
-
-    /**
      * Vybrane klice radku. Hodnoty z HTML jsou stringy, drzime je tak i tady.
      *
      * POZOR: je to public Livewire property, takze do ni klient zapise cokoli.
@@ -36,6 +31,11 @@ trait HasBulkActions
 
     /**
      * Klice radku na aktualni strance - podklad pro checkbox v hlavicce.
+     *
+     * Persistovat se musi: toggleSelectPage() bezi pred renderem, takze potrebuje
+     * klice z predchoziho vykresleni a znovu nacitat dataset by bylo drahe.
+     * Klient do nich muze zapsat cokoli, ale ovlivni tim jen obsah $selected,
+     * ktery se stejne vzdy validuje pres selectedQuery().
      *
      * @var list<string>
      */
@@ -123,27 +123,75 @@ trait HasBulkActions
         }
     }
 
-    public function updatedSelectPage(bool $value): void
+    /**
+     * Prepne vyber cele aktualni stranky.
+     *
+     * Zamerne akce, ne wire:model property - "je stranka vybrana" je odvozeny
+     * stav z $selected a klicu na strance (viz pageSelected()). Kdyz se drzel
+     * jako persistovana property, vozil se v payloadu zbytecne a rozchazel se
+     * se skutecnym vyberem.
+     */
+    public function toggleSelectPage(): void
     {
         if (!$this->selectionEnabled()) {
-            $this->selectPage = false;
+            return;
+        }
+
+        if ($this->pageSelected()) {
+            $remove = array_flip($this->visibleSelectionKeys);
+
+            $this->selected = array_values(array_filter(
+                $this->selected,
+                fn ($key) => !isset($remove[$key])
+            ));
 
             return;
         }
 
-        if ($value) {
-            $this->selected = $this->normalizeSelectedValues(
-                array_merge($this->selected, $this->visibleSelectionKeys)
-            );
+        $this->selected = $this->normalizeSelectedValues(
+            array_merge($this->selected, $this->visibleSelectionKeys)
+        );
+    }
 
-            return;
+    /**
+     * Jsou vsechny radky na aktualni strance vybrane? Podklad pro stav
+     * checkboxu v hlavicce.
+     */
+    public function pageSelected(): bool
+    {
+        if (empty($this->visibleSelectionKeys)) {
+            return false;
         }
 
-        $remove = array_flip($this->visibleSelectionKeys);
-        $this->selected = array_values(array_filter(
-            $this->selected,
-            fn ($key) => !isset($remove[$key])
-        ));
+        $selectedLookup = array_flip($this->selected);
+
+        foreach ($this->visibleSelectionKeys as $key) {
+            if (!isset($selectedLookup[$key])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Je vybrana jen cast aktualni stranky? Pro indeterminate stav hlavicky.
+     */
+    public function pagePartiallySelected(): bool
+    {
+        if (empty($this->visibleSelectionKeys) || $this->pageSelected()) {
+            return false;
+        }
+
+        $selectedLookup = array_flip($this->selected);
+
+        foreach ($this->visibleSelectionKeys as $key) {
+            if (isset($selectedLookup[$key])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function updatedSelected(): void
@@ -155,7 +203,6 @@ trait HasBulkActions
         }
 
         $this->selected = $this->normalizeSelectedValues($this->selected);
-        $this->syncSelectPageState();
     }
 
     /**
@@ -175,7 +222,6 @@ trait HasBulkActions
 
         $this->visibleSelectionKeys = $this->resolveSelectionKeys($dataset);
         $this->selected = $this->normalizeSelectedValues($this->selected);
-        $this->syncSelectPageState();
     }
 
     /**
@@ -212,7 +258,6 @@ trait HasBulkActions
     public function clearSelection(): void
     {
         $this->selected = [];
-        $this->selectPage = false;
     }
 
     public function selectedCount(): int
@@ -245,7 +290,6 @@ trait HasBulkActions
         }
 
         $this->selected = $keys;
-        $this->syncSelectPageState();
 
         return true;
     }
@@ -497,26 +541,5 @@ trait HasBulkActions
         }
 
         return null;
-    }
-
-    private function syncSelectPageState(): void
-    {
-        if (empty($this->visibleSelectionKeys)) {
-            $this->selectPage = false;
-
-            return;
-        }
-
-        $selectedLookup = array_flip($this->selected);
-
-        foreach ($this->visibleSelectionKeys as $key) {
-            if (!isset($selectedLookup[$key])) {
-                $this->selectPage = false;
-
-                return;
-            }
-        }
-
-        $this->selectPage = true;
     }
 }

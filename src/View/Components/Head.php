@@ -17,6 +17,7 @@ class Head extends Component
         public array|null $headerFilters,
         public bool $selectable = false,
         public bool $selectPage = false,
+        public bool $partiallySelected = false,
     ) {
     }
 

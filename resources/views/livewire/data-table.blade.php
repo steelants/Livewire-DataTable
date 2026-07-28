@@ -47,7 +47,7 @@
         <table class="{{ $tableClass }}">
 
             @if($showHeader)
-                <x-datatable-head :$headers :$headerFilters :$sortable :$sortableColumns :$sortBy :$sortDirection :$selectable :$selectPage/>
+                <x-datatable-head :$headers :$headerFilters :$sortable :$sortableColumns :$sortBy :$sortDirection :$selectable :$selectPage :$partiallySelected/>
             @endif
 
             @if ($dataset != null)
