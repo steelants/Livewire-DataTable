@@ -98,5 +98,6 @@ Example:
 
 Continue with:
 
+- [Bulk Actions](bulk-actions.md)
 - [Usage](usage.md)
 - [Rendering](rendering.md)

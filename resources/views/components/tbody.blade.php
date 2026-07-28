@@ -1,6 +1,7 @@
 <tbody>
     @foreach ($dataset as $idx => $row)
         <tr wire:key="row-{{ $idx }}">
+            <x-datatable-selection-cell :selectable="$selectable" :row="$row" :key-propery="$keyPropery" />
             @if (method_exists($this, 'renderRow'))
                 @php($row = $this->renderRow($row))
 

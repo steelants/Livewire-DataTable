@@ -46,15 +46,47 @@
             </div>
         </div>
     </div>
+    @if (!empty($selectable) && count($selected) > 0)
+        <div class="d-flex align-items-center gap-3 p-2 mb-2 bg-body-tertiary rounded-2">
+            <span class="fw-semibold">
+                {{ __(':count selected', ['count' => count($selected)]) }}
+            </span>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach ($bulkActions as $index => $action)
+                    @if ($action['type'] == 'url')
+                        <a class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}" href="{{ $action['url'] }}">
+                            @if (!empty($action['iconClass']))
+                                <i class="{{ $action['iconClass'] }} me-1"></i>
+                            @endif
+                            {{ __($action['text']) }}
+                        </a>
+                    @else
+                        <button type="button" class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}"
+                            wire:click="callBulkAction({{ $index }})"
+                            @if (!empty($action['confirm'])) wire:confirm="{{ __($action['confirm']) }}" @endif>
+                            @if (!empty($action['iconClass']))
+                                <i class="{{ $action['iconClass'] }} me-1"></i>
+                            @endif
+                            {{ __($action['text']) }}
+                        </button>
+                    @endif
+                @endforeach
+            </div>
+            <button type="button" class="btn btn-sm btn-link ms-auto" wire:click="clearSelection">
+                {{ __('Clear selection') }}
+            </button>
+        </div>
+    @endif
+
     <div class="table-responsive-md">
         <table class="{{ $tableClass }}">
 
             @if($showHeader)
-                <x-datatable-head :$headers :$headerFilters :$sortable :$sortableColumns :$sortBy :$sortDirection/>
+                <x-datatable-head :$headers :$headerFilters :$sortable :$sortableColumns :$sortBy :$sortDirection :$selectable :$selectPage/>
             @endif
 
             @if ($dataset != null)
-                <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" :renderCasts="$renderCasts" />
+                <x-datatable-body :dataset="$dataset" :actions="$actions" :headers="$headers" :renderCasts="$renderCasts" :selectable="$selectable" :keyPropery="$keyPropery" />
             @endif
 
             @if (!empty($footers))

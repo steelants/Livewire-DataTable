@@ -16,6 +16,7 @@ Learn how to use individual features:
 
 - [Configuration](configuration.md)
 - [Actions](actions.md)
+- [Bulk Actions](bulk-actions.md)
 - [Sorting](sorting.md)
 - [Filtering](filtering.md)
 - [Rendering](rendering.md)

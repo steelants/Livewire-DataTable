@@ -15,6 +15,8 @@ class Head extends Component
         public string|null $sortDirection,
         public array|null $sortableColumns,
         public array|null $headerFilters,
+        public bool $selectable = false,
+        public bool $selectPage = false,
     ) {
     }
 

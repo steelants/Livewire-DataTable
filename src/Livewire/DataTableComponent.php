@@ -304,6 +304,10 @@ class DataTableComponent extends Component
             }
         }
 
+        if (method_exists($this, 'refreshSelectionState')) {
+            $this->refreshSelectionState($this->dataset);
+        }
+
         if ($this->paginated != false && $this->itemsPerPage != 0) {
             $this->pagesTotal = round(ceil($this->itemsTotal / $this->itemsPerPage));
         }
@@ -363,12 +367,19 @@ class DataTableComponent extends Component
 
     public function render()
     {
+        $hasBulkActions = method_exists($this, 'bulkActions');
+
         return view($this->viewName, [
             'dataset'       => $this->getData(),
             'headers'       => $this->getHeader(),
             'footers'       => $this->footers(),
             'headerFilters' => !empty($this->filterable) ? $this->headerFilters() : null,
 			'renderCasts' => $this->renderCasts(),
+            'selectable'    => $hasBulkActions && $this->selectable,
+            'selected'      => $hasBulkActions ? $this->selected : [],
+            'selectPage'    => $hasBulkActions ? $this->selectPage : false,
+            'bulkActions'   => $hasBulkActions ? $this->bulkActions() : [],
+            'keyPropery'    => $this->keyPropery,
         ]);
     }
 

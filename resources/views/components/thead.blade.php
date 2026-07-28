@@ -1,5 +1,6 @@
 <thead class="position-sticky top-0">
     <tr>
+        <x-datatable-selection-header :selectable="$selectable" :select-page="$selectPage" />
         @foreach ($headers as $key => $header)
             {{-- Nespoléhat se na proměnou headers může být uplně jiná než property sortovat přes funkci --}}
             <th scope="col" class="text-nowrap">
@@ -34,6 +35,9 @@
     </tr>
     @if (!empty($headerFilters))
         <tr>
+            @if ($selectable)
+                <td></td>
+            @endif
             @foreach ($headers as $key => $header)
                 <td>
                     @if (isset($headerFilters[$key]))

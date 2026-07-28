@@ -6,15 +6,12 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Body extends Component
+class SelectionCell extends Component
 {
     public function __construct(
-        public array $dataset,
-        public array $actions,
-        public array $headers,
-        public array $renderCasts = [],
-        public bool $selectable = false,
-        public string $keyPropery = 'id',
+        public bool $selectable,
+        public array $row,
+        public string $keyPropery,
     ) {
     }
 
@@ -23,6 +20,6 @@ class Body extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('datatable-components::tbody');
+        return view('datatable-components::selection-cell');
     }
 }
