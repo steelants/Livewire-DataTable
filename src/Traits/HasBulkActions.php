@@ -126,7 +126,7 @@ trait HasBulkActions
      */
     public function updatedHasBulkActions(string $name, mixed $value): void
     {
-        if (!$this->clearSelectionOnFilter) {
+        if (!$this->clearSelectionOnFilter()) {
             return;
         }
 
@@ -295,13 +295,14 @@ trait HasBulkActions
      */
     public function selectAllFiltered(): bool
     {
-        if (!$this->selectionEnabled() || !$this->selectAllAcrossPages) {
+        if (!$this->selectionEnabled() || !$this->selectAllAcrossPages()) {
             return false;
         }
 
         $keys = $this->selectableKeys();
+        $limit = $this->selectAllLimit();
 
-        if ($this->selectAllLimit > 0 && count($keys) > $this->selectAllLimit) {
+        if ($limit > 0 && count($keys) > $limit) {
             return false;
         }
 
@@ -355,7 +356,7 @@ trait HasBulkActions
         $model = $query->getModel();
 
         $query->chunkById(
-            max(1, $this->bulkChunkSize),
+            max(1, $this->bulkChunkSize()),
             function ($rows) use ($callback, &$ok, &$skipped, &$failed, &$reasons): void {
                 foreach ($rows as $row) {
                     try {
