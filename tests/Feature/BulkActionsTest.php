@@ -225,7 +225,7 @@ describe('HasBulkActions clearing on filter change', function () {
 
     it('can be switched off', function () {
         $table = new ArrayDataTable(bulkActionsRows());
-        $table->clearSelectionOnFilter = false;
+        $table->clearOnFilter = false;
         $table->refreshSelectionState($table->currentPageRows());
         $table->toggleSelectPage();
 
@@ -322,7 +322,7 @@ describe('HasBulkActions with Eloquent rows', function () {
 
     it('refuses select all across pages when disabled', function () {
         $table = new PostBulkDataTable();
-        $table->selectAllAcrossPages = false;
+        $table->allowSelectAll = false;
         $table->loadRows();
 
         expect($table->selectAllFiltered())->toBeFalse()
@@ -331,7 +331,7 @@ describe('HasBulkActions with Eloquent rows', function () {
 
     it('refuses select all over the configured limit', function () {
         $table = new PostBulkDataTable();
-        $table->selectAllLimit = 2;
+        $table->selectAllCap = 2;
         $table->loadRows();
 
         expect($table->selectAllFiltered())->toBeFalse()
@@ -357,7 +357,7 @@ describe('HasBulkActions eachSelected', function () {
 
     it('processes every selected row in chunks', function () {
         $table = new PostBulkDataTable();
-        $table->bulkChunkSize = 2;
+        $table->chunkSize = 2;
         $table->selected = ['1', '2', '3', '4', '5', '6', '7'];
 
         $seen = [];
