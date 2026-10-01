@@ -150,32 +150,38 @@ class DataTableComponent extends Component
     //     $this->getData(true);
     // }
 
+    /**
+     * Properties bound to the URL. A method instead of #[Url] attributes, because the
+     * binding depends on the configuration: no URL inside a Livewire request (useUrl),
+     * nothing for disabled features. 'except' keeps default values out of the URL.
+     */
     public function queryString(): array
     {
         if (!$this->resolveUseUrl()) {
             return [];
         }
 
-        $queryStrings = [];
-        if ($this->paginated == true) {
-            $queryStrings['currentPage'] = ['except' => 0];
-        }
-        if ($this->searchable == true) {
-            $queryStrings[] = 'searchValue';
-        }
         // With load-on-scroll, itemsPerPage keeps growing with every scroll-load - in the URL
         // it would accumulate, and a refresh would immediately load hundreds of rows.
-        if ($this->itemsPerPage != 0 && !method_exists($this, 'loadMore')) {
-            $queryStrings[] = 'itemsPerPage';
-        }
-        if ($this->sortable != false) {
-            $queryStrings[] = 'sortBy';
-            // Always bound: queryString() is read before the URL values are applied, so
-            // a condition on sortBy would never restore the direction. 'except' keeps
-            // the default out of the URL.
-            $queryStrings['sortDirection'] = ['except' => 'asc'];
-        }
-        return $queryStrings;
+        $bindItemsPerPage = $this->itemsPerPage != 0 && !method_exists($this, 'loadMore');
+
+        // sortDirection does not depend on sortBy: queryString() is read before the URL
+        // values are applied, so such a condition would never restore the direction.
+        return array_filter([
+            'currentPage'   => $this->paginated ? ['except' => 1] : null,
+            'searchValue'   => $this->searchable ? ['except' => ''] : null,
+            'itemsPerPage'  => $bindItemsPerPage ? ['except' => $this->defaultValue('itemsPerPage')] : null,
+            'sortBy'        => $this->sortable ? ['except' => ''] : null,
+            'sortDirection' => $this->sortable ? ['except' => 'asc'] : null,
+        ]);
+    }
+
+    /**
+     * Declared default of a property, including the value a subclass overrides it with.
+     */
+    private function defaultValue(string $property): mixed
+    {
+        return (new \ReflectionProperty($this, $property))->getDefaultValue();
     }
 
     private function getDatasetFromArray($dataset): array

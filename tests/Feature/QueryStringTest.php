@@ -17,10 +17,10 @@ describe('query string', function () {
         $table->useUrl = true;
 
         expect($table->queryString())->toBe([
-            'currentPage' => ['except' => 0],
-            'searchValue',
-            'itemsPerPage',
-            'sortBy',
+            'currentPage'   => ['except' => 1],
+            'searchValue'   => ['except' => ''],
+            'itemsPerPage'  => ['except' => 2],
+            'sortBy'        => ['except' => ''],
             'sortDirection' => ['except' => 'asc'],
         ]);
     });
@@ -32,14 +32,14 @@ describe('query string', function () {
         $table->searchable = false;
         $table->sortable = false;
 
-        expect($table->queryString())->toBe(['itemsPerPage']);
+        expect($table->queryString())->toBe(['itemsPerPage' => ['except' => 2]]);
     });
 
     it('leaves out itemsPerPage with load on scroll', function () {
         $table = new ScrollQueryStringComponent();
         $table->useUrl = true;
 
-        expect($table->queryString())->not->toContain('itemsPerPage');
+        expect($table->queryString())->not->toHaveKey('itemsPerPage');
     });
 
     it('binds nothing when the URL is disabled', function () {
@@ -85,6 +85,12 @@ describe('query string', function () {
 
         // odd rows sorted desc: 9, 7 | 5, 3 | 1
         expect(array_column($table->viewData('dataset'), 'id'))->toBe([5, 3]);
+    });
+
+    it('restores a non-default page size from the URL', function () {
+        Livewire::withQueryParams(['itemsPerPage' => '5'])
+            ->test(QueryStringComponent::class)
+            ->assertSet('itemsPerPage', 5);
     });
 
     it('resets to the first page when the search changes', function () {
