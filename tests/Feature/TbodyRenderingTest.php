@@ -110,3 +110,33 @@ describe('tbody output', function () {
             ->and(normalizedTbody(markersVariant('plain')))->not->toContain('text-end');
     });
 });
+
+describe('morph markers', function () {
+    function tbodyMarkers(string $html): int
+    {
+        preg_match('/<tbody>.*<\/tbody>/s', $html, $tbody);
+
+        return morphMarkerCount($tbody[0]);
+    }
+
+    it('adds no markers per row for cells, casts and render methods', function () {
+        Tests\Fixtures\RenderComponent::$rows = array_map(
+            fn ($i) => ['id' => $i, 'name' => "N{$i}", 'active' => $i % 2 === 0, 'note' => 'x', 'raw' => '<b>y</b>'],
+            range(1, 50)
+        );
+
+        // Only the @if choosing the loop and the @foreach around the rows; nothing per row or cell.
+        expect(tbodyMarkers(Livewire::test(Tests\Fixtures\RenderComponent::class)->html()))->toBe(4)
+            ->and(tbodyMarkers(Livewire::test(Tests\Fixtures\RenderRowComponent::class)->html()))->toBe(4);
+    });
+
+    it('keeps the markers per row within the budget', function (string $variant, int $perRow) {
+        // 20 rows; the bench badge in the status column adds 4 markers per row itself.
+        expect(tbodyMarkers(markersVariant($variant)))->toBeLessThanOrEqual(20 * $perRow + 4);
+    })->with([
+        ['plain', 4],
+        ['row', 10],
+        ['actions', 14],
+        ['selectable', 18],
+    ]);
+});
