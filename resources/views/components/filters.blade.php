@@ -19,7 +19,7 @@
     @endif
     @if (!empty($filename))
         <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-light" wire:click="serv()">
+            <button type="button" class="btn btn-light" wire:click="serv">
                 <span>{{ __('Export') }}</span>
             </button>
         </div>

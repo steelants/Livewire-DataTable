@@ -1,0 +1,124 @@
+{
+    "array": {
+        "10000": {
+            "bez filtru": {
+                "ms": 0.05,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání": {
+                "ms": 6.84,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "filtry text+select+date": {
+                "ms": 7.62,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "řazení": {
+                "ms": 37.49,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání+filtry+řazení": {
+                "ms": 17.39,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 5.58,
+                "vybráno": 10000
+            }
+        },
+        "100000": {
+            "bez filtru": {
+                "ms": 0.07,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání": {
+                "ms": 100.46,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "filtry text+select+date": {
+                "ms": 87.82,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "řazení": {
+                "ms": 571.99,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání+filtry+řazení": {
+                "ms": 217.9,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 62.22,
+                "vybráno": 100000
+            }
+        },
+        "1000000": {
+            "bez filtru": {
+                "ms": 0.13,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání": {
+                "ms": 1638.09,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "filtry text+select+date": {
+                "ms": 971.63,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "řazení": {
+                "ms": 9954.37,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání+filtry+řazení": {
+                "ms": 3408.01,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 829.07,
+                "vybráno": 1000000
+            }
+        }
+    },
+    "db": {
+        "100000": {
+            "bez filtru": {
+                "ms": 29.9,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 46.83,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "filtry text+select": {
+                "ms": 93.94,
+                "SQL dotazů": 5,
+                "headerFilters()": 3
+            },
+            "filtry text+select+date": {
+                "chyba": "ErrorException: Undefined array key \"published_at.from\""
+            },
+            "řazení": {
+                "ms": 33.31,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            }
+        }
+    }
+}

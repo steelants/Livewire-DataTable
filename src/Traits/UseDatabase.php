@@ -49,36 +49,62 @@ trait UseDatabase
      */
     protected function applyFilters($query)
     {
-        $searchTerm = $this->searchTerm();
+        // Trimmed directly: the trait is also used outside DataTableComponent.
+        $searchTerm = trim($this->searchValue);
         if ($this->searchable && $searchTerm !== '') {
-            $query->where(function ($q) use ($searchTerm) {
-                foreach ($this->searchableColumns as $i => $name) {
-                    $this->applyWhere($q, $name, 'LIKE', '%' . str_replace('*', '%', $searchTerm) . '%', $i === 0 ? 'where' : 'orWhere');
+            // * stays a wildcard, % and _ typed by the user are matched literally.
+            $escaped = $this->escapeLike($searchTerm);
+            $pattern = '%' . str_replace('*', '%', $escaped) . '%';
+            $escape = $escaped !== $searchTerm;
+            $columns = $this->searchColumns();
+            $query->where(function ($q) use ($pattern, $escape, $columns) {
+                foreach ($columns as $i => $name) {
+                    $this->applyLike($q, $name, $pattern, $escape, $i === 0 ? 'where' : 'orWhere');
                 }
             });
         }
 
         if ($this->filterable && !empty($this->headerFilter)) {
-            $query->where(function ($q) {
-                foreach ($this->headerFilter as $name => $value) {
-                    if (is_array($value)) {
-                        foreach ($value as $key => $val) {
-                            $nameLocal = $name . "." . $key;
-                            while (is_array($val)) {
-                                $firstKey = array_key_first($val);
-                                $nameLocal .= "." . $firstKey;
-                                $val = $val[$firstKey];
-                            }
-                            $this->getFiltersWhere($q, $nameLocal, $val);
-                        }
-                    } else {
-                        $this->getFiltersWhere($q, $name, $value);
-                    }
+            // Resolved once - definitions often load select options from the database.
+            $filters = method_exists($this, 'resolvedHeaderFilters') ? $this->resolvedHeaderFilters() : $this->headerFilters();
+            $query->where(function ($q) use ($filters) {
+                foreach ($this->flattenHeaderFilter($this->headerFilter, $filters) as $name => $value) {
+                    $this->getFiltersWhere($q, $name, $value, $filters[$name]['type'] ?? null);
                 }
             });
         }
 
         return $query;
+    }
+
+    /**
+     * Same fallback as DataTableComponent::setDefaults(), for calls made outside
+     * a render (export, select all) before searchableColumns were filled in.
+     */
+    private function searchColumns(): array
+    {
+        return array_values($this->searchableColumns ?: array_keys($this->getHeader()));
+    }
+
+    /**
+     * Livewire turns wire:model="headerFilter.user.name" into ['user' => ['name' => ...]]
+     * and date filters into ['col' => ['from' => ..., 'to' => ...]]. Walks the nested
+     * values down to the first path that is a defined filter and keeps its whole value,
+     * so the date range stays together. Values without a filter definition are skipped.
+     */
+    private function flattenHeaderFilter(array $values, array $filters, string $prefix = ''): array
+    {
+        $flat = [];
+        foreach ($values as $key => $value) {
+            $path = $prefix === '' ? (string)$key : $prefix . '.' . $key;
+            if (isset($filters[$path])) {
+                $flat[$path] = $value;
+            } elseif (is_array($value)) {
+                $flat += $this->flattenHeaderFilter($value, $filters, $path);
+            }
+        }
+
+        return $flat;
     }
 
     public function datasetFromDB($query): array
@@ -88,28 +114,7 @@ trait UseDatabase
 
         $this->itemsTotal = $this->getCount($query);
 
-        if ($this->sortable && !empty($this->sortBy)) {
-            $orderByColumn = $this->sortBy;
-            if (strpos($orderByColumn, ".") !== false) {
-                $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
-            }
-
-            $method = "orderColumn" . ucfirst(Str::camel(str_replace('.', '_', $orderByColumn)));
-            if (method_exists($this, $method)) {
-                $query->orderByRaw($this->{$method}() . " " . strtoupper($this->sortDirection));
-            } elseif (str_starts_with($orderByColumn, '(')) {
-                $query->orderByRaw($orderByColumn . " " . strtoupper($this->sortDirection));
-            } else {
-                $query->orderBy($orderByColumn, $this->sortDirection);
-            }
-        }
-
-        // Secondary deterministic key (the model's primary key). Without it, rows sharing
-        // the same value in the sort column have an unstable order across pages, and OFFSET
-        // pagination ends up skipping or duplicating rows.
-        if (method_exists($query, 'getModel')) {
-            $query->orderBy($query->getModel()->getQualifiedKeyName(), $this->sortDirection ?: 'asc');
-        }
+        $this->applySorting($query);
 
         if ($this->paginated != false) {
             $query->limit($this->itemsPerPage);
@@ -118,6 +123,33 @@ trait UseDatabase
             }
         }
 
+        $caches = $this->columnCaches();
+
+        foreach ($query->get() as $item) {
+            $datasetFromDB[] = $this->buildRow($item, $caches['methods'], $caches['properties']);
+        }
+        return $datasetFromDB;
+    }
+
+    /**
+     * Every row matching the current search, filters and sorting, without pagination.
+     * Read in chunks, so exporting a large table does not load it into memory at once.
+     */
+    protected function exportRows(): iterable
+    {
+        $query = $this->applySorting($this->applyFilters($this->getRelationJoins($this->query())));
+        $caches = $this->columnCaches();
+
+        foreach ($query->lazy(1000) as $item) {
+            yield $this->buildRow($item, $caches['methods'], $caches['properties']);
+        }
+    }
+
+    /**
+     * columnX() method and model property for every header column.
+     */
+    private function columnCaches(): array
+    {
         $columnMethodCache = [];
         $columnPropertyCache = [];
         foreach (array_keys($this->getHeader()) as $header) {
@@ -126,10 +158,58 @@ trait UseDatabase
             $columnPropertyCache[$header] = str_replace('.', '->', $header);
         }
 
-        foreach ($query->get() as $item) {
-            $datasetFromDB[] = $this->buildRow($item, $columnMethodCache, $columnPropertyCache);
+        return [
+            'methods'    => $columnMethodCache,
+            'properties' => $columnPropertyCache,
+        ];
+    }
+
+    /**
+     * Orders the query by sortBy, then by the primary key.
+     *
+     * sortBy and sortDirection come from the URL and the browser, so they can hold any value.
+     * sortBy must be a known column - a value starting with "(" used to go straight into
+     * orderByRaw() (SQL injection) - and the direction is asc or desc.
+     */
+    protected function applySorting($query)
+    {
+        $direction = strtolower($this->sortDirection) === 'desc' ? 'desc' : 'asc';
+
+        if ($this->sortable && $this->sortBy !== '' && in_array($this->sortBy, $this->allowedSortColumns(), true)) {
+            $orderByColumn = $this->sortBy;
+            if (strpos($orderByColumn, ".") !== false) {
+                $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
+            }
+
+            $method = "orderColumn" . ucfirst(Str::camel(str_replace('.', '_', $orderByColumn)));
+            if (method_exists($this, $method)) {
+                $query->orderByRaw($this->{$method}() . " " . strtoupper($direction));
+            } elseif (str_starts_with($orderByColumn, '(')) {
+                $query->orderByRaw($orderByColumn . " " . strtoupper($direction));
+            } else {
+                $query->orderBy($orderByColumn, $direction);
+            }
         }
-        return $datasetFromDB;
+
+        // Secondary deterministic key (the model's primary key). Without it, rows sharing
+        // the same value in the sort column have an unstable order across pages, and OFFSET
+        // pagination ends up skipping or duplicating rows.
+        if (method_exists($query, 'getModel')) {
+            $query->orderBy($query->getModel()->getQualifiedKeyName(), $direction);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Header columns, sortableColumns (guarded against the browser in DataTableComponent)
+     * and the sortBy declared in code - a default sort by a hidden column keeps working.
+     */
+    private function allowedSortColumns(): array
+    {
+        $declared = (new \ReflectionProperty($this, 'sortBy'))->getDefaultValue();
+
+        return array_merge(array_keys($this->getHeader()), $this->sortableColumns, [$declared]);
     }
 
     protected function buildRow($item, array $columnMethodCache, array $columnPropertyCache): mixed
@@ -153,18 +233,26 @@ trait UseDatabase
             : $clone->count();
     }
 
-    private function getFiltersWhere(&$q, $name, $value)
+    private function getFiltersWhere(&$q, $name, $value, ?string $type)
     {
         if (empty($value)) {
             return;
         }
 
-        $type = $this->headerFilters()[$name]['type'];
         if ($type === "text") {
-            $this->applyWhere($q, $name, 'LIKE', '%' . $value . '%');
+            $value = trim((string)$value);
+            if ($value !== '') {
+                $escaped = $this->escapeLike($value);
+                $this->applyLike($q, $name, '%' . $escaped . '%', $escaped !== $value);
+            }
         } elseif ($type === "select") {
             $this->applyWhere($q, $name, '=', $value);
-        } elseif (in_array($type, ["date", "time", "datetime-local"], true)) {
+        } elseif ($type === "multiselect") {
+            $values = array_values(array_filter((array)$value, fn ($v) => $v !== '' && $v !== null));
+            if (!empty($values)) {
+                $this->applyWhereIn($q, $name, $values);
+            }
+        } elseif (in_array($type, ["date", "time", "datetime-local"], true) && is_array($value)) {
             if (!empty($value['from'])) {
                 $this->applyWhere($q, $name, '>=', $value['from']);
             }
@@ -184,6 +272,54 @@ trait UseDatabase
             $column = array_pop($names);
             $q->{$method . 'Relation'}(implode(".", $names), $column, $operator, $value);
         }
+    }
+
+    private function applyWhereIn($q, string $name, array $values): void
+    {
+        if (strpos($name, ".") === false) {
+            $q->whereIn($q->getModel()->getTable() . "." . $name, $values);
+        } else {
+            $names = explode('.', $name);
+            $column = array_pop($names);
+            $q->whereHas(implode(".", $names), fn ($relationQuery) => $relationQuery->whereIn($column, $values));
+        }
+    }
+
+    /**
+     * LIKE with an explicit escape character. '!' instead of a backslash, because
+     * backslash escaping differs between MySQL, PostgreSQL, SQLite and SQL Server.
+     */
+    private function applyLike($q, string $name, string $pattern, bool $escape, string $boolean = 'where'): void
+    {
+        if (strpos($name, ".") === false) {
+            $q->{$boolean . 'Raw'}($this->likeSql($q, $q->getModel()->getTable() . "." . $name, $escape), [$pattern]);
+        } else {
+            $names = explode('.', $name);
+            $column = array_pop($names);
+            $q->{$boolean === 'orWhere' ? 'orWhereHas' : 'whereHas'}(
+                implode(".", $names),
+                fn ($relationQuery) => $relationQuery->whereRaw($this->likeSql($relationQuery, $column, $escape), [$pattern])
+            );
+        }
+    }
+
+    private function likeSql($q, string $column, bool $escape): string
+    {
+        $wrapped = $q->getQuery()->getGrammar()->wrap($column);
+
+        // PostgreSQL has no LIKE for non-text columns - Laravel adds the same cast for 'like' wheres.
+        if ($q->getQuery()->getConnection()->getDriverName() === 'pgsql') {
+            $wrapped .= '::text';
+        }
+
+        // ESCAPE only when the value needed escaping - it makes LIKE measurably slower
+        // (~5 % in SQLite) and a pattern without escape characters matches the same.
+        return $wrapped . ($escape ? " LIKE ? ESCAPE '!'" : " LIKE ?");
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
     }
 
     private function getRelationJoins(Builder $query): Builder

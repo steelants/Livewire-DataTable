@@ -75,6 +75,12 @@ public array $searchableColumns = [
 ];
 ```
 
+The columns can also be set in `mount()` and may include columns that are not displayed.
+
+`searchableColumns`, `sortableColumns` and `viewName` are guarded against changes sent from the browser:
+it may only pick header columns or values the component already set (so a column picker bound with
+`wire:model` works), anything else is rejected. Values set in code are not restricted.
+
 
 ## Filtering
 

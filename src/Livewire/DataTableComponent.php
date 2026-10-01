@@ -3,6 +3,7 @@
 namespace SteelAnts\DataTable\Livewire;
 
 use Livewire\Component;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,7 @@ class DataTableComponent extends Component
 
     // Enable fulltext search
     public bool $searchable = false;
+    // Column and relation names go into the query - see updatingSearchableColumns().
     public array $searchableColumns = [];
     public string $searchValue = '';
 
@@ -79,7 +81,17 @@ class DataTableComponent extends Component
 
     public function mount()
     {
-        $this->useUrl ??= !request()->hasHeader('X-Livewire');
+        $this->resolveUseUrl();
+    }
+
+    /**
+     * URL binding is on for a full page load and off when the table is rendered inside
+     * a Livewire request (modal, lazy component). Resolved here and not only in mount(),
+     * because Livewire reads queryString() before mount() runs.
+     */
+    private function resolveUseUrl(): bool
+    {
+        return $this->useUrl ??= !request()->hasHeader('X-Livewire');
     }
 
     public function dataset(): array
@@ -140,108 +152,46 @@ class DataTableComponent extends Component
     //     $this->getData(true);
     // }
 
+    /**
+     * Properties bound to the URL. A method instead of #[Url] attributes, because the
+     * binding depends on the configuration: no URL inside a Livewire request (useUrl),
+     * nothing for disabled features. 'except' keeps default values out of the URL.
+     */
     public function queryString(): array
     {
-        if(!$this->useUrl) return [];
+        if (!$this->resolveUseUrl()) {
+            return [];
+        }
 
-        $queryStrings = [];
-        if ($this->paginated == true) {
-            $queryStrings['currentPage'] = ['except' => 0];
-        }
-        if ($this->searchable == true) {
-            $queryStrings[] = 'searchValue';
-        }
         // With load-on-scroll, itemsPerPage keeps growing with every scroll-load - in the URL
         // it would accumulate, and a refresh would immediately load hundreds of rows.
-        if ($this->itemsPerPage != 0 && !method_exists($this, 'loadMore')) {
-            $queryStrings[] = 'itemsPerPage';
-        }
-        if ($this->sortable != false) {
-            $queryStrings[] = 'sortBy';
-            if (!empty($this->sortBy)) {
-                $queryStrings[] = 'sortDirection';
-            }
-        }
-        return $queryStrings;
+        $bindItemsPerPage = $this->itemsPerPage != 0 && !method_exists($this, 'loadMore');
+
+        // sortDirection does not depend on sortBy: queryString() is read before the URL
+        // values are applied, so such a condition would never restore the direction.
+        return array_filter([
+            'currentPage'   => $this->paginated ? ['except' => 1] : null,
+            'searchValue'   => $this->searchable ? ['except' => ''] : null,
+            'itemsPerPage'  => $bindItemsPerPage ? ['except' => $this->defaultValue('itemsPerPage')] : null,
+            'sortBy'        => $this->sortable ? ['except' => ''] : null,
+            'sortDirection' => $this->sortable ? ['except' => 'asc'] : null,
+        ]);
     }
 
-    private function getDatasetFromArray($dataset): array
+    /**
+     * Declared default of a property, including the value a subclass overrides it with.
+     */
+    private function defaultValue(string $property): mixed
     {
-        // Cache headers and filter metadata once
+        return (new \ReflectionProperty($this, $property))->getDefaultValue();
+    }
+
+    private function getDatasetFromArray($dataset, bool $paginate = true): array
+    {
         $headers = array_keys($this->getHeader());
-        $filtersMeta = $this->filterable ? $this->headerFilters() : [];
-        $filterTypes = [];
-        foreach ($headers as $h) {
-            $filterTypes[$h] = $filtersMeta[$h]['type'] ?? 'text';
-        }
 
-        $searchTerm = $this->searchTerm();
-        $searchActive = $this->searchable && $searchTerm !== '';
-        $searchNeedle = $searchActive ? mb_strtolower($searchTerm) : '';
-        $searchableSet = $this->searchable ? array_flip($this->searchableColumns) : [];
-
-        // Filter and search first
-        $filtered = [];
-        if (($this->filterable && !empty($this->headerFilter)) || $searchActive) {
-            foreach ($dataset as $row) {
-                $keep = true;
-
-                if ($this->filterable && !empty($this->headerFilter)) {
-                    foreach ($row as $col => $value) {
-                        if (!array_key_exists($col, $this->headerFilter)) {
-                            continue;
-                        }
-                        $type = $filterTypes[$col] ?? 'text';
-                        $filterVal = $this->headerFilter[$col];
-                        if ($type === 'text') {
-                            if ($filterVal !== '' && mb_stripos((string)$value, (string)$filterVal) === false) {
-                                $keep = false;
-                                break;
-                            }
-                        } elseif ($type === 'select') {
-                            if ($filterVal !== '' && $value != $filterVal) {
-                                $keep = false;
-                                break;
-                            }
-                        } elseif (in_array($type, ['date', 'time', 'datetime-local'], true)) {
-                            $valTs = is_numeric($value) ? (int)$value : @strtotime((string)$value);
-                            $fromTs = (is_array($filterVal) && !empty($filterVal['from'])) ? @strtotime((string)$filterVal['from']) : null;
-                            $toTs   = (is_array($filterVal) && !empty($filterVal['to'])) ? @strtotime((string)$filterVal['to']) : null;
-                            if ($fromTs !== null && $valTs !== false && $valTs < $fromTs) {
-                                $keep = false;
-                                break;
-                            }
-                            if ($toTs !== null && $valTs !== false && $valTs > $toTs) {
-                                $keep = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if ($keep && $searchActive) {
-                    $matched = false;
-                    foreach ($row as $col => $value) {
-                        if (!isset($searchableSet[$col])) {
-                            continue;
-                        }
-                        if ($value !== null && $value !== '' && mb_stripos((string)$value, $searchNeedle) !== false) {
-                            $matched = true;
-                            break;
-                        }
-                    }
-                    if (!$matched) {
-                        $keep = false;
-                    }
-                }
-
-                if ($keep) {
-                    $filtered[] = $row;
-                }
-            }
-        } else {
-            $filtered = $dataset;
-        }
+        // Filter and search first, on the original values
+        $filtered = $this->filterArrayDataset($dataset);
 
         // Transform rows/columns once, with cached column method lookups
         if (method_exists($this, 'row')) {
@@ -263,32 +213,208 @@ class DataTableComponent extends Component
             }
         }
 
-        // Sort on the transformed dataset
-        if ($this->sortable && !empty($this->sortBy)) {
-            $sortBy = $this->sortBy;
-            $dir = strtolower($this->sortDirection) === 'desc' ? -1 : 1;
-            usort($filtered, function ($a, $b) use ($sortBy, $dir) {
-                $av = $this->valueByDot($a, $sortBy);
-                $bv = $this->valueByDot($b, $sortBy);
-                if (is_numeric($av) && is_numeric($bv)) {
-                    $cmp = (float)$av <=> (float)$bv;
-                } else {
-                    $cmp = strcmp((string)$av, (string)$bv);
-                }
-                return $cmp * $dir;
-            });
-        }
-
         // Update totals before pagination
+        $filtered = array_values($filtered);
         $this->itemsTotal = count($filtered);
 
+        // Sort on the transformed dataset. Only row indexes are sorted, so pagination
+        // can pick the page without copying every row into a new order first.
+        if ($this->sortable && !empty($this->sortBy)) {
+            $order = $this->sortedArrayOrder($filtered, $this->sortBy, strtolower($this->sortDirection) === 'desc' ? -1 : 1);
+
+            // Paginate last
+            if ($paginate && $this->paginated != false) {
+                $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
+                $order = array_slice($order, $from, $this->itemsPerPage);
+            }
+
+            $page = [];
+            foreach ($order as $idx) {
+                $page[] = $filtered[$idx];
+            }
+
+            return $page;
+        }
+
         // Paginate last
-        if ($this->paginated != false) {
+        if ($paginate && $this->paginated != false) {
             $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
             $filtered = array_slice($filtered, $from, $this->itemsPerPage);
         }
 
-        return array_values($filtered);
+        return $filtered;
+    }
+
+    /**
+     * Applies fulltext search and headerFilter values to an array dataset.
+     *
+     * Counterpart of UseDatabase::applyFilters() for the array driver - also used by
+     * HasBulkActions::selectableKeys(), so "select all" matches what the table shows.
+     */
+    protected function filterArrayDataset(array $dataset): array
+    {
+        $searchTerm = $this->searchTerm();
+        $searchActive = $this->searchable && $searchTerm !== '';
+        $filters = $this->filterable && !empty($this->headerFilter) ? $this->activeArrayFilters() : [];
+
+        if (!$searchActive && empty($filters)) {
+            return $dataset;
+        }
+
+        $searchNeedle = mb_strtolower($searchTerm);
+        // Same fallback as setDefaults(), for calls made before the first render.
+        $searchableSet = array_flip($this->searchableColumns ?: array_keys($this->getHeader()));
+
+        $filtered = [];
+        foreach ($dataset as $row) {
+            foreach ($filters as $col => [$type, $a, $b]) {
+                if (!array_key_exists($col, $row)) {
+                    continue;
+                }
+                $value = $row[$col];
+
+                if ($type === 'text') {
+                    if (mb_stripos((string)$value, $a) === false) {
+                        continue 2;
+                    }
+                } elseif ($type === 'select') {
+                    if ($value != $a) {
+                        continue 2;
+                    }
+                } elseif ($type === 'multiselect') {
+                    // Loose comparison, same as select - values from the browser are strings.
+                    if (!in_array($value, $a)) {
+                        continue 2;
+                    }
+                } else {
+                    $valTs = is_numeric($value) ? (int)$value : @strtotime((string)$value);
+                    if ($a !== null && $valTs !== false && $valTs < $a) {
+                        continue 2;
+                    }
+                    if ($b !== null && $valTs !== false && $valTs > $b) {
+                        continue 2;
+                    }
+                }
+            }
+
+            if ($searchActive) {
+                $matched = false;
+                foreach ($row as $col => $value) {
+                    if (!isset($searchableSet[$col])) {
+                        continue;
+                    }
+                    if ($value !== null && $value !== '' && mb_stripos((string)$value, $searchNeedle) !== false) {
+                        $matched = true;
+                        break;
+                    }
+                }
+                if (!$matched) {
+                    continue;
+                }
+            }
+
+            $filtered[] = $row;
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Header filters prepared once per request instead of once per row:
+     * [column => [type, text needle | select value | from timestamp, to timestamp]].
+     * Filters that cannot exclude any row are left out.
+     */
+    private function activeArrayFilters(): array
+    {
+        $filtersMeta = $this->resolvedHeaderFilters();
+        $headerSet = array_flip(array_keys($this->getHeader()));
+
+        $active = [];
+        foreach ($this->headerFilter as $col => $filterVal) {
+            // Columns outside the headers have always been treated as text filters.
+            $type = isset($headerSet[$col]) ? ($filtersMeta[$col]['type'] ?? 'text') : 'text';
+
+            if ($type === 'text') {
+                if (is_array($filterVal)) {
+                    continue;
+                }
+                $needle = trim((string)$filterVal);
+                if ($needle !== '') {
+                    $active[$col] = [
+                        'text',
+                        $needle,
+                        null,
+                    ];
+                }
+            } elseif ($type === 'select') {
+                if ($filterVal !== '') {
+                    $active[$col] = [
+                        'select',
+                        $filterVal,
+                        null,
+                    ];
+                }
+            } elseif ($type === 'multiselect') {
+                $values = $this->multiselectValues($filterVal);
+                if (!empty($values)) {
+                    $active[$col] = [
+                        'multiselect',
+                        $values,
+                        null,
+                    ];
+                }
+            } elseif (in_array($type, ['date', 'time', 'datetime-local'], true)) {
+                $fromTs = (is_array($filterVal) && !empty($filterVal['from'])) ? @strtotime((string)$filterVal['from']) : null;
+                $toTs   = (is_array($filterVal) && !empty($filterVal['to'])) ? @strtotime((string)$filterVal['to']) : null;
+                if ($fromTs !== null || $toTs !== null) {
+                    $active[$col] = [
+                        'date',
+                        $fromTs,
+                        $toTs,
+                    ];
+                }
+            }
+        }
+
+        return $active;
+    }
+
+    /**
+     * Selected multiselect options without the empty ones; an empty result means no filter.
+     */
+    protected function multiselectValues(mixed $filterVal): array
+    {
+        return array_values(array_filter((array)$filterVal, fn ($v) => $v !== '' && $v !== null));
+    }
+
+    /**
+     * Row indexes in sorted order. Sort keys are resolved once per row instead of
+     * twice per comparison; the comparison itself is unchanged (numeric when both
+     * values are numeric, strcmp otherwise; usort is stable for equal values).
+     */
+    private function sortedArrayOrder(array $rows, string $sortBy, int $dir): array
+    {
+        $numeric = [];
+        $floats = [];
+        $strings = [];
+        foreach ($rows as $idx => $row) {
+            $value = $this->valueByDot($row, $sortBy);
+            $numeric[$idx] = is_numeric($value);
+            $floats[$idx] = $numeric[$idx] ? (float)$value : 0.0;
+            // Arrays were compared as 'Array' before as well, just with a warning.
+            $strings[$idx] = is_array($value) ? 'Array' : (string)$value;
+        }
+
+        $order = array_keys($rows);
+        usort($order, function ($a, $b) use ($numeric, $floats, $strings, $dir) {
+            if ($numeric[$a] && $numeric[$b]) {
+                return ($floats[$a] <=> $floats[$b]) * $dir;
+            }
+
+            return strcmp($strings[$a], $strings[$b]) * $dir;
+        });
+
+        return $order;
     }
 
     private function getData($force = false): array
@@ -326,9 +452,31 @@ class DataTableComponent extends Component
         return $this->dataset;
     }
 
+    /**
+     * Every row matching the current search, filters and sorting, without pagination,
+     * after row() / columnX() - what HasExport writes to the CSV.
+     * UseDatabase overrides it with a query that is read in chunks.
+     */
+    protected function exportRows(): iterable
+    {
+        $this->setDefaults();
+
+        return $this->getDatasetFromArray($this->dataset(), false);
+    }
+
     private function setDefaults()
     {
         $this->actions = [];
+
+        // currentPage and itemsPerPage come from the URL as well. A negative page size
+        // removed the LIMIT and loaded the whole table.
+        if ($this->itemsPerPage < 1) {
+            $default = $this->defaultValue('itemsPerPage');
+            $this->itemsPerPage = $default >= 1 ? $default : 10;
+        }
+        if ($this->currentPage < 1) {
+            $this->currentPage = 1;
+        }
         if ($this->sortable == true && $this->sortableColumns == []) {
             $this->sortableColumns = array_keys($this->getHeader());
         }
@@ -343,9 +491,27 @@ class DataTableComponent extends Component
         $this->currentPage = $value;
     }
 
+    /**
+     * headers() memoized for the lifetime of the component instance - Livewire builds
+     * a new instance for every request, so nothing is shared between requests.
+     * In the array driver the default headers() calls dataset(), which would otherwise
+     * run several times per render.
+     *
+     * NOTE: if an action changes state that headers() depends on after getHeader()
+     * was already called in the same request, the cached value is returned.
+     */
     public function getHeader(): array
     {
-        return $this->headers();
+        return once(fn () => $this->headers());
+    }
+
+    /**
+     * headerFilters() memoized the same way as getHeader() - definitions often load
+     * select options from the database.
+     */
+    protected function resolvedHeaderFilters(): array
+    {
+        return once(fn () => $this->headerFilters());
     }
 
 	public function renderCasts(): array
@@ -383,7 +549,7 @@ class DataTableComponent extends Component
             'dataset'              => $this->getData(),
             'headers'              => $this->getHeader(),
             'footers'              => $this->footers(),
-            'headerFilters'        => !empty($this->filterable) ? $this->headerFilters() : null,
+            'headerFilters'        => !empty($this->filterable) ? $this->resolvedHeaderFilters() : null,
 			'renderCasts' => $this->renderCasts(),
             'selectable'           => $selectable,
             'selected'             => $selectable ? $this->selected : [],
@@ -400,6 +566,49 @@ class DataTableComponent extends Component
     public function updatedSearchValue()
     {
         $this->currentPage = 1;
+    }
+
+    /*
+     * Guards for configuration properties. They are public, so the browser can send a new
+     * value - a forged searchableColumns entry such as "truncate.x" made Eloquent call
+     * $model->truncate(), a forged viewName rendered any view of the application.
+     *
+     * Livewire calls updating*() only for updates sent from the browser, also when a component
+     * redeclares the property, so the component can still set any value in code (declaration,
+     * mount(), actions). The browser may only pick header columns or values the server
+     * already set - a column picker bound with wire:model keeps working.
+     */
+
+    public function updatingSearchableColumns(mixed $value, ?string $key = null): void
+    {
+        $this->guardClientColumns('searchableColumns', $value, $key);
+    }
+
+    public function updatingSortableColumns(mixed $value, ?string $key = null): void
+    {
+        $this->guardClientColumns('sortableColumns', $value, $key);
+    }
+
+    public function updatingViewName(mixed $value): void
+    {
+        if ($value !== $this->viewName && $value !== $this->defaultValue('viewName')) {
+            throw new CannotUpdateLockedPropertyException('viewName');
+        }
+    }
+
+    private function guardClientColumns(string $property, mixed $value, ?string $key): void
+    {
+        $allowed = array_merge(
+            array_keys($this->getHeader()),
+            (array)$this->defaultValue($property),
+            $this->{$property},
+        );
+
+        foreach ($key === null ? (array)$value : [$value] as $column) {
+            if (!is_string($column) || !in_array($column, $allowed, true)) {
+                throw new CannotUpdateLockedPropertyException($property);
+            }
+        }
     }
 
     /**

@@ -1,0 +1,97 @@
+{
+    "array": {
+        "10000": {
+            "bez filtru": {
+                "ms": 0.07,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 6.79,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "filtry text+select+date": {
+                "ms": 4.08,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "řazení": {
+                "ms": 15.12,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání+filtry+řazení": {
+                "ms": 8.38,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 8.79,
+                "vybráno": 4079
+            }
+        },
+        "100000": {
+            "bez filtru": {
+                "ms": 0.09,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 81.03,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "filtry text+select+date": {
+                "ms": 42.7,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "řazení": {
+                "ms": 196.31,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání+filtry+řazení": {
+                "ms": 107.79,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 101.67,
+                "vybráno": 40243
+            }
+        },
+        "1000000": {
+            "bez filtru": {
+                "ms": 0.17,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 1586.21,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "filtry text+select+date": {
+                "ms": 777.89,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "řazení": {
+                "ms": 2762.99,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání+filtry+řazení": {
+                "ms": 1607.68,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 1224.91,
+                "vybráno": 400258
+            }
+        }
+    }
+}

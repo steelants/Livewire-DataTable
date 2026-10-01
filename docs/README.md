@@ -20,6 +20,7 @@ Learn how to use individual features:
 - [Sorting](sorting.md)
 - [Filtering](filtering.md)
 - [Rendering](rendering.md)
+- [CSV Export](export.md)
 
 
 ## Development
