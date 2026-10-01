@@ -54,11 +54,13 @@ trait UseDatabase
         if ($this->searchable && $searchTerm !== '') {
             // * stays a wildcard, % and _ typed by the user are matched literally.
             $pattern = '%' . str_replace('*', '%', $this->escapeLike($searchTerm)) . '%';
-            // Same fallback as DataTableComponent::setDefaults(), for calls made outside
-            // a render (export, select all) before searchableColumns were filled in.
-            $columns = $this->searchableColumns ?: array_keys($this->getHeader());
+            $columns = $this->allowedSearchColumns();
             $query->where(function ($q) use ($pattern, $columns) {
-                foreach (array_values($columns) as $i => $name) {
+                if (empty($columns)) {
+                    // Nothing allowed to search in - nothing matches.
+                    $q->whereRaw('1 = 0');
+                }
+                foreach ($columns as $i => $name) {
                     $this->applyLike($q, $name, $pattern, $i === 0 ? 'where' : 'orWhere');
                 }
             });
@@ -75,6 +77,32 @@ trait UseDatabase
         }
 
         return $query;
+    }
+
+    /**
+     * searchableColumns the browser cannot have tampered with. It is a public Livewire
+     * property - a fake relation such as "truncate.x" made Eloquent call $model->truncate()
+     * and empty the table. Trusted as is when locked, otherwise limited to header columns
+     * and the columns declared in the component's code.
+     */
+    private function allowedSearchColumns(): array
+    {
+        $headers = array_keys($this->getHeader());
+
+        // Same fallback as DataTableComponent::setDefaults(), for calls made outside
+        // a render (export, select all) before searchableColumns were filled in.
+        $columns = $this->searchableColumns ?: $headers;
+
+        // #[Locked] on the declaration in effect: Livewire rejects any change from the browser.
+        $property = new \ReflectionProperty($this, 'searchableColumns');
+        if (!empty($property->getAttributes(\Livewire\Attributes\Locked::class))) {
+            return array_values($columns);
+        }
+
+        $declared = $property->getDefaultValue();
+        $allowed = array_merge($headers, is_array($declared) ? $declared : []);
+
+        return array_values(array_filter($columns, fn ($column) => is_string($column) && in_array($column, $allowed, true)));
     }
 
     /**

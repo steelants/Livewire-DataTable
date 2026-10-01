@@ -3,6 +3,7 @@
 namespace SteelAnts\DataTable\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,10 @@ class DataTableComponent extends Component
 
     // Enable fulltext search
     public bool $searchable = false;
+    // Locked: the column and relation names go into the query. A component that redeclares
+    // the property loses the lock - UseDatabase then allows only header columns and the
+    // declared default, so redeclare it with #[Locked] to set other columns in mount().
+    #[Locked]
     public array $searchableColumns = [];
     public string $searchValue = '';
 
@@ -465,6 +470,16 @@ class DataTableComponent extends Component
     private function setDefaults()
     {
         $this->actions = [];
+
+        // currentPage and itemsPerPage come from the URL as well. A negative page size
+        // removed the LIMIT and loaded the whole table.
+        if ($this->itemsPerPage < 1) {
+            $default = $this->defaultValue('itemsPerPage');
+            $this->itemsPerPage = $default >= 1 ? $default : 10;
+        }
+        if ($this->currentPage < 1) {
+            $this->currentPage = 1;
+        }
         if ($this->sortable == true && $this->sortableColumns == []) {
             $this->sortableColumns = array_keys($this->getHeader());
         }
