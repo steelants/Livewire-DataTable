@@ -102,28 +102,7 @@ trait UseDatabase
 
         $this->itemsTotal = $this->getCount($query);
 
-        if ($this->sortable && !empty($this->sortBy)) {
-            $orderByColumn = $this->sortBy;
-            if (strpos($orderByColumn, ".") !== false) {
-                $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
-            }
-
-            $method = "orderColumn" . ucfirst(Str::camel(str_replace('.', '_', $orderByColumn)));
-            if (method_exists($this, $method)) {
-                $query->orderByRaw($this->{$method}() . " " . strtoupper($this->sortDirection));
-            } elseif (str_starts_with($orderByColumn, '(')) {
-                $query->orderByRaw($orderByColumn . " " . strtoupper($this->sortDirection));
-            } else {
-                $query->orderBy($orderByColumn, $this->sortDirection);
-            }
-        }
-
-        // Secondary deterministic key (the model's primary key). Without it, rows sharing
-        // the same value in the sort column have an unstable order across pages, and OFFSET
-        // pagination ends up skipping or duplicating rows.
-        if (method_exists($query, 'getModel')) {
-            $query->orderBy($query->getModel()->getQualifiedKeyName(), $this->sortDirection ?: 'asc');
-        }
+        $this->applySorting($query);
 
         if ($this->paginated != false) {
             $query->limit($this->itemsPerPage);
@@ -144,6 +123,43 @@ trait UseDatabase
             $datasetFromDB[] = $this->buildRow($item, $columnMethodCache, $columnPropertyCache);
         }
         return $datasetFromDB;
+    }
+
+    /**
+     * Orders the query by sortBy, then by the primary key.
+     *
+     * sortBy and sortDirection are public Livewire properties, so the browser can send
+     * any value. sortBy must be a header column - a value starting with "(" used to go
+     * straight into orderByRaw() (SQL injection) - and the direction is asc or desc.
+     */
+    protected function applySorting($query)
+    {
+        $direction = strtolower($this->sortDirection) === 'desc' ? 'desc' : 'asc';
+
+        if ($this->sortable && $this->sortBy !== '' && array_key_exists($this->sortBy, $this->getHeader())) {
+            $orderByColumn = $this->sortBy;
+            if (strpos($orderByColumn, ".") !== false) {
+                $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
+            }
+
+            $method = "orderColumn" . ucfirst(Str::camel(str_replace('.', '_', $orderByColumn)));
+            if (method_exists($this, $method)) {
+                $query->orderByRaw($this->{$method}() . " " . strtoupper($direction));
+            } elseif (str_starts_with($orderByColumn, '(')) {
+                $query->orderByRaw($orderByColumn . " " . strtoupper($direction));
+            } else {
+                $query->orderBy($orderByColumn, $direction);
+            }
+        }
+
+        // Secondary deterministic key (the model's primary key). Without it, rows sharing
+        // the same value in the sort column have an unstable order across pages, and OFFSET
+        // pagination ends up skipping or duplicating rows.
+        if (method_exists($query, 'getModel')) {
+            $query->orderBy($query->getModel()->getQualifiedKeyName(), $direction);
+        }
+
+        return $query;
     }
 
     protected function buildRow($item, array $columnMethodCache, array $columnPropertyCache): mixed

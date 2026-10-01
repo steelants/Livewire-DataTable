@@ -1,18 +1,9 @@
 <?php
 
-use SteelAnts\DataTable\Livewire\DataTableComponent;
 use Tests\Fixtures\ArrayTableComponent;
 use Tests\Fixtures\ArrayTableWithRowComponent;
 use Tests\Fixtures\Post;
 use Tests\Fixtures\PostTableComponent;
-
-/**
- * Runs the same data pipeline as render(), without rendering the blade view.
- */
-function tableData(DataTableComponent $table): array
-{
-    return Closure::bind(fn () => $this->getData(), $table, DataTableComponent::class)();
-}
 
 function arrayTable(array $props = [], string $class = ArrayTableComponent::class): ArrayTableComponent
 {
