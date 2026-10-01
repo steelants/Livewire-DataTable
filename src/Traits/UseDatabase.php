@@ -202,8 +202,8 @@ trait UseDatabase
     }
 
     /**
-     * Header columns, sortableColumns (guarded against the browser in DataTableComponent)
-     * and the sortBy declared in code - a default sort by a hidden column keeps working.
+     * Header columns, sortableColumns (locked in DataTableComponent) and the sortBy declared
+     * in code - a default sort by a hidden column keeps working.
      */
     private function allowedSortColumns(): array
     {

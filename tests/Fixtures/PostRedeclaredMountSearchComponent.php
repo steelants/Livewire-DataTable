@@ -2,12 +2,15 @@
 
 namespace Tests\Fixtures;
 
+use Livewire\Attributes\Locked;
+
 /**
  * Redeclares searchableColumns and changes it in mount() to a hidden column.
  */
 class PostRedeclaredMountSearchComponent extends PostTableComponent
 {
     public bool $filterable = false;
+    #[Locked]
     public array $searchableColumns = ['title'];
 
     public function mount()
