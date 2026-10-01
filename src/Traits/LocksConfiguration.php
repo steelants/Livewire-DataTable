@@ -25,7 +25,11 @@ trait LocksConfiguration
      */
     protected function lockedConfiguration(): array
     {
-        return ['searchableColumns', 'sortableColumns', 'viewName'];
+        return [
+            'searchableColumns',
+            'sortableColumns',
+            'viewName',
+        ];
     }
 
     public function bootLocksConfiguration(): void
