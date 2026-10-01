@@ -21,7 +21,7 @@ class UsersTable extends DataTableComponent
 }
 ```
 
-The button calls `exportCsv()`. The older `serv()` still works as an alias.
+The button calls `serv()`, which runs `exportCsv()` - override either one to customise the export.
 
 
 ## What Is Exported

@@ -56,12 +56,8 @@ trait UseDatabase
             $escaped = $this->escapeLike($searchTerm);
             $pattern = '%' . str_replace('*', '%', $escaped) . '%';
             $escape = $escaped !== $searchTerm;
-            $columns = $this->allowedSearchColumns();
+            $columns = $this->searchColumns();
             $query->where(function ($q) use ($pattern, $escape, $columns) {
-                if (empty($columns)) {
-                    // Nothing allowed to search in - nothing matches.
-                    $q->whereRaw('1 = 0');
-                }
                 foreach ($columns as $i => $name) {
                     $this->applyLike($q, $name, $pattern, $escape, $i === 0 ? 'where' : 'orWhere');
                 }
@@ -82,29 +78,12 @@ trait UseDatabase
     }
 
     /**
-     * searchableColumns the browser cannot have tampered with. It is a public Livewire
-     * property - a fake relation such as "truncate.x" made Eloquent call $model->truncate()
-     * and empty the table. Trusted as is when locked, otherwise limited to header columns
-     * and the columns declared in the component's code.
+     * Same fallback as DataTableComponent::setDefaults(), for calls made outside
+     * a render (export, select all) before searchableColumns were filled in.
      */
-    private function allowedSearchColumns(): array
+    private function searchColumns(): array
     {
-        $headers = array_keys($this->getHeader());
-
-        // Same fallback as DataTableComponent::setDefaults(), for calls made outside
-        // a render (export, select all) before searchableColumns were filled in.
-        $columns = $this->searchableColumns ?: $headers;
-
-        // #[Locked] on the declaration in effect: Livewire rejects any change from the browser.
-        $property = new \ReflectionProperty($this, 'searchableColumns');
-        if (!empty($property->getAttributes(\Livewire\Attributes\Locked::class))) {
-            return array_values($columns);
-        }
-
-        $declared = $property->getDefaultValue();
-        $allowed = array_merge($headers, is_array($declared) ? $declared : []);
-
-        return array_values(array_filter($columns, fn ($column) => is_string($column) && in_array($column, $allowed, true)));
+        return array_values($this->searchableColumns ?: array_keys($this->getHeader()));
     }
 
     /**
@@ -188,15 +167,15 @@ trait UseDatabase
     /**
      * Orders the query by sortBy, then by the primary key.
      *
-     * sortBy and sortDirection are public Livewire properties, so the browser can send
-     * any value. sortBy must be a header column - a value starting with "(" used to go
-     * straight into orderByRaw() (SQL injection) - and the direction is asc or desc.
+     * sortBy and sortDirection come from the URL and the browser, so they can hold any value.
+     * sortBy must be a known column - a value starting with "(" used to go straight into
+     * orderByRaw() (SQL injection) - and the direction is asc or desc.
      */
     protected function applySorting($query)
     {
         $direction = strtolower($this->sortDirection) === 'desc' ? 'desc' : 'asc';
 
-        if ($this->sortable && $this->sortBy !== '' && array_key_exists($this->sortBy, $this->getHeader())) {
+        if ($this->sortable && $this->sortBy !== '' && in_array($this->sortBy, $this->allowedSortColumns(), true)) {
             $orderByColumn = $this->sortBy;
             if (strpos($orderByColumn, ".") !== false) {
                 $orderByColumn = $this->getRelationSortColumn($query, $orderByColumn);
@@ -220,6 +199,17 @@ trait UseDatabase
         }
 
         return $query;
+    }
+
+    /**
+     * Header columns, sortableColumns (guarded against the browser in DataTableComponent)
+     * and the sortBy declared in code - a default sort by a hidden column keeps working.
+     */
+    private function allowedSortColumns(): array
+    {
+        $declared = (new \ReflectionProperty($this, 'sortBy'))->getDefaultValue();
+
+        return array_merge(array_keys($this->getHeader()), $this->sortableColumns, [$declared]);
     }
 
     protected function buildRow($item, array $columnMethodCache, array $columnPropertyCache): mixed

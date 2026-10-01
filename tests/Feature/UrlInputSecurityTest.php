@@ -1,5 +1,6 @@
 <?php
 
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 use Tests\Fixtures\Post;
 use Tests\Fixtures\PostHiddenSearchComponent;
@@ -12,58 +13,88 @@ use Tests\Fixtures\PostTableComponent;
  */
 beforeEach(fn () => seedPosts());
 
-/**
- * PostHiddenSearchComponent redeclares searchableColumns without #[Locked], so the browser
- * can write it - assigning the property here is what a forged Livewire update does.
- */
-function unlockedTable(array $props): PostHiddenSearchComponent
-{
-    $table = new PostHiddenSearchComponent();
-    foreach ($props as $name => $value) {
-        $table->{$name} = $value;
-    }
+describe('searchableColumns from the browser', function () {
+    it('rejects a fake relation that would call a model method', function (string $component, string $column) {
+        $table = Livewire::test($component)->set('searchValue', 'zzz');
 
-    return $table;
-}
-
-describe('unlocked searchableColumns from the browser', function () {
-    it('does not call model methods through a fake relation', function (string $column) {
-        $table = unlockedTable(['searchValue' => 'zzz', 'searchableColumns' => [$column]]);
-
-        // Ignored column: the search has nothing left to restrict, the table is untouched.
-        expect(fn () => tableData($table))->not->toThrow(Throwable::class)
+        expect(fn () => $table->set('searchableColumns', [$column]))->toThrow(CannotUpdateLockedPropertyException::class)
+            ->and(fn () => $table->set('searchableColumns.0', $column))->toThrow(CannotUpdateLockedPropertyException::class)
             ->and(Post::count())->toBe(8);
-    })->with(['truncate.x', 'delete.x', 'newQuery.x', 'getConnection.x']);
-
-    it('ignores columns that are neither headers nor declared in code', function () {
-        $table = unlockedTable(['searchValue' => '1', 'searchableColumns' => ['title" IS NOT NULL OR "title', 'published']]);
-
-        expect(fn () => tableData($table))->not->toThrow(Throwable::class);
+    })->with(function () {
+        foreach ([PostTableComponent::class, PostHiddenSearchComponent::class] as $component) {
+            foreach (['truncate.x', 'delete.x', 'newQuery.x', 'title" IS NOT NULL OR "title'] as $column) {
+                yield class_basename($component) . ' ' . $column => [$component, $column];
+            }
+        }
     });
 
-    it('keeps the allowed columns of a tampered list', function () {
-        $table = unlockedTable(['searchValue' => 'Svoboda', 'searchableColumns' => ['truncate.x', 'title']]);
+    it('lets the browser pick header columns, e.g. from a column picker', function () {
+        $table = Livewire::test(PostTableComponent::class)
+            ->set('searchableColumns', ['title'])
+            ->set('searchValue', 'Svoboda');
 
-        expect(array_column(tableData($table), 'title'))->toBe(['Petr Svoboda'])
-            ->and(Post::count())->toBe(8);
+        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Petr Svoboda']);
     });
 
-    it('still searches a hidden column declared in code', function () {
+    it('lets the browser keep a hidden column the code declared', function () {
+        $table = Livewire::test(PostHiddenSearchComponent::class)
+            ->set('searchableColumns', ['score'])
+            ->set('searchValue', '30');
+
+        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Jan Novák']);
+    });
+
+    it('protects select all as well', function () {
+        $table = Livewire::test(Tests\Fixtures\PostBulkTableComponent::class)->set('searchValue', 'zzz');
+
+        expect(fn () => $table->set('searchableColumns', ['truncate.x']))->toThrow(CannotUpdateLockedPropertyException::class);
+
+        $table->call('selectAllFiltered');
+
+        expect(Post::count())->toBe(8);
+    });
+});
+
+describe('searchableColumns set in code', function () {
+    it('searches a hidden column from the declaration', function () {
         $table = new PostHiddenSearchComponent();
         $table->searchValue = '30';
 
         expect(array_column(tableData($table), 'title'))->toBe(['Jan Novák']);
     });
 
-    it('does not reach a fake relation through select all', function () {
-        $table = Livewire::test(Tests\Fixtures\PostBulkTableComponent::class)->set('searchValue', 'zzz');
+    it('searches a hidden column set in mount()', function () {
+        $table = Livewire::test(Tests\Fixtures\PostMountSearchComponent::class)->set('searchValue', '30');
 
-        expect(fn () => $table->set('searchableColumns', ['truncate.x']))
-            ->toThrow(\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException::class);
+        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Jan Novák']);
+    });
 
-        $table->call('selectAllFiltered');
+    it('searches a hidden column set in mount() of a component that redeclares the property', function () {
+        $table = Livewire::test(Tests\Fixtures\PostRedeclaredMountSearchComponent::class)->set('searchValue', '30');
 
-        expect(Post::count())->toBe(8);
+        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Jan Novák']);
+    });
+});
+
+describe('other configuration from the browser', function () {
+    it('rejects another view', function () {
+        expect(fn () => Livewire::test(PostTableComponent::class)->set('viewName', 'datatable-components::tbody'))->toThrow(CannotUpdateLockedPropertyException::class);
+    });
+
+    it('accepts the current view', function () {
+        Livewire::test(PostTableComponent::class)
+            ->set('viewName', 'datatable::data-table')
+            ->assertSet('viewName', 'datatable::data-table');
+    });
+
+    it('rejects a fake sortable column', function () {
+        expect(fn () => Livewire::test(PostTableComponent::class)->set('sortableColumns', ['(SELECT 1)']))->toThrow(CannotUpdateLockedPropertyException::class);
+    });
+
+    it('keeps a default sort by a hidden column declared in code', function () {
+        $table = new Tests\Fixtures\PostHiddenSortComponent();
+
+        expect(array_column(tableData($table), 'id'))->toBe([7, 8, 5, 6, 2, 4, 3, 1]);
     });
 });
 
@@ -107,25 +138,3 @@ describe('query string values', function () {
     });
 });
 
-describe('locked searchableColumns', function () {
-    it('rejects a change from the browser', function () {
-        Livewire::test(PostTableComponent::class)->set('searchableColumns', ['truncate.x']);
-    })->throws(\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException::class);
-
-    it('trusts a hidden column set in mount() while the property is locked', function () {
-        $table = Livewire::test(Tests\Fixtures\PostMountSearchComponent::class)->set('searchValue', '30');
-
-        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Jan Novák']);
-    });
-
-    it('keeps a forged value of a redeclared property out of the query', function () {
-        // PostHiddenSearchComponent redeclares searchableColumns without #[Locked], so Livewire
-        // accepts the value - the allowlist in UseDatabase keeps it out of the query.
-        $table = Livewire::test(PostHiddenSearchComponent::class)
-            ->set('searchableColumns', ['truncate.x'])
-            ->set('searchValue', 'Jan');
-
-        expect($table->viewData('dataset'))->toBe([])
-            ->and(Post::count())->toBe(8);
-    });
-});

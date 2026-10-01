@@ -54,7 +54,7 @@ trait HasExport
     }
 
     /**
-     * Kept for the existing export button and components calling it directly.
+     * Called by the export button - kept, so components overriding serv() keep working.
      */
     public function serv(): StreamedResponse
     {

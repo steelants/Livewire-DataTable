@@ -3,7 +3,7 @@
 namespace SteelAnts\DataTable\Livewire;
 
 use Livewire\Component;
-use Livewire\Attributes\Locked;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
 
@@ -29,10 +29,7 @@ class DataTableComponent extends Component
 
     // Enable fulltext search
     public bool $searchable = false;
-    // Locked: the column and relation names go into the query. A component that redeclares
-    // the property loses the lock - UseDatabase then allows only header columns and the
-    // declared default, so redeclare it with #[Locked] to set other columns in mount().
-    #[Locked]
+    // Column and relation names go into the query - see updatingSearchableColumns().
     public array $searchableColumns = [];
     public string $searchValue = '';
 
@@ -569,6 +566,49 @@ class DataTableComponent extends Component
     public function updatedSearchValue()
     {
         $this->currentPage = 1;
+    }
+
+    /*
+     * Guards for configuration properties. They are public, so the browser can send a new
+     * value - a forged searchableColumns entry such as "truncate.x" made Eloquent call
+     * $model->truncate(), a forged viewName rendered any view of the application.
+     *
+     * Livewire calls updating*() only for updates sent from the browser, also when a component
+     * redeclares the property, so the component can still set any value in code (declaration,
+     * mount(), actions). The browser may only pick header columns or values the server
+     * already set - a column picker bound with wire:model keeps working.
+     */
+
+    public function updatingSearchableColumns(mixed $value, ?string $key = null): void
+    {
+        $this->guardClientColumns('searchableColumns', $value, $key);
+    }
+
+    public function updatingSortableColumns(mixed $value, ?string $key = null): void
+    {
+        $this->guardClientColumns('sortableColumns', $value, $key);
+    }
+
+    public function updatingViewName(mixed $value): void
+    {
+        if ($value !== $this->viewName && $value !== $this->defaultValue('viewName')) {
+            throw new CannotUpdateLockedPropertyException('viewName');
+        }
+    }
+
+    private function guardClientColumns(string $property, mixed $value, ?string $key): void
+    {
+        $allowed = array_merge(
+            array_keys($this->getHeader()),
+            (array)$this->defaultValue($property),
+            $this->{$property},
+        );
+
+        foreach ($key === null ? (array)$value : [$value] as $column) {
+            if (!is_string($column) || !in_array($column, $allowed, true)) {
+                throw new CannotUpdateLockedPropertyException($property);
+            }
+        }
     }
 
     /**
