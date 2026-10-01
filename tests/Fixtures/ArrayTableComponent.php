@@ -44,6 +44,7 @@ class ArrayTableComponent extends DataTableComponent
             'name'  => ['type' => 'text'],
             'city'  => ['type' => 'select', 'values' => ['Praha' => 'Praha', 'Brno' => 'Brno']],
             'date'  => ['type' => 'date'],
+            'score' => ['type' => 'multiselect', 'values' => [5 => '5', 10 => '10', 20 => '20', 30 => '30']],
         ];
     }
 

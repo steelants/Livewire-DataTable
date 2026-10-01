@@ -378,3 +378,189 @@ describe('expensive callbacks', function () {
         expect(PostTableComponent::$calls['headerFilters'])->toBe(1);
     });
 });
+
+// ─── Database driver: relations, pagination, row(), select all ────────────────
+
+function seedComments(): void
+{
+    Post::insert([
+        ['title' => '100% done', 'score' => 10, 'published' => true],
+        ['title' => '100 done', 'score' => 20, 'published' => true],
+        ['title' => 'Svoboda', 'score' => 10, 'published' => true],
+    ]);
+    Tests\Fixtures\Comment::insert([
+        ['post_id' => 1, 'body' => 'first'],
+        ['post_id' => 2, 'body' => 'second'],
+        ['post_id' => 3, 'body' => 'third'],
+        ['post_id' => 99, 'body' => 'orphan'],
+    ]);
+}
+
+function commentTable(array $props = []): Tests\Fixtures\CommentTableComponent
+{
+    $table = new Tests\Fixtures\CommentTableComponent();
+    foreach ($props as $name => $value) {
+        $table->{$name} = $value;
+    }
+
+    return $table;
+}
+
+describe('database driver relation columns', function () {
+    beforeEach(fn () => seedComments());
+
+    it('renders relation values through the join', function () {
+        expect(array_column(tableData(commentTable()), 'post.title'))->toBe(['100% done', '100 done', 'Svoboda', null]);
+    });
+
+    it('searches a relation column', function () {
+        expect(array_column(tableData(commentTable(['searchValue' => 'svob'])), 'body'))->toBe(['third']);
+    });
+
+    it('searches local and relation columns together', function () {
+        expect(array_column(tableData(commentTable(['searchValue' => 'second'])), 'body'))->toBe(['second']);
+    });
+
+    it('treats % literally in a relation search', function () {
+        expect(array_column(tableData(commentTable(['searchValue' => '100%'])), 'body'))->toBe(['first']);
+    });
+
+    it('supports * as a wildcard in a relation search', function () {
+        expect(array_column(tableData(commentTable(['searchValue' => '100*done'])), 'body'))->toBe(['first', 'second']);
+    });
+
+    it('filters a relation column by text, nested the way Livewire sends it', function () {
+        $table = commentTable(['headerFilter' => ['post' => ['title' => ' 100% ']]]);
+
+        expect(array_column(tableData($table), 'body'))->toBe(['first']);
+    });
+
+    it('filters a relation column by select', function () {
+        $table = commentTable(['headerFilter' => ['post' => ['score' => '10']]]);
+
+        expect(array_column(tableData($table), 'body'))->toBe(['first', 'third']);
+    });
+
+    it('combines a local and a relation filter', function () {
+        $table = commentTable(['headerFilter' => ['body' => 'ir', 'post' => ['score' => '10']]]);
+
+        expect(array_column(tableData($table), 'body'))->toBe(['first', 'third']);
+    });
+});
+
+describe('database driver pagination', function () {
+    beforeEach(fn () => seedPosts());
+
+    it('returns the requested page and totals', function () {
+        $table = postTable(['paginated' => true, 'itemsPerPage' => 3, 'currentPage' => 2]);
+
+        expect(array_column(tableData($table), 'id'))->toBe([4, 5, 6])
+            ->and($table->itemsTotal)->toBe(8)
+            ->and($table->pagesTotal)->toBe(3);
+    });
+
+    it('returns a partial last page', function () {
+        $table = postTable(['paginated' => true, 'itemsPerPage' => 3, 'currentPage' => 3]);
+
+        expect(array_column(tableData($table), 'id'))->toBe([7, 8]);
+    });
+
+    it('counts the filtered rows, not the page', function () {
+        $table = postTable(['paginated' => true, 'itemsPerPage' => 1, 'searchValue' => 'hotovo']);
+
+        expect(array_column(tableData($table), 'id'))->toBe([5])
+            ->and($table->itemsTotal)->toBe(2)
+            ->and($table->pagesTotal)->toBe(2);
+    });
+
+    it('keeps rows with equal sort values in a stable order across pages', function () {
+        $ids = [];
+        foreach ([1, 2, 3, 4] as $page) {
+            $table = postTable(['paginated' => true, 'itemsPerPage' => 2, 'currentPage' => $page, 'sortBy' => 'score']);
+            $ids = array_merge($ids, array_column(tableData($table), 'id'));
+        }
+
+        // Every row exactly once; ties (score 1, 5, 10) ordered by id.
+        expect($ids)->toBe([7, 8, 5, 6, 2, 4, 3, 1]);
+    });
+});
+
+describe('database driver row transformations', function () {
+    beforeEach(fn () => seedPosts());
+
+    it('applies row() and passes the model attribute to column methods', function () {
+        $table = new Tests\Fixtures\PostRowComponent();
+        $table->paginated = true;
+        $table->itemsPerPage = 2;
+
+        expect(tableData($table))->toBe([
+            ['id' => 1, 'title' => 'JAN NOVÁK', 'score' => 300],
+            ['id' => 2, 'title' => 'PETR SVOBODA', 'score' => 100],
+        ]);
+    });
+});
+
+describe('database driver select all filtered', function () {
+    beforeEach(fn () => seedPosts());
+
+    function postBulkTable(array $props): Tests\Fixtures\PostBulkTableComponent
+    {
+        $table = new Tests\Fixtures\PostBulkTableComponent();
+        $table->bootHasBulkActions();
+        foreach ($props as $name => $value) {
+            $table->{$name} = $value;
+        }
+
+        return $table;
+    }
+
+    it('respects the search value', function () {
+        $table = postBulkTable(['paginated' => true, 'itemsPerPage' => 1, 'searchValue' => ' nov ']);
+        tableData($table);
+
+        expect($table->selectAllFiltered())->toBeTrue()
+            ->and($table->selected)->toEqualCanonicalizing(['1', '3']);
+    });
+
+    it('respects search and header filters together', function () {
+        $table = postBulkTable(['searchValue' => 'hotovo', 'headerFilter' => ['score' => '5']]);
+        tableData($table);
+        $table->selectAllFiltered();
+
+        expect($table->selected)->toEqualCanonicalizing(['5', '6']);
+    });
+
+    it('treats % literally when selecting all', function () {
+        $table = postBulkTable(['searchValue' => '100%']);
+        tableData($table);
+        $table->selectAllFiltered();
+
+        expect($table->selected)->toBe(['5']);
+    });
+});
+
+// ─── Multiselect filter ───────────────────────────────────────────────────────
+
+describe('multiselect header filter', function () {
+    it('keeps rows matching any selected value in the array driver', function () {
+        expect(array_column(tableData(arrayTable(['headerFilter' => ['score' => ['10', '30']]])), 'id'))->toBe([1, 2, 4]);
+    });
+
+    it('ignores an empty selection in the array driver', function () {
+        expect(array_column(tableData(arrayTable(['headerFilter' => ['score' => []]])), 'id'))->toBe([1, 2, 3, 4, 5]);
+    });
+
+    it('keeps rows matching any selected value in the database driver', function () {
+        seedPosts();
+        Post::whereKey([2, 7])->update(['published' => false]);
+
+        expect(array_column(tableData(postTable(['headerFilter' => ['published' => ['0']]])), 'id'))->toBe([2, 7])
+            ->and(tableData(postTable(['headerFilter' => ['published' => ['0', '1']]])))->toHaveCount(8);
+    });
+
+    it('ignores an empty selection in the database driver', function () {
+        seedPosts();
+
+        expect(tableData(postTable(['headerFilter' => ['published' => []]])))->toHaveCount(8);
+    });
+});

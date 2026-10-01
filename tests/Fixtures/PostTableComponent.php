@@ -38,6 +38,7 @@ class PostTableComponent extends DataTableComponent
             'title'        => ['type' => 'text'],
             'score'        => ['type' => 'select', 'values' => ['10' => '10', '20' => '20']],
             'published_at' => ['type' => 'date'],
+            'published'    => ['type' => 'multiselect', 'values' => ['0' => 'No', '1' => 'Yes']],
         ];
     }
 }
