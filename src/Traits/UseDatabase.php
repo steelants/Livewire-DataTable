@@ -49,10 +49,11 @@ trait UseDatabase
      */
     protected function applyFilters($query)
     {
-        if ($this->searchable && !empty($this->searchValue)) {
-            $query->where(function ($q) {
+        $searchTerm = $this->searchTerm();
+        if ($this->searchable && $searchTerm !== '') {
+            $query->where(function ($q) use ($searchTerm) {
                 foreach ($this->searchableColumns as $i => $name) {
-                    $this->applyWhere($q, $name, 'LIKE', '%' . str_replace('*', '%', $this->searchValue) . '%', $i === 0 ? 'where' : 'orWhere');
+                    $this->applyWhere($q, $name, 'LIKE', '%' . str_replace('*', '%', $searchTerm) . '%', $i === 0 ? 'where' : 'orWhere');
                 }
             });
         }

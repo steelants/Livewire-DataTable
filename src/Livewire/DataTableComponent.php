@@ -175,8 +175,9 @@ class DataTableComponent extends Component
             $filterTypes[$h] = $filtersMeta[$h]['type'] ?? 'text';
         }
 
-        $searchActive = $this->searchable && $this->searchValue !== '';
-        $searchNeedle = $searchActive ? mb_strtolower($this->searchValue) : '';
+        $searchTerm = $this->searchTerm();
+        $searchActive = $this->searchable && $searchTerm !== '';
+        $searchNeedle = $searchActive ? mb_strtolower($searchTerm) : '';
         $searchableSet = $this->searchable ? array_flip($this->searchableColumns) : [];
 
         // Filter and search first
@@ -399,6 +400,15 @@ class DataTableComponent extends Component
     public function updatedSearchValue()
     {
         $this->currentPage = 1;
+    }
+
+    /**
+     * Search value without leading/trailing whitespace, so e.g. a pasted " term "
+     * still matches. The bound $searchValue is left untouched while typing.
+     */
+    protected function searchTerm(): string
+    {
+        return trim($this->searchValue);
     }
 
     private function valueByDot(array $row, string $key)
