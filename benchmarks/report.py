@@ -33,7 +33,10 @@ def extrapolate(points, sort):
 lines = ['# Benchmark: před / po', '',
          'Medián z 5 běhů (DB: 3 běhy), PHP 8.3 bez opcache, SQLite in-memory, 4 vCPU.',
          'Řádek „10⁹ (odhad)“ je **extrapolace**, ne měření: filtrování/hledání lineárně (O(n)),',
-         'řazení jako O(n log n), proloženo dvěma největšími naměřenými velikostmi.', '']
+         'řazení jako O(n log n), proloženo dvěma největšími naměřenými velikostmi.',
+         'Opakované běhy stejného kódu se liší o 10–15 % (sdílený virtuální stroj) - rozdíly v tomto',
+         'rozsahu jsou šum. Střídavé A/B měření starého a nového kódu u DB driveru „bez filtru“,',
+         '„hledání“ a „řazení“ (identické SQL) ukázalo rozdíl mediánů do ±5 %.', '']
 
 for driver in ['array', 'db']:
     lines += [f'## Driver: {driver}', '']
