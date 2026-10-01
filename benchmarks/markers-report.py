@@ -29,6 +29,8 @@ lines = [
     'řádek žádnou), „akce + výběr“ navíc `HasBulkActions`. Bez stránkování, renderují se všechny řádky.',
     'Server: `Livewire::test()->html()`, medián z 5 běhů (100 000 řádků: 3 běhy), PHP 8.3 bez opcache.',
     'Prohlížeč: Chromium, morph `<tbody>` přes Alpine morph z `livewire.js` (zná bloky markerů) s klíčem `wire:key`.',
+    '„HTML celkem“ obsahuje i Livewire snapshot (`public $dataset`), který tahle změna neřeší.',
+    'Výkyvy kolem ±10 % jsou šum měření (sdílený virtuální stroj), u 100 000 řádků proběhly jen 3 běhy.',
     '',
     '## Server',
     '',
@@ -58,7 +60,10 @@ for n in mb:
 for key, (n, v) in names.items():
     b, a = pb.get(key, {}), pa.get(key, {})
     if 'chyba' in b or 'chyba' in a:
-        lines.append(f"| {int(n):,} | {v} | prohlížeč nezvládl ({(b.get('chyba') or a.get('chyba'))[:40]}) | | |".replace(',', ' '))
+        side = lambda r: '**spadl** (nedostatek paměti)' if 'chyba' in r else None
+        cell = lambda k: f"{side(b) or ms(b[k])} → {side(a) or ms(a[k])}"
+        nodes = f"{side(b) or format(b['DOM uzlů'], ',')} → {side(a) or format(a['DOM uzlů'], ',')}"
+        lines.append(f"| {int(n):,} | {v} | {nodes} | {cell('morph 1 buňka ms')} | {cell('morph obrácené pořadí ms')} |".replace(',', ' '))
         continue
     lines.append(
         f"| {int(n):,} | {v} | {b['DOM uzlů']:,} → {a['DOM uzlů']:,} ({pct(b['DOM uzlů'], a['DOM uzlů'])}) "
