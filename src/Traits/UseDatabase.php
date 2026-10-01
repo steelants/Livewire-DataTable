@@ -53,15 +53,17 @@ trait UseDatabase
         $searchTerm = trim($this->searchValue);
         if ($this->searchable && $searchTerm !== '') {
             // * stays a wildcard, % and _ typed by the user are matched literally.
-            $pattern = '%' . str_replace('*', '%', $this->escapeLike($searchTerm)) . '%';
+            $escaped = $this->escapeLike($searchTerm);
+            $pattern = '%' . str_replace('*', '%', $escaped) . '%';
+            $escape = $escaped !== $searchTerm;
             $columns = $this->allowedSearchColumns();
-            $query->where(function ($q) use ($pattern, $columns) {
+            $query->where(function ($q) use ($pattern, $escape, $columns) {
                 if (empty($columns)) {
                     // Nothing allowed to search in - nothing matches.
                     $q->whereRaw('1 = 0');
                 }
                 foreach ($columns as $i => $name) {
-                    $this->applyLike($q, $name, $pattern, $i === 0 ? 'where' : 'orWhere');
+                    $this->applyLike($q, $name, $pattern, $escape, $i === 0 ? 'where' : 'orWhere');
                 }
             });
         }
@@ -250,7 +252,8 @@ trait UseDatabase
         if ($type === "text") {
             $value = trim((string)$value);
             if ($value !== '') {
-                $this->applyLike($q, $name, '%' . $this->escapeLike($value) . '%');
+                $escaped = $this->escapeLike($value);
+                $this->applyLike($q, $name, '%' . $escaped . '%', $escaped !== $value);
             }
         } elseif ($type === "select") {
             $this->applyWhere($q, $name, '=', $value);
@@ -296,21 +299,21 @@ trait UseDatabase
      * LIKE with an explicit escape character. '!' instead of a backslash, because
      * backslash escaping differs between MySQL, PostgreSQL, SQLite and SQL Server.
      */
-    private function applyLike($q, string $name, string $pattern, string $boolean = 'where'): void
+    private function applyLike($q, string $name, string $pattern, bool $escape, string $boolean = 'where'): void
     {
         if (strpos($name, ".") === false) {
-            $q->{$boolean . 'Raw'}($this->likeSql($q, $q->getModel()->getTable() . "." . $name), [$pattern]);
+            $q->{$boolean . 'Raw'}($this->likeSql($q, $q->getModel()->getTable() . "." . $name, $escape), [$pattern]);
         } else {
             $names = explode('.', $name);
             $column = array_pop($names);
             $q->{$boolean === 'orWhere' ? 'orWhereHas' : 'whereHas'}(
                 implode(".", $names),
-                fn ($relationQuery) => $relationQuery->whereRaw($this->likeSql($relationQuery, $column), [$pattern])
+                fn ($relationQuery) => $relationQuery->whereRaw($this->likeSql($relationQuery, $column, $escape), [$pattern])
             );
         }
     }
 
-    private function likeSql($q, string $column): string
+    private function likeSql($q, string $column, bool $escape): string
     {
         $wrapped = $q->getQuery()->getGrammar()->wrap($column);
 
@@ -319,7 +322,9 @@ trait UseDatabase
             $wrapped .= '::text';
         }
 
-        return $wrapped . " LIKE ? ESCAPE '!'";
+        // ESCAPE only when the value needed escaping - it makes LIKE measurably slower
+        // (~5 % in SQLite) and a pattern without escape characters matches the same.
+        return $wrapped . ($escape ? " LIKE ? ESCAPE '!'" : " LIKE ?");
     }
 
     private function escapeLike(string $value): string

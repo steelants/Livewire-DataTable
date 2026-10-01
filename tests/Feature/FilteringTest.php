@@ -542,3 +542,28 @@ describe('multiselect header filter', function () {
         expect(tableData(postTable(['headerFilter' => ['published' => []]])))->toHaveCount(8);
     });
 });
+
+describe('database driver LIKE escaping', function () {
+    beforeEach(fn () => seedPosts());
+
+    function executedSql(Closure $run): string
+    {
+        $sql = [];
+        Illuminate\Support\Facades\DB::listen(function ($query) use (&$sql) {
+            $sql[] = $query->sql;
+        });
+        $run();
+
+        return implode("\n", $sql);
+    }
+
+    it('sends a plain LIKE when the value has nothing to escape', function () {
+        expect(executedSql(fn () => tableData(postTable(['searchValue' => 'Svo*da', 'headerFilter' => ['title' => 'Petr']]))))
+            ->toContain(' LIKE ?')
+            ->not->toContain('ESCAPE');
+    });
+
+    it('adds ESCAPE only for values containing % or _', function (string $value) {
+        expect(executedSql(fn () => tableData(postTable(['searchValue' => $value]))))->toContain("ESCAPE '!'");
+    })->with(['100%', 'a_b', 'wow!']);
+});
