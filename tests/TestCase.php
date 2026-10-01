@@ -51,6 +51,8 @@ abstract class TestCase extends BaseTestCase
 
     protected function getEnvironmentSetUp($app): void
     {
+        // Rendering full Livewire components needs an encryption key (CSRF token).
+        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('k', 32)));
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', [
             'driver'   => 'sqlite',
