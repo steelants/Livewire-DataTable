@@ -52,34 +52,47 @@ trait UseDatabase
         // Trimmed directly: the trait is also used outside DataTableComponent.
         $searchTerm = trim($this->searchValue);
         if ($this->searchable && $searchTerm !== '') {
-            $query->where(function ($q) use ($searchTerm) {
+            // * stays a wildcard, % and _ typed by the user are matched literally.
+            $pattern = '%' . str_replace('*', '%', $this->escapeLike($searchTerm)) . '%';
+            $query->where(function ($q) use ($pattern) {
                 foreach ($this->searchableColumns as $i => $name) {
-                    $this->applyWhere($q, $name, 'LIKE', '%' . str_replace('*', '%', $searchTerm) . '%', $i === 0 ? 'where' : 'orWhere');
+                    $this->applyLike($q, $name, $pattern, $i === 0 ? 'where' : 'orWhere');
                 }
             });
         }
 
         if ($this->filterable && !empty($this->headerFilter)) {
-            $query->where(function ($q) {
-                foreach ($this->headerFilter as $name => $value) {
-                    if (is_array($value)) {
-                        foreach ($value as $key => $val) {
-                            $nameLocal = $name . "." . $key;
-                            while (is_array($val)) {
-                                $firstKey = array_key_first($val);
-                                $nameLocal .= "." . $firstKey;
-                                $val = $val[$firstKey];
-                            }
-                            $this->getFiltersWhere($q, $nameLocal, $val);
-                        }
-                    } else {
-                        $this->getFiltersWhere($q, $name, $value);
-                    }
+            // Resolved once - definitions often load select options from the database.
+            $filters = method_exists($this, 'resolvedHeaderFilters') ? $this->resolvedHeaderFilters() : $this->headerFilters();
+            $query->where(function ($q) use ($filters) {
+                foreach ($this->flattenHeaderFilter($this->headerFilter, $filters) as $name => $value) {
+                    $this->getFiltersWhere($q, $name, $value, $filters[$name]['type'] ?? null);
                 }
             });
         }
 
         return $query;
+    }
+
+    /**
+     * Livewire turns wire:model="headerFilter.user.name" into ['user' => ['name' => ...]]
+     * and date filters into ['col' => ['from' => ..., 'to' => ...]]. Walks the nested
+     * values down to the first path that is a defined filter and keeps its whole value,
+     * so the date range stays together. Values without a filter definition are skipped.
+     */
+    private function flattenHeaderFilter(array $values, array $filters, string $prefix = ''): array
+    {
+        $flat = [];
+        foreach ($values as $key => $value) {
+            $path = $prefix === '' ? (string)$key : $prefix . '.' . $key;
+            if (isset($filters[$path])) {
+                $flat[$path] = $value;
+            } elseif (is_array($value)) {
+                $flat += $this->flattenHeaderFilter($value, $filters, $path);
+            }
+        }
+
+        return $flat;
     }
 
     public function datasetFromDB($query): array
@@ -154,18 +167,20 @@ trait UseDatabase
             : $clone->count();
     }
 
-    private function getFiltersWhere(&$q, $name, $value)
+    private function getFiltersWhere(&$q, $name, $value, ?string $type)
     {
         if (empty($value)) {
             return;
         }
 
-        $type = $this->headerFilters()[$name]['type'];
         if ($type === "text") {
-            $this->applyWhere($q, $name, 'LIKE', '%' . $value . '%');
+            $value = trim((string)$value);
+            if ($value !== '') {
+                $this->applyLike($q, $name, '%' . $this->escapeLike($value) . '%');
+            }
         } elseif ($type === "select") {
             $this->applyWhere($q, $name, '=', $value);
-        } elseif (in_array($type, ["date", "time", "datetime-local"], true)) {
+        } elseif (in_array($type, ["date", "time", "datetime-local"], true) && is_array($value)) {
             if (!empty($value['from'])) {
                 $this->applyWhere($q, $name, '>=', $value['from']);
             }
@@ -185,6 +200,41 @@ trait UseDatabase
             $column = array_pop($names);
             $q->{$method . 'Relation'}(implode(".", $names), $column, $operator, $value);
         }
+    }
+
+    /**
+     * LIKE with an explicit escape character. '!' instead of a backslash, because
+     * backslash escaping differs between MySQL, PostgreSQL, SQLite and SQL Server.
+     */
+    private function applyLike($q, string $name, string $pattern, string $boolean = 'where'): void
+    {
+        if (strpos($name, ".") === false) {
+            $q->{$boolean . 'Raw'}($this->likeSql($q, $q->getModel()->getTable() . "." . $name), [$pattern]);
+        } else {
+            $names = explode('.', $name);
+            $column = array_pop($names);
+            $q->{$boolean === 'orWhere' ? 'orWhereHas' : 'whereHas'}(
+                implode(".", $names),
+                fn ($relationQuery) => $relationQuery->whereRaw($this->likeSql($relationQuery, $column), [$pattern])
+            );
+        }
+    }
+
+    private function likeSql($q, string $column): string
+    {
+        $wrapped = $q->getQuery()->getGrammar()->wrap($column);
+
+        // PostgreSQL has no LIKE for non-text columns - Laravel adds the same cast for 'like' wheres.
+        if ($q->getQuery()->getConnection()->getDriverName() === 'pgsql') {
+            $wrapped .= '::text';
+        }
+
+        return $wrapped . " LIKE ? ESCAPE '!'";
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
     }
 
     private function getRelationJoins(Builder $query): Builder

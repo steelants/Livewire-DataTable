@@ -448,7 +448,14 @@ trait HasBulkActions
     protected function selectableKeys(): array
     {
         if (!method_exists($this, 'query')) {
-            return $this->resolveSelectionKeys($this->dataset());
+            $rows = $this->dataset();
+
+            // Same search and header filters as the rendered table (DataTableComponent).
+            if (method_exists($this, 'filterArrayDataset')) {
+                $rows = $this->filterArrayDataset($rows);
+            }
+
+            return $this->resolveSelectionKeys($rows);
         }
 
         $query = $this->query();
