@@ -10,9 +10,11 @@ const path = require('node:path');
 
 const [dir, out] = process.argv.slice(2);
 const livewire = fs.readFileSync(path.join(__dirname, '../vendor/livewire/livewire/dist/livewire.js'), 'utf8');
-const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
+let browser = null;
 // Every set gets a fresh page, a crash (out of memory on large tables) is recorded, not fatal.
 const openPage = async () => {
+    // A fresh browser as well - an out of memory crash takes the whole browser down.
+    browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
     const page = await browser.newPage();
     await page.setContent('<html><body><table id="t"></table></body></html>');
     await page.addScriptTag({ content: livewire });
@@ -26,8 +28,9 @@ const results = {};
 for (const set of sets) {
     const read = s => fs.readFileSync(path.join(dir, `${set}-${s}.html`), 'utf8');
     const [a, b, c] = ['a', 'b', 'c'].map(read);
-    const page = await openPage();
+    let page;
     try {
+    page = await openPage();
     results[set] = await page.evaluate(({ a, b, c }) => {
         const opts = { key: el => el.getAttribute && el.getAttribute('wire:key'), lookahead: false };
         const run = (from, to, runs) => {
@@ -61,9 +64,8 @@ for (const set of sets) {
     } catch (e) {
         results[set] = { 'chyba': String(e.message).split('\n')[0] };
     }
-    await page.close().catch(() => {});
+    await browser.close().catch(() => {});
     console.log(set, results[set]);
 }
 fs.writeFileSync(out, JSON.stringify(results, null, 2));
-await browser.close();
 })();
