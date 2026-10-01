@@ -180,6 +180,11 @@ trait UseDatabase
             }
         } elseif ($type === "select") {
             $this->applyWhere($q, $name, '=', $value);
+        } elseif ($type === "multiselect") {
+            $values = array_values(array_filter((array)$value, fn ($v) => $v !== '' && $v !== null));
+            if (!empty($values)) {
+                $this->applyWhereIn($q, $name, $values);
+            }
         } elseif (in_array($type, ["date", "time", "datetime-local"], true) && is_array($value)) {
             if (!empty($value['from'])) {
                 $this->applyWhere($q, $name, '>=', $value['from']);
@@ -199,6 +204,17 @@ trait UseDatabase
             $names = explode('.', $name);
             $column = array_pop($names);
             $q->{$method . 'Relation'}(implode(".", $names), $column, $operator, $value);
+        }
+    }
+
+    private function applyWhereIn($q, string $name, array $values): void
+    {
+        if (strpos($name, ".") === false) {
+            $q->whereIn($q->getModel()->getTable() . "." . $name, $values);
+        } else {
+            $names = explode('.', $name);
+            $column = array_pop($names);
+            $q->whereHas(implode(".", $names), fn ($relationQuery) => $relationQuery->whereIn($column, $values));
         }
     }
 

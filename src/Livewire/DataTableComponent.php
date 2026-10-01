@@ -260,6 +260,11 @@ class DataTableComponent extends Component
                     if ($value != $a) {
                         continue 2;
                     }
+                } elseif ($type === 'multiselect') {
+                    // Loose comparison, same as select - values from the browser are strings.
+                    if (!in_array($value, $a)) {
+                        continue 2;
+                    }
                 } else {
                     $valTs = is_numeric($value) ? (int)$value : @strtotime((string)$value);
                     if ($a !== null && $valTs !== false && $valTs < $a) {
@@ -328,6 +333,15 @@ class DataTableComponent extends Component
                         null,
                     ];
                 }
+            } elseif ($type === 'multiselect') {
+                $values = $this->multiselectValues($filterVal);
+                if (!empty($values)) {
+                    $active[$col] = [
+                        'multiselect',
+                        $values,
+                        null,
+                    ];
+                }
             } elseif (in_array($type, ['date', 'time', 'datetime-local'], true)) {
                 $fromTs = (is_array($filterVal) && !empty($filterVal['from'])) ? @strtotime((string)$filterVal['from']) : null;
                 $toTs   = (is_array($filterVal) && !empty($filterVal['to'])) ? @strtotime((string)$filterVal['to']) : null;
@@ -342,6 +356,14 @@ class DataTableComponent extends Component
         }
 
         return $active;
+    }
+
+    /**
+     * Selected multiselect options without the empty ones; an empty result means no filter.
+     */
+    protected function multiselectValues(mixed $filterVal): array
+    {
+        return array_values(array_filter((array)$filterVal, fn ($v) => $v !== '' && $v !== null));
     }
 
     /**
