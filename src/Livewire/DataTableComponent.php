@@ -184,7 +184,7 @@ class DataTableComponent extends Component
         return (new \ReflectionProperty($this, $property))->getDefaultValue();
     }
 
-    private function getDatasetFromArray($dataset): array
+    private function getDatasetFromArray($dataset, bool $paginate = true): array
     {
         $headers = array_keys($this->getHeader());
 
@@ -221,7 +221,7 @@ class DataTableComponent extends Component
             $order = $this->sortedArrayOrder($filtered, $this->sortBy, strtolower($this->sortDirection) === 'desc' ? -1 : 1);
 
             // Paginate last
-            if ($this->paginated != false) {
+            if ($paginate && $this->paginated != false) {
                 $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
                 $order = array_slice($order, $from, $this->itemsPerPage);
             }
@@ -235,7 +235,7 @@ class DataTableComponent extends Component
         }
 
         // Paginate last
-        if ($this->paginated != false) {
+        if ($paginate && $this->paginated != false) {
             $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
             $filtered = array_slice($filtered, $from, $this->itemsPerPage);
         }
@@ -448,6 +448,18 @@ class DataTableComponent extends Component
         }
 
         return $this->dataset;
+    }
+
+    /**
+     * Every row matching the current search, filters and sorting, without pagination,
+     * after row() / columnX() - what HasExport writes to the CSV.
+     * UseDatabase overrides it with a query that is read in chunks.
+     */
+    protected function exportRows(): iterable
+    {
+        $this->setDefaults();
+
+        return $this->getDatasetFromArray($this->dataset(), false);
     }
 
     private function setDefaults()

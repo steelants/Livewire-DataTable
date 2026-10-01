@@ -54,8 +54,11 @@ trait UseDatabase
         if ($this->searchable && $searchTerm !== '') {
             // * stays a wildcard, % and _ typed by the user are matched literally.
             $pattern = '%' . str_replace('*', '%', $this->escapeLike($searchTerm)) . '%';
-            $query->where(function ($q) use ($pattern) {
-                foreach ($this->searchableColumns as $i => $name) {
+            // Same fallback as DataTableComponent::setDefaults(), for calls made outside
+            // a render (export, select all) before searchableColumns were filled in.
+            $columns = $this->searchableColumns ?: array_keys($this->getHeader());
+            $query->where(function ($q) use ($pattern, $columns) {
+                foreach (array_values($columns) as $i => $name) {
                     $this->applyLike($q, $name, $pattern, $i === 0 ? 'where' : 'orWhere');
                 }
             });
@@ -111,6 +114,33 @@ trait UseDatabase
             }
         }
 
+        $caches = $this->columnCaches();
+
+        foreach ($query->get() as $item) {
+            $datasetFromDB[] = $this->buildRow($item, $caches['methods'], $caches['properties']);
+        }
+        return $datasetFromDB;
+    }
+
+    /**
+     * Every row matching the current search, filters and sorting, without pagination.
+     * Read in chunks, so exporting a large table does not load it into memory at once.
+     */
+    protected function exportRows(): iterable
+    {
+        $query = $this->applySorting($this->applyFilters($this->getRelationJoins($this->query())));
+        $caches = $this->columnCaches();
+
+        foreach ($query->lazy(1000) as $item) {
+            yield $this->buildRow($item, $caches['methods'], $caches['properties']);
+        }
+    }
+
+    /**
+     * columnX() method and model property for every header column.
+     */
+    private function columnCaches(): array
+    {
         $columnMethodCache = [];
         $columnPropertyCache = [];
         foreach (array_keys($this->getHeader()) as $header) {
@@ -119,10 +149,10 @@ trait UseDatabase
             $columnPropertyCache[$header] = str_replace('.', '->', $header);
         }
 
-        foreach ($query->get() as $item) {
-            $datasetFromDB[] = $this->buildRow($item, $columnMethodCache, $columnPropertyCache);
-        }
-        return $datasetFromDB;
+        return [
+            'methods'    => $columnMethodCache,
+            'properties' => $columnPropertyCache,
+        ];
     }
 
     /**
