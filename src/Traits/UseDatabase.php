@@ -49,7 +49,8 @@ trait UseDatabase
      */
     protected function applyFilters($query)
     {
-        $searchTerm = $this->searchTerm();
+        // Trimmed directly: the trait is also used outside DataTableComponent.
+        $searchTerm = trim($this->searchValue);
         if ($this->searchable && $searchTerm !== '') {
             $query->where(function ($q) use ($searchTerm) {
                 foreach ($this->searchableColumns as $i => $name) {
