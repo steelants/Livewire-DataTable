@@ -79,7 +79,17 @@ class DataTableComponent extends Component
 
     public function mount()
     {
-        $this->useUrl ??= !request()->hasHeader('X-Livewire');
+        $this->resolveUseUrl();
+    }
+
+    /**
+     * URL binding is on for a full page load and off when the table is rendered inside
+     * a Livewire request (modal, lazy component). Resolved here and not only in mount(),
+     * because Livewire reads queryString() before mount() runs.
+     */
+    private function resolveUseUrl(): bool
+    {
+        return $this->useUrl ??= !request()->hasHeader('X-Livewire');
     }
 
     public function dataset(): array
@@ -142,7 +152,9 @@ class DataTableComponent extends Component
 
     public function queryString(): array
     {
-        if(!$this->useUrl) return [];
+        if (!$this->resolveUseUrl()) {
+            return [];
+        }
 
         $queryStrings = [];
         if ($this->paginated == true) {
@@ -158,9 +170,10 @@ class DataTableComponent extends Component
         }
         if ($this->sortable != false) {
             $queryStrings[] = 'sortBy';
-            if (!empty($this->sortBy)) {
-                $queryStrings[] = 'sortDirection';
-            }
+            // Always bound: queryString() is read before the URL values are applied, so
+            // a condition on sortBy would never restore the direction. 'except' keeps
+            // the default out of the URL.
+            $queryStrings['sortDirection'] = ['except' => 'asc'];
         }
         return $queryStrings;
     }
