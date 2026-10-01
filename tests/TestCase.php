@@ -19,6 +19,7 @@ abstract class TestCase extends BaseTestCase
             $table->string('title');
             $table->integer('score')->default(0);
             $table->boolean('published')->default(false);
+            $table->date('published_at')->nullable();
         });
 
         Schema::create('comments', function (Blueprint $table) {
