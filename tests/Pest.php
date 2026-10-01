@@ -28,3 +28,26 @@ function seedPosts(): void
         ['title' => 'axb', 'score' => 1, 'published' => true, 'published_at' => null],
     ]);
 }
+
+/**
+ * Livewire morph markers (<!--[if BLOCK]><![endif]--> / <!--[if ENDBLOCK]><![endif]-->) in the HTML.
+ */
+function morphMarkerCount(string $html): int
+{
+    return preg_match_all('/<!--\[if (BLOCK|ENDBLOCK)\]><!\[endif\]-->/', $html);
+}
+
+/**
+ * The <tbody> of the rendered table without morph markers and with whitespace collapsed,
+ * so renders of different templates can be compared for the same content.
+ */
+function normalizedTbody(string $html): string
+{
+    preg_match('/<tbody>.*<\/tbody>/s', $html, $match);
+
+    $tbody = preg_replace('/<!--\[if (BLOCK|ENDBLOCK)\]><!\[endif\]-->/', '', $match[0] ?? '');
+    $tbody = preg_replace('/\s+/', ' ', $tbody);
+    $tbody = preg_replace('/>\s+</', '><', $tbody);
+
+    return preg_replace('/\s+>/', '>', $tbody);
+}
