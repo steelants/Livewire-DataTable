@@ -5,6 +5,7 @@
  *
  * Not part of the test suite. Run it with:
  *   BENCH_SIZES_ARRAY=10000,100000,1000000 BENCH_SIZES_DB=100000,1000000 \
+ *   (an empty BENCH_SIZES_* skips that driver)
  *   BENCH_OUT=benchmarks/out.json vendor/bin/pest benchmarks/BenchTest.php
  */
 
@@ -102,7 +103,11 @@ function benchMeasure(callable $fn, int $runs): array
 
 function benchSizes(string $env, string $default): array
 {
-    return array_map('intval', explode(',', getenv($env) ?: $default));
+    $value = getenv($env);
+    $value = $value === false ? $default : $value;
+
+    // Empty = skip this driver.
+    return $value === '' ? [] : array_map('intval', explode(',', $value));
 }
 
 it('benchmarks', function () {

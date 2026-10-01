@@ -3,8 +3,8 @@ import json, math, os
 
 D = os.path.dirname(os.path.abspath(__file__))
 load = lambda f: json.load(open(os.path.join(D, f)))
-before = {**load('before-array.json'), **load('before-db.json')}
-after = {**load('after-array.json'), **load('after-db.json')}
+before = {'array': load('before-array.json')['array'], 'db': load('before-db.json')['db']}
+after = {'array': load('after-array.json')['array'], 'db': load('after-db.json')['db']}
 TARGET = 10**9
 
 

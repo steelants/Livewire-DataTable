@@ -198,23 +198,30 @@ class DataTableComponent extends Component
 
         // Sort on the transformed dataset. Only row indexes are sorted, so pagination
         // can pick the page without copying every row into a new order first.
-        $order = array_keys($filtered);
         if ($this->sortable && !empty($this->sortBy)) {
             $order = $this->sortedArrayOrder($filtered, $this->sortBy, strtolower($this->sortDirection) === 'desc' ? -1 : 1);
+
+            // Paginate last
+            if ($this->paginated != false) {
+                $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
+                $order = array_slice($order, $from, $this->itemsPerPage);
+            }
+
+            $page = [];
+            foreach ($order as $idx) {
+                $page[] = $filtered[$idx];
+            }
+
+            return $page;
         }
 
         // Paginate last
         if ($this->paginated != false) {
             $from = max(0, $this->itemsPerPage * ($this->currentPage - 1));
-            $order = array_slice($order, $from, $this->itemsPerPage);
+            $filtered = array_slice($filtered, $from, $this->itemsPerPage);
         }
 
-        $page = [];
-        foreach ($order as $idx) {
-            $page[] = $filtered[$idx];
-        }
-
-        return $page;
+        return $filtered;
     }
 
     /**
