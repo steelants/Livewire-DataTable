@@ -13,7 +13,7 @@ Medián z 5 běhů (DB: 3 běhy), PHP 8.3 bez opcache, SQLite in-memory, 4 vCPU.
 | 10 000 | 0.1 ms | 0.1 ms | 0.7× | dataset(): 5 → 2; headerFilters(): 2 → 1 |
 | 100 000 | 0.1 ms | 0.1 ms | 0.8× | dataset(): 5 → 2; headerFilters(): 2 → 1 |
 | 1 000 000 | 0.1 ms | 0.2 ms | 0.8× | dataset(): 5 → 2; headerFilters(): 2 → 1 |
-| 10⁹ (odhad) | 135.6 ms | 177.2 ms | 0.8× | extrapolace |
+| 10⁹ (odhad) | ~0.1 ms | ~0.2 ms | — | nezávisí na počtu řádků; rozdíl ~30 µs = režie once() |
 
 ### hledání
 

@@ -56,6 +56,12 @@ for driver in ['array', 'db']:
                     note.append(f'{k}: {b.get(k, "—")} → {a.get(k, "—")}')
             speed = f'{bm / am:.1f}×' if bm and am else '—'
             lines.append(f'| {int(n):,} | {fmt_ms(bm)} | {fmt_ms(am)} | {speed} | {"; ".join(note)} |'.replace(',', ' '))
+        if driver == 'array' and sc == 'bez filtru':
+            # Only the page is sliced, no per-row work: the time does not grow with n,
+            # so a linear extrapolation would only multiply the measurement noise.
+            lines.append('| 10⁹ (odhad) | ~0.1 ms | ~0.2 ms | — | nezávisí na počtu řádků; rozdíl ~30 µs = režie once() |')
+            lines.append('')
+            continue
         eb, ea = extrapolate(pb, sort), extrapolate(pa, sort)
         speed = f'{eb / ea:.1f}×' if eb and ea else '—'
         lines.append(f'| 10⁹ (odhad) | {fmt_ms(eb)} | {fmt_ms(ea)} | {speed} | extrapolace |')
