@@ -2,6 +2,7 @@
 
 namespace Tests\Fixtures;
 
+use Livewire\Attributes\Locked;
 use SteelAnts\DataTable\Livewire\DataTableComponent;
 use SteelAnts\DataTable\Traits\HasExport;
 
@@ -12,6 +13,7 @@ class ArrayExportComponent extends DataTableComponent
     public static array $rows = [];
 
     public bool $searchable = true;
+    #[Locked]
     public array $searchableColumns = ['name'];
     public bool $filterable = true;
     public int $itemsPerPage = 2;

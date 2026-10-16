@@ -14,6 +14,8 @@ use Tests\Fixtures\PostTableComponent;
 beforeEach(fn () => seedPosts());
 
 describe('searchableColumns from the browser', function () {
+    // PostTableComponent inherits #[Locked], PostHiddenSearchComponent redeclares the
+    // property with #[Locked] - the way the documentation asks for.
     it('rejects a fake relation that would call a model method', function (string $component, string $column) {
         $table = Livewire::test($component)->set('searchValue', 'zzz');
 
@@ -28,20 +30,9 @@ describe('searchableColumns from the browser', function () {
         }
     });
 
-    it('lets the browser pick header columns, e.g. from a column picker', function () {
-        $table = Livewire::test(PostTableComponent::class)
-            ->set('searchableColumns', ['title'])
-            ->set('searchValue', 'Svoboda');
-
-        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Petr Svoboda']);
-    });
-
-    it('lets the browser keep a hidden column the code declared', function () {
-        $table = Livewire::test(PostHiddenSearchComponent::class)
-            ->set('searchableColumns', ['score'])
-            ->set('searchValue', '30');
-
-        expect(array_column($table->viewData('dataset'), 'title'))->toBe(['Jan Novák']);
+    it('rejects even a header column - the property is locked', function () {
+        expect(fn () => Livewire::test(PostTableComponent::class)->set('searchableColumns', ['title']))
+            ->toThrow(CannotUpdateLockedPropertyException::class);
     });
 
     it('protects select all as well', function () {
@@ -79,12 +70,6 @@ describe('searchableColumns set in code', function () {
 describe('other configuration from the browser', function () {
     it('rejects another view', function () {
         expect(fn () => Livewire::test(PostTableComponent::class)->set('viewName', 'datatable-components::tbody'))->toThrow(CannotUpdateLockedPropertyException::class);
-    });
-
-    it('accepts the current view', function () {
-        Livewire::test(PostTableComponent::class)
-            ->set('viewName', 'datatable::data-table')
-            ->assertSet('viewName', 'datatable::data-table');
     });
 
     it('rejects a fake sortable column', function () {
@@ -138,3 +123,21 @@ describe('query string values', function () {
     });
 });
 
+
+describe('locked configuration check at boot', function () {
+    it('refuses a component that redeclares a locked property without #[Locked]', function (string $component, string $property) {
+        expect(fn () => Livewire::test($component))
+            ->toThrow("{$component}::\${$property} must be declared with #[Locked]");
+    })->with([
+        [Tests\Fixtures\UnlockedSearchComponent::class, 'searchableColumns'],
+        [Tests\Fixtures\UnlockedViewComponent::class, 'viewName'],
+    ]);
+
+    it('accepts inherited and redeclared locked properties', function (string $component) {
+        expect(fn () => Livewire::test($component))->not->toThrow(LogicException::class);
+    })->with([
+        PostTableComponent::class,
+        PostHiddenSearchComponent::class,
+        Tests\Fixtures\PostRedeclaredMountSearchComponent::class,
+    ]);
+});

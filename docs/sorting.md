@@ -34,6 +34,7 @@ By default, all available columns can be sorted.
 You can limit sortable columns:
 
 ```php
+#[Locked]
 public array $sortableColumns = [
     'name',
     'email',
@@ -51,6 +52,7 @@ Sorting works automatically with direct database columns.
 Example:
 
 ```php
+#[Locked]
 public array $sortableColumns = [
     'name',
     'score',
@@ -155,6 +157,7 @@ class UserTable extends DataTableComponent
 
     public bool $sortable = true;
 
+    #[Locked]
     public array $sortableColumns = [
         'name',
         'email',
