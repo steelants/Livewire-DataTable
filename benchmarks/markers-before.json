@@ -1,0 +1,77 @@
+{
+    "1000": {
+        "bez akcí": {
+            "ms": 225.6,
+            "markers": 26002,
+            "tbody B": 1955549,
+            "html B": 2274247,
+            "peak MB": 5.8,
+            "html files": "1000-9643e7"
+        },
+        "akce": {
+            "ms": 328.7,
+            "markers": 39202,
+            "tbody B": 4390685,
+            "html B": 5307765,
+            "peak MB": 17.6,
+            "html files": "1000-00a8d2"
+        },
+        "akce + výběr": {
+            "ms": 277.8,
+            "markers": 41202,
+            "tbody B": 4635578,
+            "html B": 5568885,
+            "peak MB": 16.8,
+            "html files": "1000-f98944"
+        }
+    },
+    "10000": {
+        "bez akcí": {
+            "ms": 1831.8,
+            "markers": 260002,
+            "tbody B": 19640841,
+            "html B": 22793650,
+            "peak MB": 57.9,
+            "html files": "10000-9643e7"
+        },
+        "akce": {
+            "ms": 3382.4,
+            "markers": 392002,
+            "tbody B": 44016177,
+            "html B": 53176368,
+            "peak MB": 162.8,
+            "html files": "10000-00a8d2"
+        },
+        "akce + výběr": {
+            "ms": 3390.9,
+            "markers": 412002,
+            "tbody B": 46475071,
+            "html B": 55804490,
+            "peak MB": 168.4,
+            "html files": "10000-f98944"
+        }
+    },
+    "100000": {
+        "bez akcí": {
+            "ms": 21790.8,
+            "markers": 2600002,
+            "tbody B": 197268275,
+            "html B": 229176729,
+            "peak MB": 581.1
+        },
+        "akce": {
+            "ms": 42011.1,
+            "markers": 3920002,
+            "tbody B": 441261611,
+            "html B": 533483447,
+            "peak MB": 1630.1
+        },
+        "akce + výběr": {
+            "ms": 47381.2,
+            "markers": 4120002,
+            "tbody B": 465950506,
+            "html B": 559961571,
+            "peak MB": 1685.6
+        }
+    }
+}

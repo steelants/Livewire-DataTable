@@ -1,0 +1,38 @@
+{
+  "1000-00a8d2": {
+    "DOM uzlů": 73475,
+    "komentářů": 10404,
+    "morph 1 buňka ms": 401.6,
+    "morph obrácené pořadí ms": 416
+  },
+  "1000-9643e7": {
+    "DOM uzlů": 26675,
+    "komentářů": 2004,
+    "morph 1 buňka ms": 148.8,
+    "morph obrácené pořadí ms": 155.4
+  },
+  "1000-f98944": {
+    "DOM uzlů": 86475,
+    "komentářů": 14404,
+    "morph 1 buňka ms": 443.2,
+    "morph obrácené pořadí ms": 456.3
+  },
+  "10000-00a8d2": {
+    "DOM uzlů": 734675,
+    "komentářů": 104004,
+    "morph 1 buňka ms": 5524.2,
+    "morph obrácené pořadí ms": 6664.4
+  },
+  "10000-9643e7": {
+    "DOM uzlů": 266675,
+    "komentářů": 20004,
+    "morph 1 buňka ms": 1539.3,
+    "morph obrácené pořadí ms": 2642.5
+  },
+  "10000-f98944": {
+    "DOM uzlů": 864675,
+    "komentářů": 144004,
+    "morph 1 buňka ms": 6094.2,
+    "morph obrácené pořadí ms": 8300.8
+  }
+}

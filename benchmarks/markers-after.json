@@ -1,0 +1,77 @@
+{
+    "1000": {
+        "bez akcí": {
+            "ms": 103,
+            "markers": 2004,
+            "tbody B": 443623,
+            "html B": 762321,
+            "peak MB": 2.9,
+            "html files": "1000-9643e7"
+        },
+        "akce": {
+            "ms": 195.4,
+            "markers": 10404,
+            "tbody B": 2744359,
+            "html B": 3661439,
+            "peak MB": 14.5,
+            "html files": "1000-00a8d2"
+        },
+        "akce + výběr": {
+            "ms": 231,
+            "markers": 14404,
+            "tbody B": 3046252,
+            "html B": 3979559,
+            "peak MB": 13.8,
+            "html files": "1000-f98944"
+        }
+    },
+    "10000": {
+        "bez akcí": {
+            "ms": 1044.6,
+            "markers": 20004,
+            "tbody B": 4520915,
+            "html B": 7673724,
+            "peak MB": 29.1,
+            "html files": "10000-9643e7"
+        },
+        "akce": {
+            "ms": 2272.9,
+            "markers": 104004,
+            "tbody B": 27552251,
+            "html B": 36712442,
+            "peak MB": 131.4,
+            "html files": "10000-00a8d2"
+        },
+        "akce + výběr": {
+            "ms": 2515.5,
+            "markers": 144004,
+            "tbody B": 30581145,
+            "html B": 39910564,
+            "peak MB": 138.1,
+            "html files": "10000-f98944"
+        }
+    },
+    "100000": {
+        "bez akcí": {
+            "ms": 10513.8,
+            "markers": 200004,
+            "tbody B": 46068349,
+            "html B": 77976803,
+            "peak MB": 292.7
+        },
+        "akce": {
+            "ms": 24792,
+            "markers": 1040004,
+            "tbody B": 276621685,
+            "html B": 368843521,
+            "peak MB": 1316.1
+        },
+        "akce + výběr": {
+            "ms": 43582.5,
+            "markers": 1440004,
+            "tbody B": 307010580,
+            "html B": 401021645,
+            "peak MB": 1382.5
+        }
+    }
+}
