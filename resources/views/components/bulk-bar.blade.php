@@ -25,7 +25,7 @@
                         @endif
                         <span wire:loading.remove wire:target="callBulkAction">{{ __($action['text']) }}</span>
                         <span wire:loading wire:target="callBulkAction">
-                            <i class="fas fa-spinner fa-spin me-1"></i>{{ __('Processing...') }}
+                            <i class="fa-solid fa-spinner fa-spin me-1"></i>{{ __('Processing...') }}
                         </span>
                     </button>
                 @endif

@@ -66,7 +66,7 @@ describe('tbody output', function () {
     it('renders a Blade component returned by renderColumnX()', function () {
         $rows = tbodyRows(markersVariant('plain'));
 
-        expect($rows[1][2])->toContain('<td><span class="badge bg-secondary"><i class="fas fa-lock"></i> blocked</span></td>')
+        expect($rows[1][2])->toContain('<td><span class="badge bg-secondary"><i class="fa-solid fa-lock"></i> blocked</span></td>')
             ->and($rows[2][2])->toContain('<td><span class="badge bg-secondary">open</span></td>');
     });
 

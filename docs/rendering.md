@@ -46,8 +46,8 @@ class BoolAsIcon implements RenderCast
     {
         return '<i class="' .
             ($value
-                ? 'far fa-check-circle text-success'
-                : 'far fa-times-circle text-danger'
+                ? 'fa-regular fa-check-circle text-success'
+                : 'fa-regular fa-times-circle text-danger'
             )
             . '"></i>';
     }
