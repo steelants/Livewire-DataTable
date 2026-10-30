@@ -66,23 +66,23 @@
                 {!! $renderCells($row) !!}
                 <td class="text-end">
                     @if (!empty($actions[$idx]))
-                        <div class="dropdown position-static">
-                            <button class="datatable-dropdown-action btn btn-sq btn-sm" type="button" data-bs-toggle="dropdown" data-bs-boundary="window">
+                        <div class="position-static">
+                            <button class="datatable-dropdown-action btn btn-sq btn-sm" type="button" data-bs-toggle="menu" data-bs-boundary="window">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
                                     <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
                                 </svg>
                             </button>
 
-                            <div class="dropdown-menu">
+                            <div class="menu">
                                 @foreach ($actions[$idx] as $action)
                                     @php($icon = !empty($action['iconClass']) ? '<i class="dropdown-item-icon ' . e($action['iconClass']) . '"></i>' : '')
                                     @if ($action['type'] == 'url')
-                                        <a class="dropdown-item {{ $action['actionClass'] ?? '' }}" href="{{ $action['url'] }}" @attrs($action['attributes'] ?? null)>
+                                        <a class="menu-item {{ $action['actionClass'] ?? '' }}" href="{{ $action['url'] }}" @attrs($action['attributes'] ?? null)>
                                             {!! $icon !!}
                                             <span>{{ __($action['text']) }}</span>
                                         </a>
                                     @elseif ($action['type'] == 'livewire')
-                                        <button type="button" class="dropdown-item {{ $action['actionClass'] ?? '' }}"
+                                        <button type="button" class="menu-item {{ $action['actionClass'] ?? '' }}"
                                             wire:click='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'
                                             @if(!empty($action['confirm'])) wire:confirm="{{__($action['confirm'])}}" @endif
 											@attrs($action['attributes'] ?? null)
@@ -91,7 +91,7 @@
                                             <span>{{ __($action['text']) }}</span>
                                         </button>
                                     @elseif ($action['type'] == 'onclick')
-                                        <button type="button" class="dropdown-item {{ $action['actionClass'] ?? '' }}"
+                                        <button type="button" class="menu-item {{ $action['actionClass'] ?? '' }}"
                                             onclick='{{ $action['action'] }}({{ json_encode($action['parameters']) }})'
 											@attrs($action['attributes'] ?? null)
                                         >

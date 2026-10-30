@@ -93,16 +93,16 @@ describe('tbody output', function () {
     it('renders the selection cell only for selectable tables', function () {
         $selectable = tbodyRows(markersVariant('selectable'));
 
-        expect($selectable[1][2])->toStartWith('<td class="datatable-selection-cell"><input type="checkbox" class="form-check-input" wire:model.live="selected" value="2" checked></td>')
-            ->and($selectable[2][2])->toStartWith('<td class="datatable-selection-cell"><input type="checkbox" class="form-check-input" wire:model.live="selected" value="3"></td>')
+        expect($selectable[1][2])->toStartWith('<td class="datatable-selection-cell"><input type="checkbox" class="check" wire:model.live="selected" value="2" checked></td>')
+            ->and($selectable[2][2])->toStartWith('<td class="datatable-selection-cell"><input type="checkbox" class="check" wire:model.live="selected" value="3"></td>')
             ->and(normalizedTbody(markersVariant('actions')))->not->toContain('datatable-selection-cell');
     });
 
     it('renders the actions column, empty for rows without actions', function () {
         $rows = tbodyRows(markersVariant('actions'));
 
-        expect($rows[0][2])->toContain('<td class="text-end"><div class="dropdown position-static">')
-            ->and($rows[0][2])->toContain('<a class="dropdown-item " href="/tasks/1/edit"')
+        expect($rows[0][2])->toContain('<td class="text-end"><div class="position-static">')
+            ->and($rows[0][2])->toContain('<a class="menu-item " href="/tasks/1/edit"')
             ->and($rows[0][2])->toContain("wire:click='remove(1)'")
             ->and($rows[0][2])->toContain('wire:confirm="Really &quot;delete&quot;?"')
             ->and($rows[0][2])->toContain("onclick='copyRow({&quot;id&quot;:1})'")

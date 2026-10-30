@@ -1,5 +1,5 @@
 @if ($visible())
-    <div class="datatable-bulk-bar d-flex align-items-center flex-wrap gap-3 p-2 mb-3 bg-body-tertiary rounded-2">
+    <div class="datatable-bulk-bar d-flex align-items-center flex-wrap gap-3 p-2 mb-3 bg-2 rounded-8">
         <span class="fw-semibold text-nowrap">
             {{ __(':count of :total selected', ['count' => count($selected), 'total' => $itemsTotal]) }}
         </span>
@@ -7,7 +7,7 @@
         <div class="d-flex flex-wrap gap-2">
             @foreach ($bulkActions as $action)
                 @if (($action['type'] ?? 'livewire') === 'url')
-                    <a class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}" href="{{ $action['url'] }}">
+                    <a class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline theme-secondary' }}" href="{{ $action['url'] }}">
                         @if (!empty($action['iconClass']))
                             <i class="{{ $action['iconClass'] }} me-1"></i>
                         @endif
@@ -16,7 +16,7 @@
                 @else
                     {{-- Dispatch by action name, not by index: bulkActions() can be
                          permission-conditioned and indexes then shift. --}}
-                    <button type="button" class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline-secondary' }}"
+                    <button type="button" class="btn btn-sm {{ $action['actionClass'] ?? 'btn-outline theme-secondary' }}"
                             wire:click="callBulkAction('{{ $action['action'] }}')"
                             wire:loading.attr="disabled"
                             @if (!empty($action['confirm'])) wire:confirm="{{ __($action['confirm']) }}" @endif>

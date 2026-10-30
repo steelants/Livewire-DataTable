@@ -7,7 +7,7 @@
             <td>
                 @if (isset($headerFilters[$key]))
                     @if ($headerFilters[$key]['type'] == "select")
-                        <select class="form-select" wire:model.change="headerFilter.{{ $key }}">
+                        <select class="form-control" wire:model.change="headerFilter.{{ $key }}">
                             <option value="">{{ __('All') }}</option>
                             @if (!empty($headerFilters[$key]['values']))
                                 @foreach($headerFilters[$key]['values'] as $value => $name)
@@ -16,7 +16,7 @@
                             @endif
                         </select>
                     @elseif($headerFilters[$key]['type'] == "multiselect")
-                        <select multiple class="form-select form-select-sm" wire:model.change="{{ $wireModel($key) }}">
+                        <select multiple class="form-control form-control-sm" wire:model.change="{{ $wireModel($key) }}">
                             @foreach($headerFilters[$key]['values'] ?? [] as $value => $name)
                                 <option value="{{ $value }}">{{ $name }}</option>
                             @endforeach

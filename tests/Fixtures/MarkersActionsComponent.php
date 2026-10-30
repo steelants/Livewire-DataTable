@@ -26,7 +26,7 @@ class MarkersActionsComponent extends MarkersTableComponent
                 'parameters'  => $item['id'],
                 'text'        => 'Delete',
                 'confirm'     => 'Really "delete"?',
-                'actionClass' => 'text-danger',
+                'actionClass' => 'fg-danger',
             ],
             [
                 'type'       => 'onclick',
