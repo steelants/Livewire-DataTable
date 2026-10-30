@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.1
+
+### Opravy
+- Hlavičkový checkbox výběru stránky zůstával po vyprázdnění výběru (např. po bulk akci) zaškrtnutý
+  a další klik místo odznačení znovu označil celou stránku. Livewire morph přepisoval jen atribut
+  `checked`, ne DOM vlastnost přepnutou klikem. Input má teď `wire:key` podle stavu výběru, takže se
+  při změně vymění (platí i pro `indeterminate`).
+
 ## 2.9.1
 
 ### Výkon
