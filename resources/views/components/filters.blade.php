@@ -18,7 +18,8 @@
         </div> --}}
     @endif
     @if (!empty($filename))
-        <div class="d-flex justify-content-end">
+        {{-- col-auto: without a col class the div takes the full width of .row and drops below the search --}}
+        <div class="col-auto ms-auto">
             <button type="button" class="btn btn-light" wire:click="serv">
                 <span>{{ __('Export') }}</span>
             </button>

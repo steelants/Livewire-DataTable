@@ -7,6 +7,8 @@
   a další klik místo odznačení znovu označil celou stránku. Livewire morph přepisoval jen atribut
   `checked`, ne DOM vlastnost přepnutou klikem. Input má teď `wire:key` podle stavu výběru, takže se
   při změně vymění (platí i pro `indeterminate`).
+- Tlačítko Export je na stejném řádku jako vyhledávání, zarovnané doprava. Dřív zabíralo celý
+  vlastní řádek pod ním.
 
 ## 2.9.1
 
