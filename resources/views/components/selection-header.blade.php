@@ -6,7 +6,7 @@
              only rewrites the checked attribute, not the DOM property toggled by the click -
              the checkbox would stay checked after the selection is cleared (e.g. by a bulk
              action) and the next click would select the whole page again. --}}
-        <input type="checkbox" class="form-check-input"
+        <input type="checkbox" class="check"
                wire:key="datatable-select-page-{{ $selectPage ? 'all' : ($partiallySelected ? 'some' : 'none') }}"
                wire:click="toggleSelectPage"
                @checked($selectPage)
