@@ -5,14 +5,14 @@
         </div>
         {{-- <div class="col-auto">
             <button type="button" class="btn btn-outline" data-bs-toggle="collapse" data-bs-target="#filters_{{ $id }}">
-                <i class="me-2 fas fa-filter"></i>
+                <i class="me-2 fa-solid fa-filter"></i>
                 <span>{{ __('datatable::ui.filters') }}</span>
                 <span class="badge text-bg-secondary ms-2">3</span>
             </button>
         </div>
         <div class="col-auto">
             <button type="button" class="btn btn-outline">
-                <i class="me-2 fas fa-download"></i>
+                <i class="me-2 fa-solid fa-download"></i>
                 <span>{{ __('datatable::ui.export') }}</span>
             </button>
         </div> --}}

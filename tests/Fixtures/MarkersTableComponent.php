@@ -64,7 +64,7 @@ class MarkersTableComponent extends DataTableComponent
     {
         return Blade::render('<x-bench-badge :color="$color" :icon="$icon">{{ $value }}</x-bench-badge>', [
             'color' => $value === 'done' ? 'success' : 'secondary',
-            'icon'  => $value === 'blocked' ? 'fas fa-lock' : null,
+            'icon'  => $value === 'blocked' ? 'fa-solid fa-lock' : null,
             'value' => $value,
         ]);
     }
