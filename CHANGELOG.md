@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1
+
+### Opravy
+- Tlačítko Export je na stejném řádku jako vyhledávání, zarovnané doprava. Dřív zabíralo celý
+  vlastní řádek pod ním.
+
 ## 2.9.1
 
 ### Výkon
