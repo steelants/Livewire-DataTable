@@ -18,7 +18,7 @@
         </div> --}}
     @endif
     @if (!empty($filename))
-        {{-- col-auto: bez col třídy by div v .row zabral celou šířku a spadl pod vyhledávání --}}
+        {{-- col-auto: without a col class the div takes the full width of .row and drops below the search --}}
         <div class="col-auto ms-auto">
             <button type="button" class="btn btn-light" wire:click="serv">
                 <span>{{ __('Export') }}</span>
