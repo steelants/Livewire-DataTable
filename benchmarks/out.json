@@ -1,0 +1,95 @@
+{
+    "array": {
+        "10000": {
+            "bez filtru": {
+                "ms": 0.08,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 6.71,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "filtry text+select+date": {
+                "ms": 4.06,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "řazení": {
+                "ms": 15.02,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání+filtry+řazení": {
+                "ms": 8.15,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 8.81,
+                "vybráno": 4079
+            }
+        },
+        "100000": {
+            "bez filtru": {
+                "ms": 0.11,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 93.63,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "filtry text+select+date": {
+                "ms": 50.27,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "řazení": {
+                "ms": 213.2,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "hledání+filtry+řazení": {
+                "ms": 114.92,
+                "dataset()": 2,
+                "headerFilters()": 1
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 100.36,
+                "vybráno": 40243
+            }
+        }
+    },
+    "db": {
+        "100000": {
+            "bez filtru": {
+                "ms": 26.11,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 45.47,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "filtry text+select": {
+                "ms": 38.17,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "filtry text+select+date": {
+                "ms": 40.52,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "řazení": {
+                "ms": 31.37,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            }
+        }
+    }
+}

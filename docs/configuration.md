@@ -24,6 +24,7 @@ By default, all available columns can be sorted.
 You can restrict sortable columns:
 
 ```php
+#[Locked]
 public array $sortableColumns = [
     'name',
     'email',
@@ -69,6 +70,25 @@ public bool $searchable = true;
 You can restrict searchable columns:
 
 ```php
+#[Locked]
+public array $searchableColumns = [
+    'name',
+    'email',
+];
+```
+
+The columns can also be set in `mount()` and may include columns that are not displayed.
+
+`searchableColumns`, `sortableColumns` and `viewName` are `#[Locked]` in `DataTableComponent`,
+so the browser cannot change them - the column and relation names go into the query.
+**When you redeclare one of them in your component, add `#[Locked]` to the declaration** -
+PHP attributes are not inherited. A redeclaration without it throws a `LogicException` when the
+component boots, naming the class and the property:
+
+```php
+use Livewire\Attributes\Locked;
+
+#[Locked]
 public array $searchableColumns = [
     'name',
     'email',
@@ -220,11 +240,13 @@ class UserTable extends DataTableComponent
 
     public bool $filterable = true;
 
+    #[Locked]
     public array $sortableColumns = [
         'name',
         'email',
     ];
 
+    #[Locked]
     public array $searchableColumns = [
         'name',
         'email',

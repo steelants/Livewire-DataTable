@@ -85,6 +85,26 @@ The array key is the stored value.
 The array value is the displayed label.
 
 
+## Multiselect Filter
+
+Multiselect filters keep rows matching any of the selected values.
+
+Example:
+
+```php
+'status' => [
+    'type' => 'multiselect',
+    'values' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'banned' => 'Banned',
+    ],
+],
+```
+
+Values work the same way as in the select filter. An empty selection does not filter.
+
+
 ## Date Filter
 
 Date filters support date based filtering.

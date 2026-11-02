@@ -1,0 +1,143 @@
+{
+    "array": {
+        "10000": {
+            "bez filtru": {
+                "ms": 0.07,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání": {
+                "ms": 7.1,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "filtry text+select+date": {
+                "ms": 7.42,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "řazení": {
+                "ms": 36.43,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání+filtry+řazení": {
+                "ms": 18.02,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 5.59,
+                "vybráno": 10000
+            }
+        },
+        "100000": {
+            "bez filtru": {
+                "ms": 0.07,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání": {
+                "ms": 108.07,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "filtry text+select+date": {
+                "ms": 91.32,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "řazení": {
+                "ms": 546.92,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "hledání+filtry+řazení": {
+                "ms": 218.64,
+                "dataset()": 5,
+                "headerFilters()": 2
+            },
+            "selectAllFiltered (hledání)": {
+                "ms": 58.98,
+                "vybráno": 100000
+            }
+        }
+    },
+    "db": {
+        "100000": {
+            "bez filtru": {
+                "ms": 26.06,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 45.86,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "filtry text+select": {
+                "ms": 90.05,
+                "SQL dotazů": 5,
+                "headerFilters()": 3
+            },
+            "filtry text+select+date": {
+                "chyba": "ErrorException: Undefined array key \"published_at.from\""
+            },
+            "řazení": {
+                "ms": 32.34,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            }
+        },
+        "1000000": {
+            "bez filtru": {
+                "ms": 259.36,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 503.74,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "filtry text+select": {
+                "ms": 888.15,
+                "SQL dotazů": 5,
+                "headerFilters()": 3
+            },
+            "filtry text+select+date": {
+                "chyba": "ErrorException: Undefined array key \"published_at.from\""
+            },
+            "řazení": {
+                "ms": 313.82,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            }
+        },
+        "10000000": {
+            "bez filtru": {
+                "ms": 2949.2,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "hledání": {
+                "ms": 5113.02,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            },
+            "filtry text+select": {
+                "ms": 9413.91,
+                "SQL dotazů": 5,
+                "headerFilters()": 3
+            },
+            "filtry text+select+date": {
+                "chyba": "ErrorException: Undefined array key \"published_at.from\""
+            },
+            "řazení": {
+                "ms": 3425.68,
+                "SQL dotazů": 3,
+                "headerFilters()": 1
+            }
+        }
+    }
+}

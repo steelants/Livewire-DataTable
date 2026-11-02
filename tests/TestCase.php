@@ -19,6 +19,7 @@ abstract class TestCase extends BaseTestCase
             $table->string('title');
             $table->integer('score')->default(0);
             $table->boolean('published')->default(false);
+            $table->date('published_at')->nullable();
         });
 
         Schema::create('comments', function (Blueprint $table) {
@@ -50,6 +51,8 @@ abstract class TestCase extends BaseTestCase
 
     protected function getEnvironmentSetUp($app): void
     {
+        // Rendering full Livewire components needs an encryption key (CSRF token).
+        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('k', 32)));
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', [
             'driver'   => 'sqlite',
