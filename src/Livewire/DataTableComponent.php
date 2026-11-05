@@ -533,7 +533,7 @@ class DataTableComponent extends Component
     //             'type' => "url",
     //             'url' => route('test.form', ['modelId' => $item['id']]),
     //             'text' => "edit",
-    //             'iconClass' => 'fas fa-pen',
+    //             'iconClass' => 'fa-solid fa-pen',
     //         ],
     //         [
     //             'type' => "livewire",

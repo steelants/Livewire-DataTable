@@ -534,3 +534,27 @@ describe('selection cell rendering', function () {
         expect(trim($html))->toBe('');
     });
 });
+
+describe('selection header rendering', function () {
+    it('changes the checkbox key with the page selection state', function () {
+        $render = fn (bool $selectPage, bool $partiallySelected) => Blade::render(
+            '<x-datatable-selection-header :selectable="true" :select-page="$selectPage" :partially-selected="$partiallySelected" />',
+            ['selectPage' => $selectPage, 'partiallySelected' => $partiallySelected]
+        );
+
+        // Morph only rewrites the checked attribute, not the DOM property toggled by the click.
+        // A different key makes Livewire replace the input, so it always shows the server state.
+        expect($render(true, false))->toContain('wire:key="datatable-select-page-all"')
+            ->and($render(false, true))->toContain('wire:key="datatable-select-page-some"')
+            ->and($render(false, false))->toContain('wire:key="datatable-select-page-none"');
+    });
+
+    it('renders checked only when the whole page is selected', function () {
+        $html = Blade::render(
+            '<x-datatable-selection-header :selectable="true" :select-page="false" :partially-selected="false" />'
+        );
+
+        expect($html)->not->toContain('checked')
+            ->and($html)->not->toContain('indeterminate');
+    });
+});

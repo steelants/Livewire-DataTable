@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.0.2
+
+### Opravy
+- Hlavičkový checkbox výběru stránky zůstával po vyprázdnění výběru (např. po bulk akci) zaškrtnutý
+  a další klik místo odznačení znovu označil celou stránku. Livewire morph přepisoval jen atribut
+  `checked`, ne DOM vlastnost přepnutou klikem. Input má teď `wire:key` podle stavu výběru, takže se
+  při změně vymění (platí i pro `indeterminate`).
+- Tlačítko Export je na stejném řádku jako vyhledávání, zarovnané doprava. Dřív zabíralo celý
+  vlastní řádek pod ním.
+
+### Změny
+- Ikony v šablonách a dokumentaci používají Font Awesome 7 (`fa-solid` místo `fas`). Projekty
+  s Font Awesome 5 musí přejít na novější verzi.
+
 ## 3.0.0
 
 ### Bezpečnost

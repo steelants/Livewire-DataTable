@@ -39,7 +39,7 @@ public function bulkActions(): array
             'action' => 'removeSelected',
             'text' => 'Remove',
             'actionClass' => 'btn-danger',
-            'iconClass' => 'fas fa-trash',
+            'iconClass' => 'fa-solid fa-trash',
             'confirm' => 'Are you sure you want to delete the selected items?',
         ],
     ];

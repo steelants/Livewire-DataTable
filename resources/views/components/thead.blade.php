@@ -16,12 +16,12 @@
 
                     @if ($sortable && in_array($key, $sortableColumns))
                         @if ($key != $sortBy)
-                            <i class="fas fa-sort opacity-50"></i>
+                            <i class="fa-solid fa-sort opacity-50"></i>
                         @else
                             @if ($sortDirection == 'asc')
-                                <i class="fas fa-sort-up"></i>
+                                <i class="fa-solid fa-sort-up"></i>
                             @else
-                                <i class="fas fa-sort-down"></i>
+                                <i class="fa-solid fa-sort-down"></i>
                             @endif
                         @endif
                     @endif

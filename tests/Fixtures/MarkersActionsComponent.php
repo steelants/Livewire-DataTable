@@ -18,7 +18,7 @@ class MarkersActionsComponent extends MarkersTableComponent
                 'type'      => 'url',
                 'url'       => '/tasks/' . $item['id'] . '/edit',
                 'text'      => 'Edit',
-                'iconClass' => 'fas fa-pen',
+                'iconClass' => 'fa-solid fa-pen',
             ],
             [
                 'type'        => 'livewire',

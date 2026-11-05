@@ -22,7 +22,7 @@ public function actions($item): array
             'parameters' => $item['id'],
             'text' => 'Remove',
             'actionClass' => 'text-danger',
-            'iconClass' => 'fas fa-trash',
+            'iconClass' => 'fa-solid fa-trash',
             'confirm' => 'Are you sure you want to delete this post?',
         ],
         [
@@ -31,7 +31,7 @@ public function actions($item): array
                 'id' => $item['id'],
             ]),
             'text' => 'Show',
-            'iconClass' => 'fas fa-eye',
+            'iconClass' => 'fa-solid fa-eye',
         ],
     ];
 }
@@ -75,7 +75,7 @@ Example:
         'id' => $item['id'],
     ]),
     'text' => 'Show',
-    'iconClass' => 'fas fa-eye',
+    'iconClass' => 'fa-solid fa-eye',
 ]
 ```
 

@@ -33,7 +33,7 @@
                  stays in the viewport would keep firing requests in a loop. --}}
             <div wire:key="load-more-{{ $itemsPerPage }}" class="text-center p-3 text-body-tertiary">
                 <span x-intersect.once="$wire.loadMore()" wire:loading.remove>{{ __('Load more') }}</span>
-                <span wire:loading><i class="fas fa-spinner fa-spin me-1"></i>{{ __('Loading...') }}</span>
+                <span wire:loading><i class="fa-solid fa-spinner fa-spin me-1"></i>{{ __('Loading...') }}</span>
             </div>
         @endif
     @elseif ($paginated == true)
